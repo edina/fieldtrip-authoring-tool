@@ -1,0 +1,70 @@
+<form id="form379" data-ajax="false">
+
+<div class="fieldcontain" id="fieldcontain-text-1">
+<label for="form-text-1">ID</label>
+<input name="form-text-1" id="form-text-1" type="text" required="" placeholder="Survey ID (A1/B3)" maxlength="10">
+</div>
+
+<div class="fieldcontain" id="fieldcontain-range-1">
+<label for="form-range-1">Path Width (m)</label>
+<input name="form-range-1" id="form-range-1" type="range" required="" step="0.5" min="0" max="10" placeholder="Placeholder" maxlength="10">
+</div>
+
+<div class="fieldcontain" id="fieldcontain-select-1">
+<fieldset>
+<legend>Gradient</legend>
+<select id="form-select-1" required="">
+<option value=""></option>
+<option value="Flat">Flat</option>
+<option value="Shallow">Shallow</option>
+<option value="Medium">Medium</option>
+<option value="Steep">Steep</option>
+<option value="Very Steep">Very Steep</option></select>
+</fieldset>
+</div>
+
+<div class="fieldcontain" id="fieldcontain-select-3" style="position: relative;">
+<fieldset>
+<legend>Path Type</legend>
+<select id="form-select-3" required="">
+<option value=""></option>
+<option value="natural">natural</option>
+<option value="Improved">Improved</option>
+<option value="Surfaced">Surfaced</option></select>
+</fieldset>
+</div><div class="fieldcontain" id="fieldcontain-select-2">
+<fieldset>
+<legend>Condition</legend>
+<select id="form-select-2" required="">
+<option value=""></option>
+<option value="Excellent">Excellent</option>
+<option value="Good">Good</option>
+<option value="Fair">Fair</option>
+<option value="Poor">Poor</option>
+<option value="Very Poor">Very Poor</option></select>
+</fieldset>
+</div>
+
+
+
+<div class="fieldcontain" id="fieldcontain-image-1" style="position: relative;">
+<div class="button-wrapper button-camera">
+<input name="form-image-1" id="form-image-1" type="file" accept="image/png" capture="camera" required="" class="camera">
+<label for="form-image-1">Photo</label>
+</div>
+</div><div class="fieldcontain" id="fieldcontain-textarea-1">
+<label for="form-textarea-1">Notes</label>
+<textarea name="form-textarea-1" id="form-textarea-1" placeholder="Extra notes" ></textarea>
+</div>
+
+
+
+<div id="Path Errosion-buttons" class="fieldcontain ui-grid-a">
+<div class="ui-block-a">
+<input type="submit" name="record" id="379_record" value="Save" />
+</div>
+<div class="ui-block-b">
+<input type="button" name="cancel" id="379_cancel" value="Cancel" />
+</div>
+</div>
+</form>

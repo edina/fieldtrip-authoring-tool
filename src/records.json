@@ -1,0 +1,118 @@
+[{
+    "name": "photo",
+    "editor": "http://blah.com/myeditor.edtr",
+    "timestamp": "2012-11-13T13:52:53.432Z",
+    "point": {
+        "lon": -3.1,
+        "lat": 57.4,
+        "alt": 123
+    },
+    "fields": [
+        {
+            "id": "fieldcontain-text-1",
+            "val": "title1",
+            "label": "Title" 
+        },
+        {
+            "id": "fieldcontain-textarea-1",
+            "val": "blah blah",
+            "label": "Description" 
+        },
+        {
+            "id": "fieldcontain-image-1",
+            "val": "http://blah.com/1351771566096.jpg",
+            "label": "Image" 
+        }
+    ]
+},
+{
+    "name": "test1",
+    "editor": "test1.edtr",
+    "timestamp": "2012-11-13T13:52:53.432Z",
+    "point": {
+        "lon": -3.1,
+        "lat": 57.9,
+        "alt": 123
+    },
+    "fields": [
+        {
+            "id": "fieldcontain-text-1",
+            "val": "title1",
+            "label": "Title" 
+        },
+        {
+            "id": "fieldcontain-textarea-1",
+            "val": "blah blah",
+            "label": "Description" 
+        },
+        {
+            "id": "fieldcontain-checkbox-1",
+            "val": "Checkbox1, Checkbox2",
+            "label": "Checkbox1, Checkbox2" 
+        },
+        {
+            "id": "fieldcontain-radio-1",
+            "val": "Radio1",
+            "label": "Radio1" 
+        },
+        {
+            "id": "fieldcontain-select-1",
+            "val": "Select1",
+            "label": "Choose" 
+        },
+        {
+            "id": "fieldcontain-image-1",
+            "val": "1351771566096.jpg",
+            "label": "Image" 
+        },
+        {
+            "id": "fieldcontain-audio-1",
+            "val": "1351771566096.aif",
+            "label": "Audio" 
+        }
+    ]
+},
+{
+    "name": "record2",
+    "editor": "http://blah.com/myeditor.edtr",
+    "timestamp": "2012-11-13T13:52:53.432Z",
+    "point": {
+        "lon": -3.25,
+        "lat": 55.08,
+        "alt": 123
+    },
+    "fields": [
+        {
+            "id": "fieldcontain-textarea-1",
+            "val": "blah blah",
+            "label": "Description" 
+        },
+        {
+            "id": "fieldcontain-image-1",
+            "val": "http://blah.com/1351771566096.jpg",
+            "label": "Image" 
+        }
+    ]
+},
+{
+    "name": "record3",
+    "editor": "http://blah.com/myeditor.edtr",
+    "timestamp": "2012-11-13T13:52:53.432Z",
+    "point": {
+        "lon": -3.05,
+        "lat": 53.4,
+        "alt": 123
+    },
+    "fields": [
+        {
+            "id": "fieldcontain-textarea-1",
+            "val": "blah blah",
+            "label": "Description" 
+        },
+        {
+            "id": "fieldcontain-image-1",
+            "val": "http://blah.com/1351771566096.jpg",
+            "label": "Image" 
+        }
+    ]
+}]

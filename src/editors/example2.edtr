@@ -1,0 +1,64 @@
+<form id="form334" data-ajax="false">
+
+<div class="fieldcontain" id="fieldcontain-text-1">
+<label for="form-text-1">Title</label>
+<input name="form-text-1" id="form-text-1" type="text" required="" placeholder="Placeholder" maxlength="10">
+</div>
+
+<div class="fieldcontain" id="fieldcontain-textarea-1">
+<label for="form-textarea-1">Description</label>
+<textarea name="form-textarea-1" id="form-textarea-1" placeholder="Placeholder"></textarea>
+</div>
+
+<div class="fieldcontain" id="fieldcontain-checkbox-1">
+<fieldset>
+<legend>Choose</legend>
+<label for="form-checkbox-1">Checkbox1</label>
+<input name="form-checkbox-1" id="form-checkbox-1" value="Checkbox1" type="checkbox">
+
+<label for="form-checkbox-2">Checkbox2</label>
+<input name="form-checkbox-2" id="form-checkbox-2" value="Checkbox2" type="checkbox"></fieldset>
+</div>
+
+<div class="fieldcontain" id="fieldcontain-radio-1">
+<fieldset data-role="controlgroup">
+<legend>Choose</legend>
+<label for="form-radio-1">Radio1</label>
+<input name="form-radio" id="form-radio-1" value="Radio1" type="radio">
+
+<label for="form-radio-2">Radio2</label>
+<input name="form-radio" id="form-radio-2" value="Radio2" type="radio"></fieldset>
+</div>
+
+<div class="fieldcontain" id="fieldcontain-select-1">
+<fieldset>
+<legend>Choose</legend>
+<select id="form-select-1">
+<option value="Select1">Select1</option>
+<option value="Select2">Select2</option></select>
+</fieldset>
+</div>
+
+<div class="fieldcontain" id="fieldcontain-image-1">
+<div class="button-wrapper button-camera">
+<input name="form-image-1" id="form-image-1" type="file" accept="image/png" capture="camera" class="camera">
+<label for="form-image-1">Take</label>
+</div>
+</div>
+
+<div class="fieldcontain" id="fieldcontain-audio-1">
+<div class="button-wrapper button-microphone">
+<input name="form-audio-1" id="form-audio-1" type="file" accept="audio/*" capture="microphone" class="microphone">
+<label for="form-audio-1">Record</label>
+</div>
+</div>
+
+<div id="example2-buttons" class="fieldcontain ui-grid-a">
+<div class="ui-block-a">
+<input type="submit" name="record" id="334_record" value="Save" />
+</div>
+<div class="ui-block-b">
+<input type="button" name="cancel" id="334_cancel" value="Cancel" />
+</div>
+</div>
+</form>

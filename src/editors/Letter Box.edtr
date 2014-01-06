@@ -1,0 +1,43 @@
+<form id="form1053" data-ajax="false">
+<div class="fieldcontain" id="fieldcontain-text-1">
+<label for="form-text-1">Title</label>
+<input name="form-text-1" id="form-text-1" type="text" required="" placeholder="Placeholder" maxlength="10" >
+</div><div class="fieldcontain" id="fieldcontain-select-1">
+<fieldset>
+<legend>Pick Ups</legend>
+<select id="form-select-1" required="">
+<option value=""></option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4+">4+</option></select>
+</fieldset>
+</div><div class="fieldcontain" id="fieldcontain-range-1" style="position: relative;">
+<label for="form-range-1">Last Post</label>
+<input name="form-range-1" id="form-range-1" type="range" required="" step="0.5" min="3" max="10" placeholder="Placeholder" maxlength="10">
+</div><div class="fieldcontain" id="fieldcontain-radio-1">
+<fieldset data-role="controlgroup">
+<legend>Saturday</legend>
+<label for="form-radio-1">Yes</label>
+<input name="form-radio1" id="form-radio-1" value="Yes" type="radio" required="">
+
+<label for="form-radio-2">No</label>
+<input name="form-radio1" id="form-radio-2" value="No" type="radio" required=""></fieldset>
+</div><div class="fieldcontain" id="fieldcontain-image-1">
+<div class="button-wrapper button-camera">
+<input name="form-image-1" id="form-image-1" type="file" accept="image/png" capture="camera" required="" class="camera">
+<label for="form-image-1">Photo</label>
+</div>
+</div><div class="fieldcontain" id="fieldcontain-textarea-1">
+<label for="form-textarea-1">Notes</label>
+<textarea name="form-textarea-1" id="form-textarea-1" placeholder="Placeholder" ></textarea>
+</div>
+<div id="Letter_Box-buttons" class="fieldcontain ui-grid-a">
+<div class="ui-block-a">
+<input type="submit" name="record" id="1053_record" value="Save" />
+</div>
+<div class="ui-block-b">
+<input type="button" name="cancel" id="1053_cancel" value="Cancel" />
+</div>
+</div>
+</form>

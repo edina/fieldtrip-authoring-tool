@@ -1,0 +1,74 @@
+<form id="form89" data-ajax="false">
+<div class="fieldcontain" id="fieldcontain-text-1">
+<label for="form-text-1">Name Of Business</label>
+<input name="form-text-1" id="form-text-1" type="text" required="" placeholder="Shop name or identifier" maxlength="20" >
+</div><div class="fieldcontain" id="fieldcontain-radio-1">
+<fieldset data-role="controlgroup">
+<legend>Use Classification</legend>
+<label for="form-radio-1">Retail</label>
+<input name="form-radio1" id="form-radio-1" value="Retail" type="radio" required="">
+
+<label for="form-radio-2">Financial or professional</label>
+<input name="form-radio1" id="form-radio-2" value="Financial or professional" type="radio" required="">
+<label for="form-radio-3">Food and Drink</label>
+<input name="form-radio1" id="form-radio-3" value="Food and Drink" type="radio" required="">
+<label for="form-radio-4">Vacant</label>
+<input name="form-radio1" id="form-radio-4" value="Vacant" type="radio" required="">
+<label for="form-radio-5">Other</label>
+<input name="form-radio1" id="form-radio-5" value="Other" type="radio" required=""></fieldset>
+</div><div class="fieldcontain" id="fieldcontain-select-1">
+<fieldset>
+<legend>Nature of Business</legend>
+<select id="form-select-1" required="">
+<option value=""></option>
+<option value="Accountants">Accountants</option>
+<option value="Amusement Arcade">Amusement Arcade</option>
+<option value="Aquatics">Aquatics</option>
+<option value="Baker">Baker</option>
+<option value="Bank">Bank</option>
+<option value="Beauty Salon">Beauty Salon</option>
+<option value="Betting Office">Betting Office</option>
+<option value="Butcher">Butcher</option>
+<option value="Cafe">Cafe</option>
+<option value="Card Shop">Card Shop</option>
+<option value="Carpet Shop">Carpet Shop</option>
+<option value="Charity Shop">Charity Shop</option>
+<option value="Chemist">Chemist</option>
+<option value="Clothes / Fashion">Clothes / Fashion</option>
+<option value="Discount Store">Discount Store</option>
+<option value="Drugstore">Drugstore</option>
+<option value="Estate Agents">Estate Agents</option>
+<option value="Florist">Florist</option>
+<option value="Frozen food store">Frozen food store</option>
+<option value="Green grocer">Green grocer</option>
+<option value="Hairdresser / Salon">Hairdresser / Salon</option>
+<option value="Jewller">Jewller</option>
+<option value="Library">Library</option>
+<option value="Loan office">Loan office</option>
+<option value="Mini market">Mini market</option>
+<option value="mobile phone shop">mobile phone shop</option>
+<option value="Newsagent &amp; Confectioner / Post Office">Newsagent &amp; Confectioner / Post Office</option>
+<option value="Optician">Optician</option>
+<option value="Post Office">Post Office</option>
+<option value="Public House">Public House</option>
+<option value="Restaurant (sit in)">Restaurant (sit in)</option>
+<option value="Restaurant (take away)">Restaurant (take away)</option>
+<option value="Restaurant (fast food sit in)">Restaurant (fast food sit in)</option>
+<option value="Solicitors office">Solicitors office</option>
+<option value="Tailor">Tailor</option>
+<option value="Travel Agent">Travel Agent</option></select>
+
+
+
+
+
+</fieldset></div>
+<div id="High_Street_Land_Use-buttons" class="fieldcontain ui-grid-a">
+<div class="ui-block-a">
+<input type="submit" name="record" id="89_record" value="Save" />
+</div>
+<div class="ui-block-b">
+<input type="button" name="cancel" id="89_cancel" value="Cancel" />
+</div>
+</div>
+</form>

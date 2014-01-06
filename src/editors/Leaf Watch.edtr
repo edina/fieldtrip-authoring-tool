@@ -1,0 +1,35 @@
+<form id="form800" data-ajax="false">
+
+<div class="fieldcontain" id="fieldcontain-text-1">
+<label for="form-text-1">record name</label>
+<input name="form-text-1" id="form-text-1" type="text" required="" placeholder="tree record" maxlength="10">
+</div>
+
+<div class="fieldcontain" id="fieldcontain-range-1">
+<label for="form-range-1">Damage Rating (1-leaf all green 2-damaged area less than green area 3- equal green and damaged area 4-damaged area more than half leaf</label>
+<input name="form-range-1" id="form-range-1" type="range" required="" step="1" min="1" max="4" placeholder="Placeholder" maxlength="10">
+</div>
+
+<div class="fieldcontain" id="fieldcontain-select-1">
+<fieldset>
+<legend>Ground cover</legend>
+<select id="form-select-1" required="">
+<option value=""></option>
+<option value="short (mown) grass">short (mown) grass</option>
+<option value="long grass only">long grass only</option>
+<option value="scrub or undergrowth">scrub or undergrowth</option>
+<option value="stone, concrete or tarmac">stone, concrete or tarmac</option>
+<option value="mixture of above">mixture of above</option>
+<option value="other">other</option></select>
+</fieldset>
+</div>
+
+<div id="Leaf_Watch-buttons" class="fieldcontain ui-grid-a">
+<div class="ui-block-a">
+<input type="submit" name="record" id="800_record" value="Save" />
+</div>
+<div class="ui-block-b">
+<input type="button" name="cancel" id="800_cancel" value="Cancel" />
+</div>
+</div>
+</form>

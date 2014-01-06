@@ -1,0 +1,58 @@
+<form id="form373" data-ajax="false">
+
+<div class="fieldcontain" id="fieldcontain-text-1">
+<label for="form-text-1">ID</label>
+<input name="form-text-1" id="form-text-1" type="text" required="" placeholder="Placeholder" maxlength="10">
+</div>
+
+<div class="fieldcontain" id="fieldcontain-select-1">
+<fieldset>
+<legend>Type</legend>
+<select id="form-select-1" required="">
+<option value=""></option>
+<option value="Tag">Tag</option>
+<option value="Picture">Picture</option>
+<option value="Stencil">Stencil</option>
+<option value="Words">Words</option>
+<option value="Other (specify)">Other (specify)</option></select>
+</fieldset>
+</div>
+
+<div class="fieldcontain" id="fieldcontain-textarea-1">
+<label for="form-textarea-1">Other Type</label>
+<textarea name="form-textarea-1" id="form-textarea-1" placeholder="only if other" ></textarea>
+</div><div class="fieldcontain" id="fieldcontain-range-1" style="position: relative;">
+<label for="form-range-1">Size (m2)</label>
+<input name="form-range-1" id="form-range-1" type="range" required="" step="0.5" min="0" max="10" placeholder="Placeholder" maxlength="10">
+</div>
+
+<div class="fieldcontain" id="fieldcontain-select-2" style="position: relative;">
+<fieldset>
+<legend>Offensive</legend>
+<select id="form-select-2" required="">
+<option value=""></option>
+<option value="Yes">Yes</option>
+<option value="No">No</option></select>
+</fieldset>
+</div><div class="fieldcontain" id="fieldcontain-image-1">
+<div class="button-wrapper button-camera">
+<input name="form-image-1" id="form-image-1" type="file" accept="image/png" capture="camera" required="" class="camera">
+<label for="form-image-1">Photo</label>
+</div>
+</div>
+
+
+
+
+
+
+
+<div id="Graffiti-buttons" class="fieldcontain ui-grid-a">
+<div class="ui-block-a">
+<input type="submit" name="record" id="373_record" value="Save" />
+</div>
+<div class="ui-block-b">
+<input type="button" name="cancel" id="373_cancel" value="Cancel" />
+</div>
+</div>
+</form>

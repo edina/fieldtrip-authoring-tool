@@ -1,0 +1,45 @@
+<form id="form454" data-ajax="false">
+
+<div class="fieldcontain" id="fieldcontain-text-1">
+<label for="form-text-1">Title</label>
+<input name="form-text-1" id="form-text-1" type="text" required="" placeholder="Placeholder" maxlength="10">
+</div>
+
+<div class="fieldcontain" id="fieldcontain-text-2" style="position: relative;">
+<label for="form-text-2">Location</label>
+<input name="form-text-2" id="form-text-2" type="text" required="" placeholder="Placeholder" maxlength="50">
+</div><div class="fieldcontain" id="fieldcontain-select-1" style="position: relative;">
+<fieldset>
+<legend>Risk</legend>
+<select id="form-select-1" required="">
+<option value=""></option>
+<option value="Low">Low</option>
+<option value="Med">Med</option>
+<option value="High">High</option>
+<option value="Extreme">Extreme</option></select>
+</fieldset>
+</div><div class="fieldcontain" id="fieldcontain-image-1">
+<div class="button-wrapper button-camera">
+<input name="form-image-1" id="form-image-1" type="file" accept="image/png" capture="camera" required="" class="camera">
+<label for="form-image-1">Pic</label>
+</div>
+</div>
+
+
+
+<div class="fieldcontain" id="fieldcontain-textarea-1">
+<label for="form-textarea-1">Description</label>
+<textarea name="form-textarea-1" id="form-textarea-1" placeholder="Placeholder" required="" ></textarea>
+</div>
+
+
+
+<div id="Potholes-buttons" class="fieldcontain ui-grid-a">
+<div class="ui-block-a">
+<input type="submit" name="record" id="454_record" value="Save" />
+</div>
+<div class="ui-block-b">
+<input type="button" name="cancel" id="454_cancel" value="Cancel" />
+</div>
+</div>
+</form>

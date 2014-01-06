@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fieldtrip GB Author</title>
+  <!-- disable iPhone inital scale -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  
+  <link rel="stylesheet" type="text/css" href="css/ext/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="css/ext/swipebox.css">
+  <link href="css/ext/jPaginator.css" rel="stylesheet" type="text/css">
+    
+  <link href="css/jquery-ui-1.9.1.custom.min.css" rel="stylesheet" type="text/css">
+  <link href="css/former.css" rel="stylesheet" type="text/css">
+  <link href="css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css">
+  <link href="css/DT_bootstrap.css" rel="stylesheet" type="text/css">
+  <link href="css/media_queries.css" rel="stylesheet" type="text/css">
+  <link href="css/jquery.snippet.min.css" rel="stylesheet" type="text/css">
+    
+  <style>
+    [class^="icon-"], [class*=" icon-"] {
+      background-image: url(img/glyphicons-halflings.png)
+    }
+  </style>
+
+  <script type="text/javascript">
+    if (typeof console == "undefined") {
+      this.console = {log: function() {}};
+    }
+  </script>
+
+  <!--<script type="text/javascript" src="https://getfirebug.com/firebug-lite-debug.js"></script>-->
+  <script type="text/javascript" src="js/ext/jquery.js"></script>
+  <script type="text/javascript" src="js/ext/jquery-ui.js"></script>
+  <script type="text/javascript" src="js/ext/jqueryui-timepicker-addon.js"></script>
+  <script type="text/javascript" src="js/ext/jquery.ui.touch-punch.min.js"></script>
+  <script type="text/javascript" src="js/ext/snippet.js"></script>
+  <script type="text/javascript" src="js/ext/jquery.dataTables.js"></script>
+  <script type="text/javascript" src="js/DT_bootstrap.js"></script>
+  <script type="text/javascript" src="js/ext/proj4js.js"></script>
+  <script type="text/javascript">
+    Proj4js.defs["EPSG:27700"] = "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs";
+  </script>
+  <script type="text/javascript" src="js/ext/openlayers.js"></script>
+  <script type="text/javascript" src="js/ext/d3.js"></script>
+  <script type="text/javascript" src="js/ext/bootstrap.js"></script>
+  <script type="text/javascript" src="js/ext/jquery.swipebox.js"></script>
+  <script type="text/javascript" src="js/ext/jPaginator.js"></script>
+
+  <script type="text/javascript" src="js/former/jquery.former.functions.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.mapviewer.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.statistics.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.core.js"></script>
+  <!--<script type="text/javascript" src="js/former/jquery.former.storage.js"></script>-->
+  <script type="text/javascript" src="js/former/jquery.former.action.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.searcher.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.renderer.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.text.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.textarea.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.checkbox.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.radio.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.option.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.photo.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.audio.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.capture.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.optionsform.js"></script>
+</head>
+
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Fieldtrip GB Author</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav" id="mainmenu"></ul>
+            <p class="navbar-text pull-right" style="display: none;" id="user-section">
+              Logged in as <span class="username"></span>
+              <a href="/authoring/" class="btn btn-primary btn-small">Logout</a>
+            </p>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <fieldset id="elements-fieldset" style="display: none;">
+              <legend>Form Elements</legend>
+              <ul id="elements" class="nav nav-list"></ul>
+            </fieldset>
+            <fieldset id="mapviewer-fieldset" style="display: none;">
+              <legend>Filter Records</legend>
+              <div id="filter-area">
+                <select id="filter-data">
+                  <option selected="selected">All</option>
+                  <option>Filter</option>
+                </select>
+                <br>
+                <div id="filters" style="display: none;">
+                  <label for="by-editor">By Editor:</label>
+                  <select id="by-editor" name="by-editor"></select>
+                  <!--<input type="text" id="by-editor" name="by-editor" placeholder="Type your text in here">-->
+                  <!--<label for="by-record">By Record Id:</label>
+                  <input type="text" id="by-record" name="by-record" placeholder="Type your record in here" >-->
+                  <!--<label for="by-radius">By Radius:</label>
+                  <input type="checkbox" id="by-radius" name="by-radius" >-->
+                  <label for="date-start">From:</label>
+                  <input type="text" name="date-start" id="date-start" placeholder="Click here for inserting date">
+                  <label for="date-end">To:</label>
+                  <input type="text" name="date-end" id="date-end" placeholder="Click here for inserting date">
+                  <br>
+                </div>
+                <button id="filter-records" class="btn">Get Records</button>
+                <button id="clear-records" class="btn">Clear Records</button>
+              </div>
+            </fieldset>
+            <fieldset id="export-fieldset" style="display: none;">
+              <legend>Export Records</legend>
+              <div id="export-area">
+                <label for="export-format">Format:</label>
+                <select id="export-format" name="export-format">
+                  <option value="geojson">GeoJSON</option>
+                  <option value="kml">KML</option>
+                  <option value="csv">CSV</option>
+                </select>
+                <button id="export-records" class="btn disabled">Export</button>
+              </div>
+            </fieldset>
+            <fieldset id="help-fieldset">
+              <legend>Help Menu</legend>
+               <ul class="nav nav-list">
+                <li><a href="http://fieldtripgb.blogs.edina.ac.uk/fieldtripgb-help/" target="blank">Check our blog for some HELP.</a></li>
+              </ul>
+            </fieldset>
+            <fieldset>
+              <legend>Download app from:</legend>
+               <ul class="nav nav-list">
+                <li>
+                  <a href="https://play.google.com/store/apps/details?id=uk.ac.edina.mobile" target="blank" class="img-logo"><img src="img/android.png" width="50px" height="50px"></a>
+                  <a href="#" class="img-logo"><img src="img/apple.png" width="50px" height="50px"></a>
+                </li>
+              </ul>
+            </fieldset>
+            <fieldset>
+              <legend>Cloud providers:</legend>
+               <ul class="nav nav-list">
+                <li>
+                  <img src="img/dropbox.png">
+                </li>
+              </ul>
+            </fieldset>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+          <div class="hero-unit">
+            <div class="navbar">
+              <div class="navbar-inner" id="editmenu" style="display: none;">
+                <div class="container">
+                  <a class="brand" href="#">Edit menu</a>
+                </div>
+              </div>
+            </div>
+            <div id="f_title"></div>
+            <div id="form-content"></div>
+            <div id="home-content"></div>
+            <div id="map-content" style="display: none;">
+              <div class="navbar">
+                <div class="navbar-inner">
+                  <ul class="nav nav-pills">
+                    <li class="disabled">
+                      <a href="javascript:void(0)" id="expand-table" title="expand">Show Table</a>
+                    </li>
+                    <!--<li class="disabled">
+                      <a href="javascript:void(0)" id="export-map" title="export">Clone map</a>
+                    </li>
+                    <li class="disabled">
+                      <a href="javascript:void(0)" role="button" id="graph">Graph</a>
+                    </li>-->
+                    <li>
+                      <a href="javascript:void(0)" role="button" id="image-view">Image Viewer</a>
+                    </li>
+                    <!--<li>
+                      <a href="javascript:void(0)" role="button" id="expand-window"><i class="icon-fullscreen"></i>Expand</a>
+                    </li>-->
+                    <!--<li><a href="javascript:void(0)" id="clear-table" class="disabled">Clear Table</a></li>-->
+                  </ul>
+                </div>
+              </div>
+              <div id="map_canvas"></div>
+              <br><br>
+              <div id="myTable" style="clear: both;" >
+                <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example">
+                  <thead>
+                    <tr>
+                      <th>A/A</th>
+                      <th>Record</th>
+                      <th>Editor</th>
+                      <th>Date</th>
+                      <th>View/Edit</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+        <p>&copy; <a href="http://edina.ac.uk" target="blank"><img src="img/edina.png"></a> <a href="http://www.jisc.ac.uk/" target="blank"><img src="img/jisc.gif"></a></p>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <div id="dialog-map" title="Map Viewer"></div>
+    
+    <div id="dialog-login" title="Login">
+      <p>
+        <a href="javascript:void(0);" class="redirect-me" id="dropbox"><img src="img/dropbox.png" alt="Dropbox" /></a>
+      </p>
+    </div>
+    
+    <div id="dialog-upload" title="Upload tiles">
+      <form id="fileupload" name="fileupload" enctype="multipart/form-data" method="post">
+        <fieldset>
+          <input type="file" name="fileselect" id="fileselect"></input>
+          <input id="uploadbutton" type="button" value="Upload Tiles" class="btn" />
+        </fieldset>
+      </form>
+    </div>
+
+    <div id="loader">
+      <img src="css/images/ajax-loader.gif">
+    </div>
+
+
+  <script type="text/javascript">
+    //var map, oTable;
+    var provider;
+
+    $(document).ready(function(){
+      $("#map_canvas").width(0.8*$(".span9").width());
+      $("#map_canvas").height(0.45*$(window).height());
+
+      $( "#dialog-map" ).dialog({
+        autoOpen: false,
+        height: 0.90*$(window).height(),
+        width: 0.90*$(window).width(),
+        modal: false
+      });
+      
+      $("#dialog-login").dialog({
+        autoOpen: false,
+        modal: false
+      });
+      
+      $("#dialog-upload").dialog({
+        autoOpen: false,
+        modal: false
+      });
+
+
+      var uid = getParam('uid', $(location).attr('href')), token = getParam('oauth_token', $(location).attr('href'));
+      $.ajax({
+        url: "home.html",
+        dataType: "html",
+        success: function(data){
+          $("#home-content").append(data);
+          $("#open-login").click(function(){
+            $("#dialog-login").dialog("open");
+          });
+          $(".redirect-me").click(function(){
+            if(uid == 0){
+              provider = $(this).attr("id");
+              var url = "/1.3/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
+              $.getJSON(url, function(data) {
+                $(location).attr('href',data.url);
+              });
+            }
+          });
+          if(uid != 0){
+            $("#login-paragraph").hide("fast");
+          }
+        }
+      });
+
+      if(uid != 0){
+        initialize_app(token, "dropbox");
+      }
+      
+      if(screen.width < 768){
+        $("#fat-menu").hide();
+        $("#size-screen").hide();
+        $("#edit-buttons").hide();
+        $(".btn").removeClass('btn-large').addClass('btn-small');
+      }else if(screen.width <= 1200){
+        $(".btn").removeClass('btn-large');
+      }
+
+    });
+
+    function initialize_app(oauth, provider){
+      var options = {
+        version: "1.3",
+        provider: provider,
+        mainmenu_id: "mainmenu",
+        editmenu_id: "editmenu",
+        sizes: ["240x320", "320x480", "480x800", "600x1024"],
+        form_elements_id: "elements",
+        oauth: oauth,
+        choices: {
+          "textAction": ["text", "Text"],
+          "rangeAction": ["range", "Range"],
+          "textareaAction": ["textarea", "Text Area"],
+          "checkboxAction": ["checkbox", "Multiple Choice Selector"],
+          "radioAction": ["radio", "Single Choice Selector"],
+          "selectAction": ["select", "Drop down Selector"],
+          "photoAction": ["image", "Image Capture"],
+          "audioAction": ["audio", "Audio Capture"]
+        }
+      };
+
+      $("#form-content").buildformer(options);
+    }
+
+    function getParam( name,href ){
+      name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+      var regexS = "[\\?&]"+name+"=([^&#]*)";
+      var regex = new RegExp( regexS );
+      var results = regex.exec( href );
+      if( results == null )
+        return "";
+      else
+        return decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+  </script>
+
+</body>
+</html>

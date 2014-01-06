@@ -1,0 +1,23 @@
+{
+  "name": "authoring_tool",
+  "version": "1.0.0",
+  "description": "A web app for creating your own forms",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "forms",
+    "fieldtrip",
+    "edina"
+  ],
+  "author": "P. Terzis",
+  "license": "BSD",
+  "preferGlobal": true,
+  "devDependencies": {
+    "uglify-js": "latest",
+    "clean-css": "2.0.2"
+  },
+  "engines": {
+    "node": ">=0.8.0"
+  }
+}

@@ -1,0 +1,50 @@
+{
+    "name": "Authoring Tool",
+    "version": "1.0.0",
+    "description": "A web app for creating your own forms and GIS visualizer.",
+    "keywords": [
+        "fieldtrip",
+        "Authoring Tool",
+        "custom forms",
+        "GIS"
+    ],
+    "authors": [
+        "Panos Terzis <panterz>"
+    ],
+    "license": "BSD",
+    "homepage": "http://fieldtripgb.edina.ac.uk/authoring/",
+    "dependencies": {
+        "jquery": "1.10.2",
+        "jquery-ui": "1.9.2",
+        "jquery-mobile-bower": "1.3.2",
+        "bootstrap": "2.3.2",
+        "jqueryui-timepicker-addon": "1.4.3",
+        "jquery-ui-touch-punch": "*",
+        "datatables": "1.9.4",
+        "openlayers": "2.13.1",
+        "d3": "3.3.11",
+        "jPaginator": "https://github.com/remylab/jpaginator/archive/master.zip",
+        "snippet": "http://www.steamdev.com/snippet/js/jquery.snippet.min.js",
+        "swipebox": "*"
+    },
+    "dependency_locations": {
+        "snippet": [
+            "index.js"
+        ],
+        "jquery-mobile-bower": [
+            "js/jquery.mobile-x.x.min.js"
+        ],
+        "jPaginator": [
+            "jPaginator.js",
+            "jPaginator.css"
+        ],
+        "jqueryui-timepicker-addon": [
+            "src/jquery-ui-timepicker-addon.js"
+        ],
+        "swipebox": [
+            "source/jquery.swipebox.js",
+            "source/swipebox.css",
+            "source/img"
+        ]
+    }
+}

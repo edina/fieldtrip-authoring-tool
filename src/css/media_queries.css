@@ -1,0 +1,98 @@
+/* Large desktop */
+@media (min-width: 1200px) {
+    .hero-unit {
+        padding: 60px;
+        margin-bottom: 30px;
+        font-size: 16px;
+        font-weight: 200;
+        line-height: 30px;
+        color: inherit;
+        background-color: #eee;
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        border-radius: 6px;
+    }
+}
+
+@media (max-width: 1200px) {
+    #clear-records{
+        margin-top: 5px !important;
+    }
+}
+
+ 
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+    .hero-unit {
+        font-size: 12px;
+        font-weight: 30;
+        line-height: 12px;
+        color: inherit;
+    }
+    
+    .navbar .brand {
+        font-size: 14px;
+        font-weight: 30;
+    }
+}
+
+@media (max-width: 979px) {
+    .container .brand {
+        margin: 10px 0 0 -5px;
+    }
+    
+    #options-dialog{
+        font-size: 11px;
+    }
+    
+    #options-dialog input{
+        font-size: 11px;
+    }
+}
+
+
+@media (min-width: 600px) and (max-width: 767px) {
+    .span3{
+        width: 25% !important;
+    }
+    
+    .span9{
+        width: 65% !important;
+    }
+    
+    .row-fluid [class*="span"] {
+        display: block;
+        float: left;
+        width: 100%;
+        min-height: 30px;
+        margin-left: 2.7624309392265194%;
+        *margin-left: 2.709239449864817%;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+    
+    .hero-unit {
+        font-size: 10px;
+        font-weight: 200;
+        line-height: 10px;
+        color: inherit;
+    }
+    
+    .navbar .brand {
+        font-size: 14px;
+        font-weight: 20;
+    }
+    
+    legend{
+        font-size: 14px;
+    }
+    
+    #options-dialog{
+        font-size: 10px;
+    }
+    
+    #options-dialog input{
+        font-size: 10px;
+    }
+}
