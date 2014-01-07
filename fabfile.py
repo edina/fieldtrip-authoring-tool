@@ -142,12 +142,6 @@ def _update():
     """Copies your project and updates environment and symlink"""
     _checkout()
     _symlink()
-    _restart_apache()
-
-def _restart_apache():
-    restart = prompt('Do you want to graceful the apache? [y/N]')
-    if restart.lower() == 'y':
-        live_apache_graceful()
 
 def _checkout():
     """Checkout code to the remote servers"""
@@ -160,50 +154,35 @@ def _checkout():
 
 def _find_version():
     refspec = local('git tag | sort -V | tail -1 | cut -d"v" -f2', capture=True)
-    use_tag = prompt('Use Tagging for installation? [y/N]: ')
-    if use_tag == 'y':
-        print "Showing the last 5 tags"
-        local('git tag | sort -V | tail -5')
-        create_tag = prompt('Tag this release? [y/N]')
-        if create_tag.lower() == 'y':
-            notify("Showing latest tags for reference")
-            refspec = prompt('Tag name [in format x.x.x for general tagging or x.x.x.x for pcapi tagging]? ')
-            local('git tag %(ref)s -m "Tagging version %(ref)s in fabfile"' % {'ref': refspec})
-            local('git push --tags')
+    print "Showing the last 5 tags"
+    local('git tag | sort -V | tail -5')
+    create_tag = prompt('Tag this release? [y/N]')
+    if create_tag.lower() == 'y':
+        notify("Showing latest tags for reference")
+        refspec = prompt('Tag name [in format x.x.x for general tagging or x.x.x.x for pcapi tagging]? ')
+        local('git tag %(ref)s -m "Tagging version %(ref)s in fabfile"' % {'ref': refspec})
+        local('git push --tags')
+    else:
+        use_commit = prompt('Build from a specific commit? [y/N] ')
+        if use_commit.lower() == 'y':
+            refspec = prompt('Choose commit to build from [in format x.x.x]: ')
+            local('git stash save')
+            local('git checkout v%s' % refspec)
+            print "Don't forget to run the command <git stash pop> after the app is installed"
         else:
-            use_commit = prompt('Build from a specific commit? [y/N] ')
-            if use_commit.lower() == 'y':
-                refspec = prompt('Choose commit to build from [in format x.x.x]: ')
-                local('git stash save')
-                local('git checkout v%s' % refspec)
-                print "Don't forget to run the command <git stash pop> after the app is installed"
-            else:
-                refspec = prompt('Create dev folder to build in [e.g. dev]: ')
+            refspec = prompt('Create dev folder to build in [e.g. dev]: ')
     return refspec
 
 def _symlink():
     """Updates the symlink to the most recently deployed version"""
-    symlink = prompt('Do you want to make it live (=symlink it)? [y/N]')
-    if symlink.lower() == 'y':
-        sudo("if [ -d %(current_path)s ]; then rm %(current_path)s; fi" % { 'current_path':env.html_current_path })
-        sudo("ln -s %(current_release)s/src %(current_path)s" % { 'current_release':env.current_release, 'current_path':env.html_current_path })
-    else:
-        print "You need to run these two commands to make your service live: "
-        print "*********************************************************"
-        print "if [ -d %(current_path)s ]; then rm %(current_path)s; fi" % { 'current_path':env.html_current_path }
-        print "ln -s %(current_release)s %(current_path)s" % { 'current_release':env.current_release, 'current_path':env.html_current_path }
-        print "*********************************************************"
+    print "You need to symlink your app that exists here "
+    print "%(current_release)s" % { 'current_release':env.current_release}
+    print "with your apache folder that serves static pages by running the commands: "
+    print "*********************************************************"
+    print "if [ -d %(current_path)s ]; then rm %(current_path)s; fi" % { 'current_path':env.html_current_path }
+    print "ln -s %(current_release)s %(current_path)s" % { 'current_release':env.current_release, 'current_path':env.html_current_path }
+    print "*********************************************************"
 
-
-
-# Apache server tasks
-def live_apache_restart():
-    """Restarts your application"""
-    sudo("/etc/init.d/httpd restart")
-
-def live_apache_graceful():
-    """Apache graceful"""
-    sudo("/etc/init.d/httpd graceful")
 
 ###Configuration
 
