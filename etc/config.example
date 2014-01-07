@@ -1,0 +1,15 @@
+[install]
+html_path=<path in server>
+
+; the source of the config.ini on a server
+location=<user>@<domain>:<path>
+
+[live1]
+; accounts and machine names hosting the release
+user=<user>
+hosts=<host>
+
+[beta]
+; accounts and machine names hosting the release
+user=<user>
+hosts=<host>
