@@ -11,17 +11,20 @@ Software Requirements
 
 ## Installation Instructions
 
-1. Fabric
+- Fabric
+
 ``` 
 apt-get install python-setuptools  # for easy_install
 easy_install pip
 pip install fabric
 ```
-2. Nodejs/npm
-Follow the instructions here:
-http://nodejs.org/dist/v0.10.24/node-v0.10.24.tar.gz
 
-### Installation instructions of app
+- Nodejs/npm
+Follow the instructions here:
+
+http://nodejs.org
+
+### Installation instructions of the app
 
 1. Prepare a configuration file
 Go and check the template for this which is inside etc/config.example. Create a config.ini out of it and save it in the same path or store it on a server and add the path of the server on the config.ini.
