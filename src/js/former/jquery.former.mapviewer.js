@@ -580,8 +580,8 @@ MapViewer.prototype.enableRecordEdit = function(){
 }
 
 MapViewer.prototype.enableRecordDelete = function(){
-    $(document).off('click', 'record-delete');
-    $(document).on('click', 'record-delete', $.proxy(function(event){
+    $(document).off('click', '.record-delete');
+    $(document).on('click', '.record-delete', $.proxy(function(event){
         var record = $(event.currentTarget).attr("title");
         console.log(record)
         this.askForDeletion(record);

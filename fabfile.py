@@ -1,4 +1,5 @@
 from fabric.api import env, put, run, task, local, sudo, prompt, lcd, settings
+from fabric.contrib.project import rsync_project
 import datetime, os, json, ast, ConfigParser
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -117,6 +118,7 @@ def server(server='beta'):
     env.user = _config('user', section=server)
     env.home = "/home/%s" % env.user
     env.html_current_path = _config('html_path')
+    env.port = _config('port', section=server)
     _set_server()
 
 def _set_server():
@@ -150,7 +152,8 @@ def _checkout():
     env.current_release = "%(releases_path)s/%(release)s" % { 'releases_path':env.releases_path, 'release': refspec }
     run("mkdir -p %(current_release)s" % { 'current_release':env.current_release })
     print env.app_local, env.current_release
-    put("%(app_local)s" % { 'app_local':env.app_local }, "%(current_release)s" % { 'current_release':env.current_release })
+    #put("%(app_local)s" % { 'app_local':env.app_local }, "%(current_release)s" % { 'current_release':env.current_release })
+    rsync_project(local_dir=env.app_local_name, remote_dir=env.current_release, exclude='.git,.pyc,.gitignore')
 
 def _find_version():
     refspec = local('git tag | sort -V | tail -1 | cut -d"v" -f2', capture=True)
