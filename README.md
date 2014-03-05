@@ -1,7 +1,7 @@
 fieldtrip-authoring-tool
 ========================
 
-A web app for creating customs forms
+A web app for creating customs html5 forms that can be synchronized through an API called Personal Cloud API (PCAPI) with the user's dropbox account.
 
 Software Requirements
 =====================
