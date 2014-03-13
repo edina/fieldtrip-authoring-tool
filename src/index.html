@@ -227,7 +227,10 @@
     
     <div id="dialog-login" title="Login">
       <p>
-        <a href="javascript:void(0);" class="redirect-me" id="dropbox"><img src="img/dropbox.png" alt="Dropbox" /></a>
+        <ul>
+          <li><a href="javascript:void(0);" class="redirect-me" id="dropbox"><img src="img/dropbox.png" alt="Dropbox" /></a></li>
+          <li><a href="javascript:void(0);" class="redirect-me" id="local">Local Provider</a></li>
+        </ul>
       </p>
     </div>
     
@@ -238,6 +241,13 @@
           <input id="uploadbutton" type="button" value="Upload Tiles" class="btn" />
         </fieldset>
       </form>
+    </div>
+
+    <div id="dialog-local-login" title="Loging to Local Provider">
+      <fieldset>
+        <input type="email" id="user-email">
+        <button id="loginbutton" type="button" class="btn">Login</button>
+      </fieldset>
     </div>
 
     <div id="loader">
@@ -270,6 +280,11 @@
         modal: false
       });
 
+      $("#dialog-local-login").dialog({
+        autoOpen: false,
+        modal: false
+      });
+
 
       var uid = getParam('uid', $(location).attr('href')), token = getParam('oauth_token', $(location).attr('href'));
       $.ajax({
@@ -283,10 +298,33 @@
           $(".redirect-me").click(function(){
             if(uid == 0){
               provider = $(this).attr("id");
-              var url = "/1.3/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
-              $.getJSON(url, function(data) {
-                $(location).attr('href',data.url);
-              });
+              localStorage.setItem("provider", provider);
+              if(provider === 'local'){
+                var url = "/1.3/pcapi/auth/"+provider;
+                $("#dialog-local-login").dialog("open");
+                $("#loginbutton").click(function(){
+                  //$.ajax({
+                  //  method: "POST",
+                  //  data: "user="+$("#useremail").val(),
+                  //  url: url
+                  //}).done(function(data){
+                  //  console.log(data)
+                  //});
+                  var $location = $(location);
+                  $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+$('#user-email').val());
+                  //$.getJSON(url, function(data) {
+                  //  console.log(data);
+                   // console.log($location.attr("href"))
+                  //  $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+data["userid"]);
+                    //$(location).attr('href',data.url);
+                  //});
+                });
+              }else{
+                var url = "/1.3/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
+                $.getJSON(url, function(data) {
+                  $(location).attr('href',data.url);
+                });
+              }
             }
           });
           if(uid != 0){
@@ -296,7 +334,7 @@
       });
 
       if(uid != 0){
-        initialize_app(token, "dropbox");
+        initialize_app(token, localStorage.getItem("provider"));
       }
       
       if(screen.width < 768){
