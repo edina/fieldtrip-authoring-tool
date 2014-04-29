@@ -25,7 +25,7 @@
         "d3": "3.3.11",
         "jPaginator": "https://github.com/remylab/jpaginator/archive/master.zip",
         "snippet": "http://www.steamdev.com/snippet/js/jquery.snippet.min.js",
-        "swipebox": "1.2.6"
+        "swipebox": "1.2.9"
     },
     "dependency_locations": {
         "snippet": [
@@ -42,9 +42,9 @@
             "src/jquery-ui-timepicker-addon.js"
         ],
         "swipebox": [
-            "source/jquery.swipebox.js",
-            "source/swipebox.css",
-            "source/img"
+            "src/js/jquery.swipebox.js",
+            "src/css/swipebox.css",
+            "src/img"
         ]
     }
 }
