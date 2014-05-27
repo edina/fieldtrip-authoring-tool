@@ -454,6 +454,10 @@
                                     }
                                 });
                             });
+                        },
+                        error: function(jqXHR, status, error){
+                            loading(false);
+                            giveFeedback("There is a problem loading all the editors.");
                         }
                     });
                 }else{
