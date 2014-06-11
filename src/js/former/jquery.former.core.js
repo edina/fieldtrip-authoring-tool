@@ -64,6 +64,7 @@
         var config = this.options;
         var main_menu = $("#"+config.mainmenu_id);
         var editmenu_id = $("#"+ config.editmenu_id);
+        var accessibility = new Accesibility();
         
         //add html for the main menu
         main_menu.html(this.createMainMenu().join(""));
@@ -93,6 +94,8 @@
         //the events of dragging, dropping, sorting, editing and deleting the elements
         this.enableEvents();
     
+        accessibility.apply();
+
         return this;
   };
   
