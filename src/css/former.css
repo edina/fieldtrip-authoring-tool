@@ -21,12 +21,20 @@ body {
   overflow: auto;
 }
 
-.hero-unit{
+/*.hero-unit{
   background-image: url("images/home-background.png");
   background-repeat: no-repeat;
   background-position: right bottom;
   min-height: 550px;
+}*/
+
+#main{
+  background-image: url("images/home-background.png");
+  background-repeat: no-repeat;
+  background-position: right bottom;
 }
+
+
 
 .element{
   float: left;
@@ -161,6 +169,7 @@ body {
 #map_canvas{
   float:left;
   max-width: 100%;
+  background-color: #eee;
 }
 #filter-area{float: left;}
 

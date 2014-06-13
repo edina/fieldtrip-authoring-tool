@@ -42,7 +42,7 @@ MapViewer.prototype.initElements = function(){
         stepSecond: 10
     });
     //$("#"+this.options["filter-elements"]["filterId"]).hide();
-    $("#"+this.options["table-elements"]["tableId"]).hide();
+    //$("#"+this.options["table-elements"]["tableId"]).hide();
 }
 
 //expand the filters when the user selects filter in the select menu or not
@@ -439,12 +439,14 @@ MapViewer.prototype.initTable = function(table_data){
         this.oTable = $("#"+this.options["table-elements"]["tableId"]).dataTable({
             "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
             "sPaginationType": "bootstrap",
+            "bPaginate": false,
             "aoColumns": header_cols,
             "aaData": table_data,
             "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
                 $(nRow).attr("id", "row-"+aData.id );
             }
         });
+        this.enableTableKeyboardNavigation();
     }else{
         this.oTable.fnClearTable();
         this.oTable.fnAddData(table_data);
@@ -608,6 +610,43 @@ MapViewer.prototype.filterTableData = function(features){
     }, this));
 }
 
+MapViewer.prototype.enableTableKeyboardNavigation = function(){
+    this.oTable.on('keypress', function(e){
+        console.log(e);
+        switch(e.keyCode){
+            case 40: // Down
+                $row = $('.row_selected', this);
+                if($row.length == 0){
+                    $('tbody tr:first', this).addClass('row_selected');
+                }else{
+                    if(!$row.is(':last-child')){
+                        $row.removeClass('row_selected')
+                            .next()
+                            .addClass('row_selected')
+                            .focus();
+                    }
+                }
+            break;
+            case 38: // Up
+                $row = $('.row_selected', this);
+                if($row.length == 0){
+                    $('tbody tr:last', this).addClass('row_selected');
+                }else{                   
+                    if($row.index() > 0){
+                        $row.removeClass('row_selected')
+                            .prev()
+                            .addClass('row_selected')
+                            .focus();
+                    }
+                }                 
+            break;
+            case 13: // Enter
+                // TODO
+            break;
+        }
+    });
+}
+
 MapViewer.prototype.clearTableData = function(){
     $("#"+this.options["table-elements"]["clear-btn"]).click(function(){
         $(".row_selected").removeClass('row_selected');
@@ -678,7 +717,7 @@ MapViewer.prototype.createMapCode = function(){
     mapcode.push('</head>\n');
     mapcode.push('<body>\n');
     //mapcode.push('<p>Hover functionality: <input type="checkbox" name="enable-hover" id="enable-hover" checked="checked" /></li></p>\n');
-    mapcode.push('<div id=\"map_canvas\"></div>\n');
+    mapcode.push('<div id=\"map_canvas\" aria-hidden="true"></div>\n');
     mapcode.push('<div id="myTable" style="clear: both;" >\n');
     mapcode.push('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example">\n')
     mapcode.push('<thead><tr><th>A/A</th><th>Record</th><th>Editor</th><th>Expand</th></tr></thead></table>\n');
