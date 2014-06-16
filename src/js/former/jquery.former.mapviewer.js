@@ -412,9 +412,11 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
     for(var i=0; i<data.length; i++){
         for(key in data[i]){
             //var obj = this.prepareSingleTableData(data[i].name, data[i], i, state);
-            var obj = this.prepareSingleTableData(key, data[i][key], i, state);
-            table_data.push(obj.data);
-            features.push(obj.feature);
+            if(data[i][key]['editor'] == "track.edtr"){
+                var obj = this.prepareSingleTableData(key, data[i][key], i, state);
+                table_data.push(obj.data);
+                features.push(obj.feature);
+            }
         }
     }
     return {"table": table_data, "features": features};
@@ -422,10 +424,11 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
-    var data_obj = {id: i, name: folder, editor: record.editor, date: record.timestamp.split("T")[0]};
+    description = findLabel(record.fields, 'Description')
+    var data_obj = {'id': i, 'name': folder, 'description': description, 'date': record.timestamp.split("T")[0]};    
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
     if(state === "edit"){
-        data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View/Edit</button> | <button class="record-delete" title="'+folder+'" row="'+i+'">Delete</button>';
+        data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View</button>';
     }else if(state === "show"){
         data_obj["buttons"] = '<button class="record-expand" title="'+folder+'" row="'+i+'">Expand</button>';
     }
@@ -434,7 +437,7 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
 
 
 MapViewer.prototype.initTable = function(table_data){
-    var header_cols = [{"mData": "id"}, {"mData": "name"}, {"mData": "editor"}, {"mData": "date"}, {"mData": "buttons"}];
+    var header_cols = [{"mData": "name"}, {"mData": "description"}, {"mData": "date"}, {"mData": "buttons"}];
     if(this.oTable == undefined){
         this.oTable = $("#"+this.options["table-elements"]["tableId"]).dataTable({
             "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
@@ -591,28 +594,31 @@ MapViewer.prototype.enableRecordDelete = function(){
 }
 
 MapViewer.prototype.filterTableData = function(features){
-    $(document).off('click', "#"+this.options["table-elements"]["tableId"]+" tbody tr");
-    $(document).on('click', "#"+this.options["table-elements"]["tableId"]+" tbody tr", $.proxy(function( event ) {
-        if ( $(event.currentTarget).hasClass('row_selected') ) {
-            $(this).removeClass('row_selected');
-        }else {
-            this.oTable.$('tr.row_selected').removeClass('row_selected');
-            $(event.currentTarget).addClass('row_selected');
-            for(var j=0; j<features.length; j++){
-                for(var i=0; i<features[j].cluster.length; i++){
-                    if(features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
-                        this.map.setCenter(features[j].cluster[i].geometry.bounds.centerLonLat, 11);
-                        break;
-                    }
+    var row_element = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
+
+    center_record = function( event ) {
+        this.oTable.$('tr.row_selected').removeClass('row_selected');
+        $(event.currentTarget).addClass('row_selected');
+        for(var j=0; j<features.length; j++){
+            for(var i=0; i<features[j].cluster.length; i++){
+                if(features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
+                    this.map.setCenter(features[j].cluster[i].geometry.bounds.centerLonLat, 11);
+                    break;
                 }
             }
         }
-    }, this));
+    };
+
+    $(document).off('click', row_element);
+    $(document).on('click', row_element, $.proxy(center_record, this));
+
+    $(document).off('row_selected', row_element);
+    $(document).on('row_selected', row_element, $.proxy(center_record, this));
+
 }
 
 MapViewer.prototype.enableTableKeyboardNavigation = function(){
     this.oTable.on('keypress', function(e){
-        console.log(e);
         switch(e.keyCode){
             case 40: // Down
                 $row = $('.row_selected', this);
@@ -620,10 +626,8 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                     $('tbody tr:first', this).addClass('row_selected');
                 }else{
                     if(!$row.is(':last-child')){
-                        $row.removeClass('row_selected')
-                            .next()
-                            .addClass('row_selected')
-                            .focus();
+                        $row.next()
+                            .trigger('row_selected');
                     }
                 }
             break;
@@ -633,10 +637,8 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                     $('tbody tr:last', this).addClass('row_selected');
                 }else{                   
                     if($row.index() > 0){
-                        $row.removeClass('row_selected')
-                            .prev()
-                            .addClass('row_selected')
-                            .focus();
+                        $row.prev()
+                            .trigger('row_selected');
                     }
                 }                 
             break;

@@ -136,7 +136,7 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                     data: obj.name,
                     success: function(data) {
                         console.log(data);
-                        oTable.fnUpdate(obj.name, parseInt(row), 1);
+                        oTable.fnUpdate(obj.name, parseInt(row), 0);
                         $("#row-"+row +" .record-edit").attr("title", obj.name+"-"+row);
                         $("#row-"+row +" .record-delete").attr("title", obj.name+"-"+row);
                         loading(false);
@@ -424,6 +424,22 @@ function replaceSpace(title){
         //console.log(title)
     }
     return title;
+}
+
+
+/*
+    Find a label in the array of fields of a record
+
+    @param{Array} fields
+    @param{String} label
+    @return{String}
+*/
+function findLabel(fields, label){
+    for(i=0; i< fields.length; i++){
+        if(fields[i].label == label){
+            return fields[i].val;
+        }
+    }
 }
 
 //check if it is a touchdevice the device that uses this webapp
