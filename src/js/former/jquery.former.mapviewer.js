@@ -618,7 +618,9 @@ MapViewer.prototype.filterTableData = function(features){
 }
 
 MapViewer.prototype.enableTableKeyboardNavigation = function(){
-    this.oTable.on('keypress', function(e){
+
+    $(document).off('keyup', this.oTable);
+    $(document).on('keyup', this.oTable, $.proxy(function(e){
         switch(e.keyCode){
             case 40: // Down
                 $row = $('.row_selected', this);
@@ -646,7 +648,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                 // TODO
             break;
         }
-    });
+    }));
 }
 
 MapViewer.prototype.clearTableData = function(){
