@@ -409,15 +409,49 @@ MapViewer.prototype.updateFeaturesOnMap = function(features){
 
 //preparing the object for the table data and the point features
 MapViewer.prototype.prepareManyTableData= function(data, state){
-    var features = new Array(), table_data = new Array();
+    var features = new Array();
+    var table_data = new Array();
+
+    // Rearrange the array in order to display it as a tree
+    var tracks = new Array();
+    var pois = new Array();
     for(var i=0; i<data.length; i++){
         for(key in data[i]){
-            //var obj = this.prepareSingleTableData(data[i].name, data[i], i, state);
             if(data[i][key]['editor'] == "track.edtr"){
-                var obj = this.prepareSingleTableData(key, data[i][key], i, state);
-                table_data.push(obj.data);
-                features.push(obj.feature);
+                tracks.push(data[i]);
+            }else{
+                track_id = data[i][key]['trackId'];
+                if(track_id !== undefined){
+                    if(pois[track_id] === undefined){
+                        pois[track_id] = new Array();
+                    }
+                    pois[track_id].push(data[i]);
+                }else{
+                    console.warn("Not track id for POI: " + key);
+                }
             }
+            break; // Should be one key only
+        }
+    }
+
+    data = Array();
+    for(var i=0; i<tracks.length; i++){
+        key = getKeys(tracks[i])[0];
+        track_id = tracks[i][key]['geofenceId'];
+
+        data.push(tracks[i]);
+        if(pois[track_id] !== undefined){
+            for(var j=0; j<pois[track_id].length; j++){
+                data.push(pois[track_id][j]);
+            }
+        }
+    }
+
+    for(var i=0; i<data.length; i++){
+        for(key in data[i]){
+            var obj = this.prepareSingleTableData(key, data[i][key], i, state);
+            table_data.push(obj.data);
+            features.push(obj.feature);
         }
     }
     return {"table": table_data, "features": features};
@@ -428,6 +462,8 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     description = findLabel(record.fields, 'Description')
     var data_obj = {'id': i, 'name': folder, 'description': description, 'date': record.timestamp.split("T")[0]};    
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
+
+    data_obj['control'] = '';
     if(state === "edit"){
         data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View</button>';
     }else if(state === "show"){
@@ -438,7 +474,7 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
 
 
 MapViewer.prototype.initTable = function(table_data){
-    var header_cols = [{"mData": "name"}, {"mData": "description"}, {"mData": "date"}, {"mData": "buttons"}];
+    var header_cols = [{"mData": "control"}, {"mData": "name"}, {"mData": "description"}, {"mData": "date"}, {"mData": "buttons"}];
     if(this.oTable == undefined){
         this.oTable = $("#"+this.options["table-elements"]["tableId"]).dataTable({
             "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
@@ -448,7 +484,10 @@ MapViewer.prototype.initTable = function(table_data){
             "aoColumns": header_cols,
             "aaData": table_data,
             "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-                $(nRow).attr("id", "row-"+aData.id );
+                $nRow = $(nRow);
+                $nRow.attr("id", "row-"+aData.id );
+                // Add style to the controls column
+                $("td:first", $nRow).addClass('details-control');
             }
         });
         this.enableTableKeyboardNavigation();
