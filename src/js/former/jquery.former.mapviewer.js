@@ -6,6 +6,7 @@ var MapViewer = function(options, base_url){
     this.base_url = base_url;
     this.select_id;
     this.cursor;
+    this.features;
 }
 
 MapViewer.prototype.init = function(){
@@ -590,31 +591,42 @@ MapViewer.prototype.enableRecordDelete = function(){
         var record = $(event.currentTarget).attr("title");
         console.log(record)
         this.askForDeletion(record);
-    }, this))
+    }, this));
+}
+
+MapViewer.prototype.onRowSelected = function(event){
+    // Unselect the row selected and select the new and toggle aria-selected attribute
+    this.oTable.$('tr.row_selected')
+               .removeClass('row_selected')
+               .attr('aria-selected', false);
+    $(event.currentTarget).addClass('row_selected')
+                          .attr('aria-selected', true)
+                          .focus();
+
+    // Center the map
+    for(var j=0; j<this.features.length; j++){
+        for(var i=0; i<this.features[j].cluster.length; i++){
+            if(this.features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
+                this.map.setCenter(this.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
+                break;
+            }
+        }
+    }
 }
 
 MapViewer.prototype.filterTableData = function(features){
-    var row_element = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
+    // Store the features for manipulate the map later
+    this.features = features;
 
-    center_map = function( event ) {
-        this.oTable.$('tr.row_selected').removeClass('row_selected');
-        $(event.currentTarget).addClass('row_selected');
-        for(var j=0; j<features.length; j++){
-            for(var i=0; i<features[j].cluster.length; i++){
-                if(features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
-                    this.map.setCenter(features[j].cluster[i].geometry.bounds.centerLonLat, 11);
-                    break;
-                }
-            }
-        }
-    };
+    row = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
 
-    $(document).off('click', row_element);
-    $(document).on('click', row_element, $.proxy(center_map, this));
+    // Bind the click event on the table to onRowSelected event
+    $(document).off('click', row);
+    $(document).on('click', row, $.proxy(this.onRowSelected, this));
 
-    $(document).off('row_selected', row_element);
-    $(document).on('row_selected', row_element, $.proxy(center_map, this));
-
+    // Bind the row_selected event to onRowSelected event
+    $(document).off('row_selected', row);
+    $(document).on('row_selected', row, $.proxy(this.onRowSelected, this));
 }
 
 MapViewer.prototype.enableTableKeyboardNavigation = function(){
