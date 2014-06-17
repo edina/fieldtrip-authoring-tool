@@ -136,7 +136,7 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                     data: obj.name,
                     success: function(data) {
                         $row = $("#row-"+row);
-                        oTable.fnUpdate(obj.name, $row.index(), 0);
+                        oTable.fnUpdate(obj.name, $row.index(), 1);
                         $(".record-edit", $row).attr("title", obj.name);
                         $(".record-delete", $row).attr("title", obj.name);
                         loading(false);
@@ -440,6 +440,17 @@ function findLabel(fields, label){
             return fields[i].val;
         }
     }
+}
+
+/*
+    Get the keys of a dictionary
+*/
+function getKeys(dict){
+    keys = new Array();
+    for(key in dict){
+        keys.push(key);
+    }
+    return keys;
 }
 
 //check if it is a touchdevice the device that uses this webapp
