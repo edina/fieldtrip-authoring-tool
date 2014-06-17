@@ -135,10 +135,10 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                     type: 'PUT',
                     data: obj.name,
                     success: function(data) {
-                        console.log(data);
-                        oTable.fnUpdate(obj.name, parseInt(row), 0);
-                        $("#row-"+row +" .record-edit").attr("title", obj.name+"-"+row);
-                        $("#row-"+row +" .record-delete").attr("title", obj.name+"-"+row);
+                        $row = $("#row-"+row);
+                        oTable.fnUpdate(obj.name, $row.index(), 0);
+                        $(".record-edit", $row).attr("title", obj.name);
+                        $(".record-delete", $row).attr("title", obj.name);
                         loading(false);
                     }
                 });

@@ -45,7 +45,7 @@ RecordRenderer.prototype.renderType = {
     }
   },
   textarea: function(dialog, el_id, obj){
-    $("#"+dialog+" "+el_id).attr("value", obj.val);
+    $("#"+dialog+" "+el_id).val(obj.val);
   },
   checkbox: function(dialog, el_id, obj){
     var splits = new Array();

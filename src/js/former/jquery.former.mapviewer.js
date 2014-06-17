@@ -443,6 +443,7 @@ MapViewer.prototype.initTable = function(table_data){
             "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
             "sPaginationType": "bootstrap",
             "bPaginate": false,
+            "bSort": false,
             "aoColumns": header_cols,
             "aaData": table_data,
             "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
@@ -527,7 +528,6 @@ MapViewer.prototype.enableRecordEdit = function(){
                 var title = editor.split(".")[0];
                 var field_values = data.fields;
                 var url = mapviewer.buildUrl('editors', '/'+editor);
-                //console.log(editor)
                 if(editor === "image.edtr" || editor === "audio.edtr" || editor === "text.edtr"){
                     url = "editors/default/"+editor;
                 }
@@ -596,7 +596,7 @@ MapViewer.prototype.enableRecordDelete = function(){
 MapViewer.prototype.filterTableData = function(features){
     var row_element = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
 
-    center_record = function( event ) {
+    center_map = function( event ) {
         this.oTable.$('tr.row_selected').removeClass('row_selected');
         $(event.currentTarget).addClass('row_selected');
         for(var j=0; j<features.length; j++){
@@ -610,10 +610,10 @@ MapViewer.prototype.filterTableData = function(features){
     };
 
     $(document).off('click', row_element);
-    $(document).on('click', row_element, $.proxy(center_record, this));
+    $(document).on('click', row_element, $.proxy(center_map, this));
 
     $(document).off('row_selected', row_element);
-    $(document).on('row_selected', row_element, $.proxy(center_record, this));
+    $(document).on('row_selected', row_element, $.proxy(center_map, this));
 
 }
 
