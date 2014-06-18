@@ -464,6 +464,15 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
 
     data_obj['control'] = '';
+
+    // Add styles for show and hiding the poi's and the tracks
+    data_obj['styles'] = new Array();
+    if(record.editor == 'track.edtr'){
+        data_obj['styles'].push('track-record', 'track-collapsed');
+    }else{
+        data_obj['styles'].push('poi-record', 'poi-collapsed');
+    }
+
     if(state === "edit"){
         data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View</button>';
     }else if(state === "show"){
@@ -485,9 +494,14 @@ MapViewer.prototype.initTable = function(table_data){
             "aaData": table_data,
             "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
                 $nRow = $(nRow);
-                $nRow.attr("id", "row-"+aData.id );
+                $nRow.attr("id", "row-" + aData.id)
+                     .attr("tabindex", "0")
+                     .attr("role", "row")
+                     .addClass(aData.styles.join(' '));
+
                 // Add style to the controls column
-                $("td:first", $nRow).addClass('details-control');
+                $("td:first", $nRow).addClass('details-control')
+                                    .attr("aria-hidden", "true");
             }
         });
         this.enableTableKeyboardNavigation();

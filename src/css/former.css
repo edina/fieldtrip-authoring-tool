@@ -217,3 +217,23 @@ hr.style-one {
 #download_images{
   clear: both;
 }
+
+.track-collapsed td:first-child{
+  background: url('img/details_open.png') no-repeat scroll center center transparent;
+}
+
+.track-expanded td:first-child{
+  background: url('img/details_close.png') no-repeat scroll center center transparent;
+}
+
+.poi-record{
+
+}
+
+.poi-collapsed{
+  display: none;
+}
+
+.poi-collapsed{
+  display: initial;
+}
