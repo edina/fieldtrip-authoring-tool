@@ -81,10 +81,10 @@
           <a class="brand" role="banner" href="#">Spatial Memories Author</a>
           <div class="nav-collapse collapse">
             <ul class="nav" role="navigation" id="mainmenu"></ul>
-            <p class="navbar-text pull-right" style="display: none;" id="user-section">
-              Logged in as <span class="username"></span>
-              <a href="/authoring/" class="btn btn-primary btn-small">Logout</a>
-            </p>
+            <div class="navbar-text pull-right" id="user-section">
+              <button class="btn btn-primary btn-small loginbutton" role="button" tabindex="0">Login</button>
+              <button class="btn btn-primary btn-small logoutbutton" role="button" tabindex="0" style="display: none">Logout</button>
+            </div>
           </div><!--/.nav-collapse -->
         </div>
       </div>
@@ -104,7 +104,7 @@
             <div id="f_title"></div>
             <div id="form-content"></div>
             <div id="home-content" aria-hidden="false"></div>
-            <div id="map-content">
+            <div id="map-content" style="display: none" aria-hidden="true">
               <div id="map_canvas"></div>
               <br><br>
               <div id="filter-area">
@@ -158,13 +158,6 @@
       </form>
     </div>
 
-    <div id="dialog-local-login" title="Loging to Local Provider">
-      <fieldset>
-        <input type="email" id="user-email">
-        <button id="loginbutton" type="button" class="btn">Login</button>
-      </fieldset>
-    </div>
-
     <div id="loader">
       <img src="css/images/ajax-loader.gif">
     </div>
@@ -172,7 +165,7 @@
 
   <script type="text/javascript">
     //var map, oTable;
-    var provider;
+    var provider = 'dropbox';
 
     $(document).ready(function(){
       $("#map_canvas").width($(".span10").width());
@@ -200,53 +193,38 @@
         modal: false
       });
 
+      // Get the authentication parameters
+      var uid = getParam('uid', $(location).attr('href'));
+      var token = getParam('oauth_token', $(location).attr('href'));
 
-      var uid = getParam('uid', $(location).attr('href')), token = getParam('oauth_token', $(location).attr('href'));
+      // Load the home and attack login event
       $.ajax({
         url: "home.html",
         dataType: "html",
         success: function(data){
           $("#home-content").append(data);
-          $("#open-login").click(function(){
-            $("#dialog-login").dialog("open");
-          });
-          $(".redirect-me").click(function(){
+          $(".loginbutton").click(function(evt){
+            // If not authenticated yet
             if(uid == 0){
-              provider = $(this).attr("id");
+              evt.preventDefault();
+              var callback = $(location).attr('href');
+              var url = "/1.3/pcapi/auth/"+provider+"?callback=" + callback;
               localStorage.setItem("provider", provider);
-              if(provider === 'local'){
-                var url = "/1.3/pcapi/auth/"+provider;
-                $("#dialog-local-login").dialog("open");
-                $("#loginbutton").click(function(){
-                  //$.ajax({
-                  //  method: "POST",
-                  //  data: "user="+$("#useremail").val(),
-                  //  url: url
-                  //}).done(function(data){
-                  //  console.log(data)
-                  //});
-                  var $location = $(location);
-                  $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+$('#user-email').val());
-                  //$.getJSON(url, function(data) {
-                  //  console.log(data);
-                   // console.log($location.attr("href"))
-                  //  $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+data["userid"]);
-                    //$(location).attr('href',data.url);
-                  //});
-                });
-              }else{
-                var url = "/1.3/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
-                $.getJSON(url, function(data) {
-                  $(location).attr('href',data.url);
-                });
-              }
-            }
+
+              // Redirect the user to the dropbox oauth page
+              $.getJSON(url, function(data) {
+                $(location).attr('href', data.url);
+              });
+            }            
           });
-          if(uid != 0){
-            $("#login-paragraph").hide("fast");
-          }
+
+          $(".logoutbutton").click(function(evt){
+            url = $(location).attr('href');
+            home = url.split('?')[0];
+            $(location).attr('href', home);
+          });
         }
-      });
+      });      
 
       if(uid != 0){
         initialize_app(token, localStorage.getItem("provider"));
@@ -284,6 +262,8 @@
         }
       };
 
+      $('.loginbutton').hide();
+      $('.logoutbutton').show();
       $("#form-content").buildformer(options);
     }
 
