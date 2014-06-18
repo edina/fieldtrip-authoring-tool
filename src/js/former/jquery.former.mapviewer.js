@@ -459,9 +459,12 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
-    description = findLabel(record.fields, 'Description') || ''; 
-    var data_obj = {'id': i, 'name': folder, 'description': description, 'date': record.timestamp.split("T")[0]};    
-    var feature = new OpenLayers.Feature.Vector(point, data_obj);
+    description = findLabel(record.fields, 'Description') || '';
+    console.log(record)
+    var data_obj = {'id': i, 'name': folder, 'description': description, 'date': record.timestamp.split("T")[0], 'fields': record.fields};
+    record['id'] = i;
+    //delete record['point'];
+    var feature = new OpenLayers.Feature.Vector(point, record);
 
     data_obj['control'] = '';
     if(state === "edit"){
@@ -573,34 +576,7 @@ MapViewer.prototype.enableRecordEdit = function(){
                 }
                 if(editor === "track.edtr"){
                     url = "editors/default/text.edtr";
-                    var style = {
-                        "strokeColor": "rgb(255, 255, 0)",
-                        "strokeWidth": 5,
-                        "strokeOpacity": 1
-                    }
-                    
-                    for(var i=0; i<data.fields.length; i++){
-                        if(data.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
-                            style = data.fields[i]["style"];
-                        }
-                    }
-                    
-                    $.ajax({
-                        type: "GET",
-                        url: mapviewer.buildUrl('records', '/'+record+'/'+data.fields[1].val),
-                        dataType: "xml",
-                        success: function(gpx_data){
-                            var in_options = {
-                                'internalProjection': mapviewer.map.baseLayer.projection,
-                                'externalProjection': new OpenLayers.Projection("EPSG:4326")
-                            };
-                            var layers = mapviewer.map.getLayersByName("GPX");
-                            var gpx_format = new OpenLayers.Format.GPX(in_options);
-                            layers[0].removeAllFeatures();
-                            layers[0].style = style;
-                            layers[0].addFeatures(gpx_format.read(gpx_data))
-                        }
-                    });
+                    //mapviewer.displayGPX(record, data);
                 }
                 $.ajax({
                     type: "GET",
@@ -633,6 +609,38 @@ MapViewer.prototype.enableRecordDelete = function(){
     }, this));
 }
 
+MapViewer.prototype.displayGPX = function(record, data){
+    console.log(data)
+    var style = {
+        "strokeColor": "rgb(255, 255, 0)",
+        "strokeWidth": 5,
+        "strokeOpacity": 1
+    }
+
+    for(var i=0; i<data.fields.length; i++){
+        if(data.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
+            style = data.fields[i]["style"];
+        }
+    }
+
+    $.ajax({
+        type: "GET",
+        url: this.buildUrl('records', '/'+record+'/'+data.fields[1].val),
+        dataType: "xml",
+        success: $.proxy(function(gpx_data){
+            var in_options = {
+                'internalProjection': this.map.baseLayer.projection,
+                'externalProjection': new OpenLayers.Projection("EPSG:4326")
+            };
+            var layers = this.map.getLayersByName("GPX");
+            var gpx_format = new OpenLayers.Format.GPX(in_options);
+            layers[0].removeAllFeatures();
+            layers[0].style = style;
+            layers[0].addFeatures(gpx_format.read(gpx_data))
+        }, this)
+    });
+}
+
 MapViewer.prototype.onRowSelected = function(event){
     // Unselect the row selected and select the new and toggle aria-selected attribute
     this.oTable.$('tr.row_selected')
@@ -646,7 +654,9 @@ MapViewer.prototype.onRowSelected = function(event){
     for(var j=0; j<this.features.length; j++){
         for(var i=0; i<this.features[j].cluster.length; i++){
             if(this.features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
+                console.log(this.features[j].cluster[i])
                 this.map.setCenter(this.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
+                this.displayGPX(this.features[j].cluster[i].attributes.name, this.features[j].cluster[i].attributes)
                 break;
             }
         }
@@ -688,12 +698,13 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                 $row = $('.row_selected', this);
                 if($row.length == 0){
                     $('tbody tr:last', this).addClass('row_selected');
-                }else{                   
+                }
+                else{
                     if($row.index() > 0){
                         $row.prev()
                             .trigger('row_selected');
                     }
-                }                 
+                }
             break;
             case 13: // Enter
                 // TODO
