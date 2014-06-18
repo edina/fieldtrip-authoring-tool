@@ -6,6 +6,7 @@ var MapViewer = function(options, base_url){
     this.base_url = base_url;
     this.select_id;
     this.cursor;
+    this.features;
 }
 
 MapViewer.prototype.init = function(){
@@ -42,7 +43,7 @@ MapViewer.prototype.initElements = function(){
         stepSecond: 10
     });
     //$("#"+this.options["filter-elements"]["filterId"]).hide();
-    $("#"+this.options["table-elements"]["tableId"]).hide();
+    //$("#"+this.options["table-elements"]["tableId"]).hide();
 }
 
 //expand the filters when the user selects filter in the select menu or not
@@ -408,10 +409,46 @@ MapViewer.prototype.updateFeaturesOnMap = function(features){
 
 //preparing the object for the table data and the point features
 MapViewer.prototype.prepareManyTableData= function(data, state){
-    var features = new Array(), table_data = new Array();
+    var features = new Array();
+    var table_data = new Array();
+
+    // Rearrange the array in order to display it as a tree
+    var tracks = new Array();
+    var pois = new Array();
     for(var i=0; i<data.length; i++){
         for(key in data[i]){
-            //var obj = this.prepareSingleTableData(data[i].name, data[i], i, state);
+            if(data[i][key]['editor'] == "track.edtr"){
+                tracks.push(data[i]);
+            }else{
+                track_id = data[i][key]['trackId'];
+                if(track_id !== undefined){
+                    if(pois[track_id] === undefined){
+                        pois[track_id] = new Array();
+                    }
+                    pois[track_id].push(data[i]);
+                }else{
+                    console.warn("Not track id for POI: " + key);
+                }
+            }
+            break; // Should be one key only
+        }
+    }
+
+    data = Array();
+    for(var i=0; i<tracks.length; i++){
+        key = getKeys(tracks[i])[0];
+        track_id = tracks[i][key]['geofenceId'];
+
+        data.push(tracks[i]);
+        if(pois[track_id] !== undefined){
+            for(var j=0; j<pois[track_id].length; j++){
+                data.push(pois[track_id][j]);
+            }
+        }
+    }
+
+    for(var i=0; i<data.length; i++){
+        for(key in data[i]){
             var obj = this.prepareSingleTableData(key, data[i][key], i, state);
             table_data.push(obj.data);
             features.push(obj.feature);
@@ -422,10 +459,13 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
-    var data_obj = {id: i, name: folder, editor: record.editor, date: record.timestamp.split("T")[0]};
+    description = findLabel(record.fields, 'Description') || ''; 
+    var data_obj = {'id': i, 'name': folder, 'description': description, 'date': record.timestamp.split("T")[0]};    
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
+
+    data_obj['control'] = '';
     if(state === "edit"){
-        data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View/Edit</button> | <button class="record-delete" title="'+folder+'" row="'+i+'">Delete</button>';
+        data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View</button>';
     }else if(state === "show"){
         data_obj["buttons"] = '<button class="record-expand" title="'+folder+'" row="'+i+'">Expand</button>';
     }
@@ -434,17 +474,23 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
 
 
 MapViewer.prototype.initTable = function(table_data){
-    var header_cols = [{"mData": "id"}, {"mData": "name"}, {"mData": "editor"}, {"mData": "date"}, {"mData": "buttons"}];
+    var header_cols = [{"mData": "control"}, {"mData": "name"}, {"mData": "description"}, {"mData": "date"}, {"mData": "buttons"}];
     if(this.oTable == undefined){
         this.oTable = $("#"+this.options["table-elements"]["tableId"]).dataTable({
             "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
             "sPaginationType": "bootstrap",
+            "bPaginate": false,
+            "bSort": false,
             "aoColumns": header_cols,
             "aaData": table_data,
             "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-                $(nRow).attr("id", "row-"+aData.id );
+                $nRow = $(nRow);
+                $nRow.attr("id", "row-"+aData.id );
+                // Add style to the controls column
+                $("td:first", $nRow).addClass('details-control');
             }
         });
+        this.enableTableKeyboardNavigation();
     }else{
         this.oTable.fnClearTable();
         this.oTable.fnAddData(table_data);
@@ -522,7 +568,6 @@ MapViewer.prototype.enableRecordEdit = function(){
                 var title = editor.split(".")[0];
                 var field_values = data.fields;
                 var url = mapviewer.buildUrl('editors', '/'+editor);
-                //console.log(editor)
                 if(editor === "image.edtr" || editor === "audio.edtr" || editor === "text.edtr"){
                     url = "editors/default/"+editor;
                 }
@@ -585,27 +630,76 @@ MapViewer.prototype.enableRecordDelete = function(){
         var record = $(event.currentTarget).attr("title");
         console.log(record)
         this.askForDeletion(record);
-    }, this))
+    }, this));
+}
+
+MapViewer.prototype.onRowSelected = function(event){
+    // Unselect the row selected and select the new and toggle aria-selected attribute
+    this.oTable.$('tr.row_selected')
+               .removeClass('row_selected')
+               .attr('aria-selected', false);
+    $(event.currentTarget).addClass('row_selected')
+                          .attr('aria-selected', true)
+                          .focus();
+
+    // Center the map
+    for(var j=0; j<this.features.length; j++){
+        for(var i=0; i<this.features[j].cluster.length; i++){
+            if(this.features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
+                this.map.setCenter(this.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
+                break;
+            }
+        }
+    }
 }
 
 MapViewer.prototype.filterTableData = function(features){
-    $(document).off('click', "#"+this.options["table-elements"]["tableId"]+" tbody tr");
-    $(document).on('click', "#"+this.options["table-elements"]["tableId"]+" tbody tr", $.proxy(function( event ) {
-        if ( $(event.currentTarget).hasClass('row_selected') ) {
-            $(this).removeClass('row_selected');
-        }else {
-            this.oTable.$('tr.row_selected').removeClass('row_selected');
-            $(event.currentTarget).addClass('row_selected');
-            for(var j=0; j<features.length; j++){
-                for(var i=0; i<features[j].cluster.length; i++){
-                    if(features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
-                        this.map.setCenter(features[j].cluster[i].geometry.bounds.centerLonLat, 11);
-                        break;
+    // Store the features for manipulate the map later
+    this.features = features;
+
+    row = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
+
+    // Bind the click event on the table to onRowSelected event
+    $(document).off('click', row);
+    $(document).on('click', row, $.proxy(this.onRowSelected, this));
+
+    // Bind the row_selected event to onRowSelected event
+    $(document).off('row_selected', row);
+    $(document).on('row_selected', row, $.proxy(this.onRowSelected, this));
+}
+
+MapViewer.prototype.enableTableKeyboardNavigation = function(){
+
+    $(document).off('keyup', this.oTable);
+    $(document).on('keyup', this.oTable, $.proxy(function(e){
+        switch(e.keyCode){
+            case 40: // Down
+                $row = $('.row_selected', this);
+                if($row.length == 0){
+                    $('tbody tr:first', this).addClass('row_selected');
+                }else{
+                    if(!$row.is(':last-child')){
+                        $row.next()
+                            .trigger('row_selected');
                     }
                 }
-            }
+            break;
+            case 38: // Up
+                $row = $('.row_selected', this);
+                if($row.length == 0){
+                    $('tbody tr:last', this).addClass('row_selected');
+                }else{                   
+                    if($row.index() > 0){
+                        $row.prev()
+                            .trigger('row_selected');
+                    }
+                }                 
+            break;
+            case 13: // Enter
+                // TODO
+            break;
         }
-    }, this));
+    }));
 }
 
 MapViewer.prototype.clearTableData = function(){
@@ -678,7 +772,7 @@ MapViewer.prototype.createMapCode = function(){
     mapcode.push('</head>\n');
     mapcode.push('<body>\n');
     //mapcode.push('<p>Hover functionality: <input type="checkbox" name="enable-hover" id="enable-hover" checked="checked" /></li></p>\n');
-    mapcode.push('<div id=\"map_canvas\"></div>\n');
+    mapcode.push('<div id=\"map_canvas\" aria-hidden="true"></div>\n');
     mapcode.push('<div id="myTable" style="clear: both;" >\n');
     mapcode.push('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example">\n')
     mapcode.push('<thead><tr><th>A/A</th><th>Record</th><th>Editor</th><th>Expand</th></tr></thead></table>\n');

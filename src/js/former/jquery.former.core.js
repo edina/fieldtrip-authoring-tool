@@ -64,6 +64,7 @@
         var config = this.options;
         var main_menu = $("#"+config.mainmenu_id);
         var editmenu_id = $("#"+ config.editmenu_id);
+        var accessibility = new Accesibility();
         
         //add html for the main menu
         main_menu.html(this.createMainMenu().join(""));
@@ -93,28 +94,15 @@
         //the events of dragging, dropping, sorting, editing and deleting the elements
         this.enableEvents();
     
+        accessibility.apply();
+
         return this;
   };
   
     BuildFormer.prototype.createMainMenu = function(){
         var menu = new Array();
         menu.push('<li><a href="javascript:void(0)" id="home" class="menu-item">Home</a></li>');
-        menu.push('<li><a href="javascript:void(0)" rel="tooltip" data-placement="bottom" data-original-title="Click here to create new form" id="create-form" class="menu-item">Create new form</a></li>');
-        menu.push('<li class="active"><a href="javascript:void(0)" rel="tooltip" data-placement="bottom" data-original-title="Click here to see your records" id="my-records" class="menu-item">Record Viewer</a></li>');
-        menu.push('<li class="dropdown">');
-        menu.push('<a href="javascript:void(0)" id="example-editors" rel="tooltip" data-placement="bottom" data-original-title="Click here to download some example forms" class="dropdown-toggle" data -toggle="dropdown">Editors Gallery <b class="caret"></b></a>');
-        menu.push('<ul class="dropdown-menu" id="editors-gallery"></ul>');
-        menu.push('</li>');
-        menu.push('<li class="dropdown">');
-        menu.push('<a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" rel="tooltip" data-placement="bottom" data-original-title="Click here to download your custom forms" id="    my-editors">My Editors <b class="caret"></b></a>');
-        menu.push('<ul class="dropdown-menu" id="forms">');
-        menu.push('<li><a href="javascript:void(0)" id="import">Import</a></li>');
-        menu.push('<li class="divider"></li>');
-        menu.push('<li class="nav-header" id="deditors">Editors</li>');
-        //menu.push('<li class="divider"></li>');
-        //menu.push('<li class="nav-header" id="leditors">Locally saved Editors</li>');
-        menu.push('</ul></li>');
-        menu.push('<li><a href="javascript:void(0)" id="layers" class="menu-item">Layers</a></li>');
+        menu.push('<li class="active"><a href="javascript:void(0)" rel="tooltip" data-placement="bottom" data-original-title="Click here to see your memories" id="my-records" class="menu-item">Memories Viewer</a></li>');
         menu.push('<li><a href="mailto:edina@ed.ac.uk" class="menu-item">Contact</a></li>');
         return menu;
     }
