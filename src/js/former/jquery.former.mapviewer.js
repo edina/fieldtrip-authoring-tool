@@ -459,7 +459,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
-    description = findLabel(record.fields, 'Description')
+    description = findLabel(record.fields, 'Description') || ''; 
     var data_obj = {'id': i, 'name': folder, 'description': description, 'date': record.timestamp.split("T")[0]};    
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
 
