@@ -503,6 +503,7 @@ MapViewer.prototype.initTable = function(table_data){
                      .attr("tabindex", "0")
                      .attr("role", "row")
                      .attr("trackid", aData.trackId)
+                     .attr("track_name", aData.name)
                      .addClass(aData.styles.join(' '));
             },
             "fnDrawCallback": function(){
@@ -567,53 +568,68 @@ MapViewer.prototype.enableRecordActions = function(){
     this.enableRecordDelete();
 }
 
-MapViewer.prototype.enableRecordEdit = function(){
+
+MapViewer.prototype.onEditRecord = function(evt){
     var oauth = this.options.oauth;
     var mapviewer = this;
     var oTable = this.oTable;
-    $(document).off('click', '.record-edit');
-    $(document).on('click', '.record-edit', function(){
-        //bformer.showEditElements(false, false)
-        var record = this.title;
-        var row = $(this).attr("row");
-        console.log(row)
-        loading(true);
-        $.ajax({
-            url: mapviewer.buildUrl('records', '/'+record),
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                var editor = data.editor;
-                var title = editor.split(".")[0];
-                var field_values = data.fields;
-                var url = mapviewer.buildUrl('editors', '/'+editor);
-                if(editor === "image.edtr" || editor === "audio.edtr" || editor === "text.edtr"){
-                    url = "editors/default/"+editor;
-                }
-                if(editor === "track.edtr"){
-                    url = "editors/default/text.edtr";
-                    //mapviewer.displayGPX(record, data);
-                }
-                $.ajax({
-                    type: "GET",
-                    url: url,
-                    dataType: "html",
-                    success: function(edit_data){
-                        var path = mapviewer.options.version+'/'+mapviewer.options.provider+'/'+oauth;
-                        var recorder = new RecordRenderer(path, record, editor, 'edit-record-dialog', field_values)
-                        makeAlertWindow(edit_data, "Edit", 300, 400, "edit-record-dialog", 1000, "middle", makeEditDialogButtons('edit-record-dialog', data, mapviewer.options.version, mapviewer.options.provider+'/'+oauth, oTable, row));
-                        recorder.render();
-                        loading(false);
-                    }
-                });
-                //need code to open a dialog with which the user will edit the data
-            },
-            error: function(jqXHR, status, error){
-                loading(false);
-                giveFeedback(JSON.parse(jqXHR.responseText)["msg"]);
+
+    $target = $(evt.currentTarget);
+    if($target.is("button")){
+        $row = $target.parent().parent();
+    }else{
+        $row = $target;
+    }
+
+    var record = $row.attr('track_name');
+
+    loading(true);
+    $.ajax({
+        url: mapviewer.buildUrl('records', '/'+record),
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            var editor = data.editor;
+            var title = editor.split(".")[0];
+            var field_values = data.fields;
+            var url = mapviewer.buildUrl('editors', '/'+editor);
+            if(editor === "image.edtr" || editor === "audio.edtr" || editor === "text.edtr"){
+                url = "editors/default/"+editor;
             }
-        });
+            if(editor === "track.edtr"){
+                url = "editors/default/text.edtr";
+                //mapviewer.displayGPX(record, data);
+            }
+            $.ajax({
+                type: "GET",
+                url: url,
+                dataType: "html",
+                success: function(edit_data){
+                    var path = mapviewer.options.version+'/'+mapviewer.options.provider+'/'+oauth;
+                    var recorder = new RecordRenderer(path, record, editor, 'edit-record-dialog', field_values)
+                    makeAlertWindow(edit_data, "Edit", 300, 400, "edit-record-dialog", 1000, "middle", makeEditDialogButtons('edit-record-dialog', data, mapviewer.options.version, mapviewer.options.provider+'/'+oauth, oTable, $row));
+                    recorder.render();
+                    loading(false);
+                }
+            });
+            //need code to open a dialog with which the user will edit the data
+        },
+        error: function(jqXHR, status, error){
+            loading(false);
+            giveFeedback(JSON.parse(jqXHR.responseText)["msg"]);
+        }
     });
+}
+
+
+MapViewer.prototype.enableRecordEdit = function(){
+    row = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
+
+    $(document).off('click', '.record-edit');
+    $(document).on('click', '.record-edit', $.proxy(this.onEditRecord, this));
+
+    $(document).off('edit_record', '.record-edit');
+    $(document).on('edit_record', row, $.proxy(this.onEditRecord, this));
 }
 
 MapViewer.prototype.enableRecordDelete = function(){
@@ -662,7 +678,6 @@ MapViewer.prototype.onRowSelected = function(event){
                .removeClass('row_selected')
                .attr('aria-selected', false);
 
-    console.log(event.currentTarget);
     $(event.currentTarget).addClass('row_selected')
                           .attr('aria-selected', true)
                           .focus();
@@ -782,7 +797,9 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                 $row = $('.row_selected', this);
                 $row.trigger('row_expanded', false);
             break;
-            case 43: // Enter
+            case 13: // Enter
+                $row = $('.row_selected', this);
+                $row.trigger('edit_record');
             break;
         }
     }));
