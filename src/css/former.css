@@ -209,6 +209,10 @@ hr.style-one {
   clear: both;
 }
 
+:focus {
+  outline: 3px solid #f7983a;
+}
+
 .img_thumb{
   width: 100px !important;
   height: 100px !important;

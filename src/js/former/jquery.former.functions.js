@@ -81,7 +81,7 @@ function openWindow(element, title,  wdth, hght, zindex, position, buttons){
         height: hght,
         width: wdth,
         zIndex: zindex, 
-        modal: false,
+        modal: true,
         position: position,
         title: title,
         buttons: buttons
@@ -288,7 +288,7 @@ function appendDeleteDialog(id, name){
 function makeAlertModal(id, msg){
     var header = new Array(), body = new Array(), footer = new Array();
     header.push('<h3 id="myModalLabel">Feedback</h3>');
-    body.push('<div class="alert">');
+    body.push('<div class="alert" role="alert">');
     body.push(msg);
     body.push('</div>');
     return makeModalWindow(id, header, body, footer);
@@ -409,6 +409,11 @@ function giveFeedback(msg){
 
 function loading(param){
     $("#loader").toggle(param);
+    if(param){
+        $("#notification").text("Loading");
+    }else{
+        $("#notification").text("Loaded");
+    }
 }
 
 function simplify_name(title){

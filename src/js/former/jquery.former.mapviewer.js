@@ -479,7 +479,7 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     }
 
     if(state === "edit"){
-        data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View</button>';
+        data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'" aria-label="Edit the name and the description of a track">Edit</button>';
     }else if(state === "show"){
         data_obj["buttons"] = '<button class="record-expand" title="'+folder+'" row="'+i+'">Expand</button>';
     }
@@ -504,10 +504,9 @@ MapViewer.prototype.initTable = function(table_data){
                      .attr("role", "row")
                      .attr("trackid", aData.trackId)
                      .addClass(aData.styles.join(' '));
-
-                // Add style to the controls column
-                // $("td:first", $nRow).addClass('details-control')
-                //                     .attr("aria-hidden", "true");
+            },
+            "fnDrawCallback": function(){
+                $("#notification").text("Table loaded");
             }
         });
         this.enableTableKeyboardNavigation();
@@ -662,6 +661,8 @@ MapViewer.prototype.onRowSelected = function(event){
     this.oTable.$('tr.row_selected')
                .removeClass('row_selected')
                .attr('aria-selected', false);
+
+    console.log(event.currentTarget);
     $(event.currentTarget).addClass('row_selected')
                           .attr('aria-selected', true)
                           .focus();
@@ -679,7 +680,7 @@ MapViewer.prototype.onRowSelected = function(event){
     }
 }
 
-MapViewer.prototype.onRowExpanded = function(evt){
+MapViewer.prototype.onRowExpanded = function(evt, expanded){
     // If click in the control find the row
     $target = $(evt.currentTarget)
     if($target.is("td")){
@@ -749,7 +750,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
             case 40: // Down
                 $row = $('.row_selected', this);
                 if($row.length == 0){
-                    $('tbody tr:first', this).addClass('row_selected');
+                    $('tbody tr:first', this).trigger('row_selected');
                 }else{
                     if(!$row.is(':last-child')){
                         $row.nextAll('.record:not( .hidden)')
@@ -761,7 +762,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
             case 38: // Up
                 $row = $('.row_selected', this);
                 if($row.length == 0){
-                    $('tbody tr:last', this).addClass('row_selected');
+                    $('tbody tr:last', this).trigger('row_selected');
                 }
                 else{
                     if($row.index() > 0){
@@ -771,9 +772,17 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                     }
                 }
             break;
-            case 13: // Enter
+            case 61: // Plus
+            case 107: // Plus Numpad
                 $row = $('.row_selected', this);
-                $row.trigger('row_expanded');
+                $row.trigger('row_expanded', true);
+            break;
+            case 173: // Minus
+            case 109: // Minus Numpad
+                $row = $('.row_selected', this);
+                $row.trigger('row_expanded', false);
+            break;
+            case 43: // Enter
             break;
         }
     }));
