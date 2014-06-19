@@ -218,22 +218,17 @@ hr.style-one {
   clear: both;
 }
 
-.track-collapsed td:first-child{
+.record.track.collapsed td:first-child{
   background: url('img/details_open.png') no-repeat scroll center center transparent;
 }
 
-.track-expanded td:first-child{
+.record.track.expanded td:first-child{
   background: url('img/details_close.png') no-repeat scroll center center transparent;
 }
 
-.poi-record{
-
-}
-
-.poi-collapsed{
+.record.poi.hidden{
   display: none;
 }
 
-.poi-expanded{
-  display: initial;
+.record.poi.visible{
 }

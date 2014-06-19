@@ -460,7 +460,6 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
     description = findLabel(record.fields, 'Description') || '';
-    console.log(record)
     var data_obj = {'id': i, 'name': folder, 'description': description, 'date': record.timestamp.split("T")[0], 'fields': record.fields};
     record['id'] = i;
     //delete record['point'];
@@ -470,10 +469,13 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
 
     // Add styles for show and hiding the poi's and the tracks
     data_obj['styles'] = new Array();
+    data_obj['styles'].push('record');
     if(record.editor == 'track.edtr'){
-        data_obj['styles'].push('track-record', 'track-collapsed');
+        data_obj['styles'].push('track', 'collapsed');
+        data_obj['trackId'] = record.geofenceId;
     }else{
-        data_obj['styles'].push('poi-record', 'poi-collapsed');
+        data_obj['styles'].push('poi', 'hidden');
+        data_obj['trackId'] = record.trackId;
     }
 
     if(state === "edit"){
@@ -500,11 +502,12 @@ MapViewer.prototype.initTable = function(table_data){
                 $nRow.attr("id", "row-" + aData.id)
                      .attr("tabindex", "0")
                      .attr("role", "row")
+                     .attr("trackid", aData.trackId)
                      .addClass(aData.styles.join(' '));
 
                 // Add style to the controls column
-                $("td:first", $nRow).addClass('details-control')
-                                    .attr("aria-hidden", "true");
+                // $("td:first", $nRow).addClass('details-control')
+                //                     .attr("aria-hidden", "true");
             }
         });
         this.enableTableKeyboardNavigation();
@@ -624,7 +627,6 @@ MapViewer.prototype.enableRecordDelete = function(){
 }
 
 MapViewer.prototype.displayGPX = function(record, data){
-    console.log(data)
     var style = {
         "strokeColor": "rgb(255, 255, 0)",
         "strokeWidth": 5,
@@ -668,7 +670,7 @@ MapViewer.prototype.onRowSelected = function(event){
     for(var j=0; j<this.features.length; j++){
         for(var i=0; i<this.features[j].cluster.length; i++){
             if(this.features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
-                console.log(this.features[j].cluster[i])
+                //console.log(this.features[j].cluster[i])
                 this.map.setCenter(this.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
                 this.displayGPX(this.features[j].cluster[i].attributes.name, this.features[j].cluster[i].attributes)
                 break;
@@ -677,11 +679,50 @@ MapViewer.prototype.onRowSelected = function(event){
     }
 }
 
+MapViewer.prototype.onRowExpanded = function(evt){
+    // If click in the control find the row
+    $target = $(evt.currentTarget)
+    if($target.is("td")){
+        $row = $target.parent('.track');
+    }else{
+        $row = $target;
+    }
+
+    trackid = $row.attr('trackid');
+
+
+    if($row.is('.expanded')){
+        // Collapse it
+        $row.removeClass('expanded')
+            .addClass('collapsed');
+
+        // Collapse children
+        $row.siblings('[trackid="' + trackid + '"]')
+            .addClass('hidden'); 
+    }else{
+        // Collapse any other track expanded
+        $row.siblings('.track')
+            .removeClass('expanded')
+            .addClass('collapsed');       
+    
+        $row.siblings('.poi:not([trackid="' + trackid + '"])')
+            .addClass('hidden');
+    
+        // Expand this track
+        $row.removeClass('collapsed')
+            .addClass('expanded');
+
+        $row.siblings('[trackid="' + trackid + '"]')
+            .removeClass('hidden');
+    }
+}
+
 MapViewer.prototype.filterTableData = function(features){
     // Store the features for manipulate the map later
     this.features = features;
 
     row = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
+    first_cell = row + ".track td:first-child";
 
     // Bind the click event on the table to onRowSelected event
     $(document).off('click', row);
@@ -690,6 +731,14 @@ MapViewer.prototype.filterTableData = function(features){
     // Bind the row_selected event to onRowSelected event
     $(document).off('row_selected', row);
     $(document).on('row_selected', row, $.proxy(this.onRowSelected, this));
+
+    // Bind the row_selected event to onRowExpanded event
+    $(document).off('row_expanded', row);
+    $(document).on('row_expanded', row, $.proxy(this.onRowExpanded, this));
+
+    // Click the plus/minus symbol
+    $(document).off('click', first_cell);
+    $(document).on('click', first_cell, $.proxy(this.onRowExpanded, this));
 }
 
 MapViewer.prototype.enableTableKeyboardNavigation = function(){
@@ -703,7 +752,8 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                     $('tbody tr:first', this).addClass('row_selected');
                 }else{
                     if(!$row.is(':last-child')){
-                        $row.next()
+                        $row.nextAll('.record:not( .hidden)')
+                            .first()
                             .trigger('row_selected');
                     }
                 }
@@ -715,13 +765,15 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                 }
                 else{
                     if($row.index() > 0){
-                        $row.prev()
+                        $row.prevAll('.record:not( .hidden)')
+                            .first()
                             .trigger('row_selected');
                     }
                 }
             break;
             case 13: // Enter
-                // TODO
+                $row = $('.row_selected', this);
+                $row.trigger('row_expanded');
             break;
         }
     }));
