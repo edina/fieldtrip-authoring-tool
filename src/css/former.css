@@ -209,6 +209,10 @@ hr.style-one {
   clear: both;
 }
 
+:focus {
+  outline: 3px solid #f7983a;
+}
+
 .img_thumb{
   width: 100px !important;
   height: 100px !important;
@@ -216,4 +220,19 @@ hr.style-one {
 
 #download_images{
   clear: both;
+}
+
+.record.track.collapsed td:first-child{
+  background: url('img/details_open.png') no-repeat scroll center center transparent;
+}
+
+.record.track.expanded td:first-child{
+  background: url('img/details_close.png') no-repeat scroll center center transparent;
+}
+
+.record.poi.hidden{
+  display: none;
+}
+
+.record.poi.visible{
 }
