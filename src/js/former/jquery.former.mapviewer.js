@@ -576,7 +576,7 @@ MapViewer.prototype.onEditRecord = function(evt){
 
     $target = $(evt.currentTarget);
     if($target.is("button")){
-        $row = $target.parent().parent();
+        $row = $target.closest('tr.record');
     }else{
         $row = $target;
     }
@@ -766,7 +766,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
 
         table_selector = "#" + this.options["table-elements"]["tableId"];    
 
-        // Ignore events not related to the table or de record
+        // Ignore events not related to the table or the record
         if($target.is(table_selector)){
             $table = $target;
         }else if($target.is(table_selector + ' tr.record'))
