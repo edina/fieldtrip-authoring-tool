@@ -164,18 +164,19 @@
       <img src="css/images/ajax-loader.gif" alt="Loading data">
     </div>
 
+<!--[if IE]>
+  <script type="text/javascript">
+    // Dummy console for problems in IE
+    var console = { 
+      log: function (msg) { },
+      warn: function (msg) { }
+    };
+  </script>
+<![endif]-->
 
   <script type="text/javascript">
     //var map, oTable;
     var provider = 'dropbox';
-
-    //Avoid errors for undefined console on IE
-    if(typeof console === "undefined") {
-      var console = { 
-        //log: function (msg) { },
-        warn: function (msg) { }
-      };     
-    }
 
     $(document).ready(function(){
 
