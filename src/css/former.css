@@ -1,6 +1,7 @@
-body {
-  padding-top: 60px;
-  padding-bottom: 40px;
+html, body {
+  height: 100%;
+/*  padding-top: 60px;
+  padding-bottom: 40px;*/
 }
 
 /* css for timepicker */
@@ -28,11 +29,11 @@ body {
   min-height: 550px;
 }*/
 
-#main{
+/*#main{
   background-image: url("images/home-background.png");
   background-repeat: no-repeat;
   background-position: right bottom;
-}
+}*/
 
 
 
@@ -235,4 +236,53 @@ hr.style-one {
 }
 
 .record.poi.visible{
+}
+
+#wrap {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0px auto -91px;
+}
+
+#wrap > .container-fluid {
+    padding-top: 40px;
+}
+
+#push, #footer {
+    height: 91px;
+}
+
+#push .fieltrip{
+  float: right;
+  position: relative;
+  top: -91px;
+  
+}
+
+#home-content,
+#map-content{
+  padding-bottom: 50px;
+}
+#home-content{
+  min-width: 821px;
+  background-repeat: no-repeat;;
+  background-position: top left;
+  background-image: url("../img/web-image.jpg");
+}
+
+.welcome{
+  margin-left: 250px;
+  padding-top: 190px;
+}
+
+.edina-logo{
+  width: 10%;
+  float: left;
+  display: inline-block;
+}
+
+.funders-logo{
+  width: 90%;
+  margin-left: 95px;
 }

@@ -70,6 +70,7 @@
 </head>
 
 <body>
+  <div id="wrap">
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
@@ -127,42 +128,48 @@
                   </thead>
                 </table>
               </div>
+              <div id="notification" aria-live="assertive" tabindex="-1"></div>
             </div>
-            <div id="notification" aria-live="assertive" tabindex="-1"></div>
           <!--/div-->
         </div><!--/span-->
       </div><!--/row-->
-      
-      <hr>
-      <footer>
-        <p>&copy; <a href="http://edina.ac.uk" target="blank"><img src="img/edina.png"></a> <a href="http://www.jisc.ac.uk/" target="blank"><img src="img/jisc.gif"></a></p>
-      </footer>
-
     </div><!--/.fluid-container-->
+    <div id="push"></div>
+  </div><!--/wrap-->
+  <footer id="#footer">
+    <div class="container">
+      <div class="edina-logo">
+      &copy;&nbsp;<a href="http://edina.ac.uk" target="blank"><img src="img/edina.png"></a>
+      </div>
+      <div class="funders-logo">
+        <img src="img/funders-logo.jpg">
+      </div>
+    </div>
+  </footer>
 
-    <div id="dialog-map" title="Map Viewer"></div>
-    
-    <div id="dialog-login" title="Login">
-      <p>
-        <ul>
-          <li><a href="javascript:void(0);" class="redirect-me" id="dropbox"><img src="img/dropbox.png" alt="Dropbox" /></a></li>
-          <li><a href="javascript:void(0);" class="redirect-me" id="local">Local Provider</a></li>
-        </ul>
-      </p>
-    </div>
-    
-    <div id="dialog-upload" title="Upload tiles">
-      <form id="fileupload" name="fileupload" enctype="multipart/form-data" method="post">
-        <fieldset>
-          <input type="file" name="fileselect" id="fileselect"></input>
-          <input id="uploadbutton" type="button" value="Upload Tiles" class="btn" />
-        </fieldset>
-      </form>
-    </div>
+  <div id="dialog-map" title="Map Viewer"></div>
+  
+  <div id="dialog-login" title="Login">
+    <p>
+      <ul>
+        <li><a href="javascript:void(0);" class="redirect-me" id="dropbox"><img src="img/dropbox.png" alt="Dropbox" /></a></li>
+        <li><a href="javascript:void(0);" class="redirect-me" id="local">Local Provider</a></li>
+      </ul>
+    </p>
+  </div>
+  
+  <div id="dialog-upload" title="Upload tiles">
+    <form id="fileupload" name="fileupload" enctype="multipart/form-data" method="post">
+      <fieldset>
+        <input type="file" name="fileselect" id="fileselect"></input>
+        <input id="uploadbutton" type="button" value="Upload Tiles" class="btn" />
+      </fieldset>
+    </form>
+  </div>
 
-    <div id="loader">
-      <img src="css/images/ajax-loader.gif" alt="Loading data">
-    </div>
+  <div id="loader">
+    <img src="css/images/ajax-loader.gif" alt="Loading data">
+  </div>
 
 <!--[if IE]>
   <script type="text/javascript">
