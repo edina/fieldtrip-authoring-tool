@@ -125,6 +125,9 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                     type: 'PUT',
                     data: data,
                     success: function(data) {
+                        description = findLabel(obj.fields, "Description")
+                        oTable.fnUpdate(description, $row.index(), 2);
+                        $row.focus();
                         loading(false);
                     }
                 });
@@ -135,10 +138,10 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                     type: 'PUT',
                     data: obj.name,
                     success: function(data) {
-                        $row = $("#row-"+row);
                         oTable.fnUpdate(obj.name, $row.index(), 1);
                         $(".record-edit", $row).attr("title", obj.name);
                         $(".record-delete", $row).attr("title", obj.name);
+                        $row.focus();
                         loading(false);
                     }
                 });
