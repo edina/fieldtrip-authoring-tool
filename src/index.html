@@ -80,7 +80,7 @@
           </button>
           <a class="brand" role="banner" href="#">Spatial Memories Author</a>
           <div class="nav-collapse collapse">
-            <ul class="nav" role="navigation" id="mainmenu"></ul>
+            <ul class="nav" role="tablist" id="mainmenu"></ul>
             <div class="navbar-text pull-right" id="user-section">
               <button class="btn btn-primary btn-small loginbutton" role="button" tabindex="0" aria-label="Login using your dropbox account">Login</button>
               <button class="btn btn-primary btn-small logoutbutton" role="button" tabindex="0" style="display: none">Logout</button>
@@ -240,6 +240,7 @@
 
       if(uid != 0){
         initialize_app(token, localStorage.getItem("provider"));
+        $("#my-records").trigger('click');
       }
       
       if(screen.width < 768){

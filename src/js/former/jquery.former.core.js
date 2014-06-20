@@ -101,9 +101,9 @@
   
     BuildFormer.prototype.createMainMenu = function(){
         var menu = new Array();
-        menu.push('<li><a href="javascript:void(0)" id="home" class="menu-item">Home</a></li>');
-        menu.push('<li class="active"><a href="javascript:void(0)" rel="tooltip" data-placement="bottom" data-original-title="Click here to see your memories" id="my-records" class="menu-item">Memories Viewer</a></li>');
-        menu.push('<li><a href="mailto:edina@ed.ac.uk" class="menu-item">Contact</a></li>');
+        menu.push('<li role="tab" aria-selected="false"><a href="" id="home" class="menu-item" role="button">Home</a></li>');
+        menu.push('<li role="tab" class="active" aria-selected="false"><a href="" id="my-records" rel="tooltip" data-placement="bottom" data-original-title="Click here to see your memories" class="menu-item" role="button">Memories Viewer</a></li>');
+        menu.push('<li role="tab" aria-selected="false"><a href="mailto:edina@ed.ac.uk" class="menu-item" role="button">Contact</a></li>');
         return menu;
     }
   
@@ -116,9 +116,18 @@
   
     //the events relating to the buttons of the create main menu
     BuildFormer.prototype.enableMainMenuEvents = function(){
-        $(".menu-item").click(function(){
-            $('#mainmenu .active').removeClass('active');
-            $(this).parent().addClass("active");
+        $(".menu-item").click(function(evt){
+            $target = $(evt.currentTarget)
+            if($target.attr("href") == ""){
+                evt.preventDefault();
+            }
+
+            $li = $target.closest("li");
+
+            $li.siblings().removeClass('active')
+                          .attr("aria-selected", "false");
+            $li.addClass("active")
+               .attr("aria-selected", "true");
         });
     
         this.enableHomeEvent();
