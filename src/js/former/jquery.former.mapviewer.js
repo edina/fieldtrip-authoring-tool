@@ -759,13 +759,27 @@ MapViewer.prototype.filterTableData = function(features){
 
 MapViewer.prototype.enableTableKeyboardNavigation = function(){
 
-    $(document).off('keyup', this.oTable);
-    $(document).on('keyup', this.oTable, $.proxy(function(e){
-        switch(e.keyCode){
+    $(document).off('keyup', document);
+    $(document).on('keyup', document, $.proxy(function(evt){
+        var $table;
+        var $target = $(evt.target);
+
+        table_selector = "#" + this.options["table-elements"]["tableId"];    
+
+        // Ignore events not related to the table or de record
+        if($target.is(table_selector)){
+            $table = $target;
+        }else if($target.is(table_selector + ' tr.record'))
+            $table = $target.closest(table_selector);
+        else{
+            return;
+        }
+
+        switch(evt.keyCode){
             case 40: // Down
-                $row = $('.row_selected', this);
+                $row = $('.row_selected', $table);
                 if($row.length == 0){
-                    $('tbody tr:first', this).trigger('row_selected');
+                    $('tbody tr:first', $table).trigger('row_selected');
                 }else{
                     if(!$row.is(':last-child')){
                         $row.nextAll('.record:not( .hidden)')
@@ -775,9 +789,9 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                 }
             break;
             case 38: // Up
-                $row = $('.row_selected', this);
+                $row = $('.row_selected', $table);
                 if($row.length == 0){
-                    $('tbody tr:last', this).trigger('row_selected');
+                    $('tbody tr:last', $table).trigger('row_selected');
                 }
                 else{
                     if($row.index() > 0){
@@ -789,20 +803,20 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
             break;
             case 61: // Plus
             case 107: // Plus Numpad
-                $row = $('.row_selected', this);
+                $row = $('.row_selected', $table);
                 $row.trigger('row_expanded', true);
             break;
             case 173: // Minus
             case 109: // Minus Numpad
-                $row = $('.row_selected', this);
+                $row = $('.row_selected', $table);
                 $row.trigger('row_expanded', false);
             break;
             case 13: // Enter
-                $row = $('.row_selected', this);
+                $row = $('.row_selected', $table);
                 $row.trigger('edit_record');
             break;
         }
-    }));
+    }, this));
 }
 
 MapViewer.prototype.clearTableData = function(){
