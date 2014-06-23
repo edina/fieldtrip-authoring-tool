@@ -105,8 +105,6 @@ function makeDialogButtons(dialog_id, former_id){
 function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
     return buttons = {
         "Save": function(){
-            console.log($("#"+dialog_id+" form").attr("id"));
-            console.log($("#"+$("#"+dialog_id+" form").attr("id")).serialize())
             var rename = false;
             if($("#"+dialog_id+" #form-text-1").val() != $("#"+dialog_id+" #form-text-hidden-1").val()){
                 rename = true;
@@ -114,7 +112,12 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
             for(var i=0; i<obj.fields.length; i++){
                 var fid = obj.fields[i].id;
                 var splits = obj.fields[i].id.split("-");
-                obj.fields[i].val = getValueFromEditForm(splits[1], dialog_id, fid);
+                var new_value = getValueFromEditForm(splits[1], dialog_id, fid);
+
+                // TODO: Temp fix for records that hasn't been copied into the dialog
+                if(new_value !== undefined){
+                    obj.fields[i].val = new_value;
+                }
             }
             obj.name = $("#"+dialog_id+" #form-text-1").val();
             var data = JSON.stringify(obj);

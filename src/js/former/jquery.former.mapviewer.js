@@ -600,7 +600,6 @@ MapViewer.prototype.onEditRecord = function(evt){
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            console.log(data);
             var editor = data.editor;
             var title = editor.split(".")[0];
             var field_values = data.fields;
