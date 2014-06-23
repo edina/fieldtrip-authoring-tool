@@ -58,4 +58,15 @@ Accesibility.prototype.mailto = function(){
 
 })(jQuery);
 
+(function(){
+	var Aria = function(){
+
+	};
+
+	Aria.prototype.notify = function(text){
+		$("#aria-notification").text(text);
+	};
+
+	window.aria = new Aria();
+})();
 

@@ -458,31 +458,39 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 }
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
-    var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
-    description = findLabel(record.fields, 'Description') || '';
-    var data_obj = {'id': i, 'name': folder, 'description': description, 'date': record.timestamp.split("T")[0], 'fields': record.fields};
     record['id'] = i;
-    //delete record['point'];
-    var feature = new OpenLayers.Feature.Vector(point, record);
+    
+    point =  new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
+    description = findLabel(record.fields, 'Description') || '';
+    feature = new OpenLayers.Feature.Vector(point, record);
+    control = '';
 
-    data_obj['control'] = '';
-
-    // Add styles for show and hiding the poi's and the tracks
-    data_obj['styles'] = new Array();
-    data_obj['styles'].push('record');
+    // Add styles for showing and hiding the poi's and the tracks
+    styles = new Array();
+    styles.push('record');
     if(record.editor == 'track.edtr'){
-        data_obj['styles'].push('track', 'collapsed');
-        data_obj['trackId'] = record.geofenceId;
+        styles.push('track', 'collapsed');
+        trackId = record.geofenceId;
+        buttons = '<button class="record-edit" title="'+folder+'" row="'+i+'" aria-label="Edit the name and the description of a track">Edit</button>';
     }else{
-        data_obj['styles'].push('poi', 'hidden');
-        data_obj['trackId'] = record.trackId;
+        styles.push('poi', 'hidden');
+        trackId = record.trackId;
+        buttons = '<button class="record-edit" title="'+folder+'" row="'+i+'" aria-label="Edit the name and the description of a memory">Edit</button>';
     }
 
-    if(state === "edit"){
-        data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'" aria-label="Edit the name and the description of a track">Edit</button>';
-    }else if(state === "show"){
-        data_obj["buttons"] = '<button class="record-expand" title="'+folder+'" row="'+i+'">Expand</button>';
-    }
+    data_obj = { 'id': i,
+                 'name': folder,
+                 'description': description,
+                 'date': record.timestamp.split("T")[0],
+                 'fields': record.fields,
+                 'point' : point,
+                 'control': control,
+                 'trackId': trackId,
+                 'styles': styles,
+                 'buttons': buttons,
+                 'editor' : record.editor
+                };
+
     return {"feature": feature, "data": data_obj};
 }
 
@@ -503,11 +511,17 @@ MapViewer.prototype.initTable = function(table_data){
                      .attr("tabindex", "0")
                      .attr("role", "row")
                      .attr("trackid", aData.trackId)
-                     .attr("track_name", aData.name)
                      .addClass(aData.styles.join(' '));
+
+                if(aData.editor == 'track.edtr'){
+                    $nRow.attr("track-name", aData.name);
+                }
             },
-            "fnDrawCallback": function(){
-                $("#notification").text("Table loaded");
+            "oLanguage": {
+                "sInfo": "",
+                "sInfoEmpty": "",
+                "sInfoFiltered": "",
+                "sInfoPostFix": ""
             }
         });
         this.enableTableKeyboardNavigation();
@@ -695,41 +709,88 @@ MapViewer.prototype.onRowSelected = function(event){
     }
 }
 
-MapViewer.prototype.onRowExpanded = function(evt, expanded){
-    // If click in the control find the row
-    $target = $(evt.currentTarget)
+/* 
+    Find the track to which the element belongs in the table
+    @returns a jquery element
+*/
+MapViewer.prototype._findClosestTrack = function(node){
+    // Find the closest record
+    
+    $node = $(node);
+
     if($target.is("td")){
-        $row = $target.parent('.track');
+        $row = $node.parent('.record');
     }else{
-        $row = $target;
+        $row = $node;
     }
 
     trackid = $row.attr('trackid');
 
+    // Find the closest track
+    if($row.is('.record.track')){
+        $track = $row;
+    }else{
+        $track = $row.siblings('.record.track[trackid="' + trackid + '"]');
+    }
 
-    if($row.is('.expanded')){
+    return $track;
+}
+
+MapViewer.prototype.onRowExpanded = function(evt){
+    var ariaMsg = '';
+ 
+    $track = this._findClosestTrack(evt.currentTarget)
+
+    trackName = $track.attr('track-name');
+
+    if(!$track.is('.expanded')){
+        // Collapse any other track expanded
+        $track.siblings('.track')
+              .removeClass('expanded')
+              .addClass('collapsed')
+              .attr('aria-expanded', 'false');     
+
+        $track.siblings('.poi:not([trackid="' + trackid + '"])')
+              .addClass('hidden');
+
+        // Expand this track
+        $track.removeClass('collapsed')
+              .addClass('expanded')
+              .attr('aria-expanded', 'true');
+
+        $pois = $track.siblings('[trackid="' + trackid + '"]');
+        $pois.removeClass('hidden');
+    
+        switch(n = $pois.length){
+            case 0:
+                ariaMsg = "No memories associated to " + trackName + " track.";
+            break;
+            case 1:
+                ariaMsg = "Showing " + n + " memory for " + trackName + " track.";
+            break;
+            default:
+                ariaMsg = "Showing " + n + " memories for " + trackName + " track.";
+            break;
+        }
+        aria.notify(ariaMsg);
+    }
+}
+
+MapViewer.prototype.onRowCollapsed = function(evt){
+    // If click in the control find the row
+    $track = this._findClosestTrack(evt.currentTarget)
+
+    trackName = $track.attr('track-name');
+
+    if($track.is('.expanded')){
         // Collapse it
-        $row.removeClass('expanded')
-            .addClass('collapsed');
+        $track.removeClass('expanded')
+              .addClass('collapsed');
 
         // Collapse children
-        $row.siblings('[trackid="' + trackid + '"]')
-            .addClass('hidden'); 
-    }else{
-        // Collapse any other track expanded
-        $row.siblings('.track')
-            .removeClass('expanded')
-            .addClass('collapsed');       
-    
-        $row.siblings('.poi:not([trackid="' + trackid + '"])')
-            .addClass('hidden');
-    
-        // Expand this track
-        $row.removeClass('collapsed')
-            .addClass('expanded');
-
-        $row.siblings('[trackid="' + trackid + '"]')
-            .removeClass('hidden');
+        $track.siblings('[trackid="' + trackid + '"]')
+              .addClass('hidden'); 
+        aria.notify("Hiding memories for " + trackName + " track.")
     }
 }
 
@@ -751,6 +812,10 @@ MapViewer.prototype.filterTableData = function(features){
     // Bind the row_selected event to onRowExpanded event
     $(document).off('row_expanded', row);
     $(document).on('row_expanded', row, $.proxy(this.onRowExpanded, this));
+
+    // Bind the row_selected event to onRowExpanded event
+    $(document).off('rowCollapsed', row);
+    $(document).on('rowCollapsed', row, $.proxy(this.onRowCollapsed, this));
 
     // Click the plus/minus symbol
     $(document).off('click', first_cell);
@@ -809,7 +874,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
             case 173: // Minus
             case 109: // Minus Numpad
                 $row = $('.row_selected', $table);
-                $row.trigger('row_expanded', false);
+                $row.trigger('rowCollapsed', false);
             break;
             case 13: // Enter
                 $row = $('.row_selected', $table);

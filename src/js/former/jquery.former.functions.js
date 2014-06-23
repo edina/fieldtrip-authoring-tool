@@ -413,9 +413,9 @@ function giveFeedback(msg){
 function loading(param){
     $("#loader").toggle(param);
     if(param){
-        $("#notification").text("Loading");
+        aria.notify("Loading");
     }else{
-        $("#notification").text("Loaded");
+        aria.notify("Loaded");
     }
 }
 
