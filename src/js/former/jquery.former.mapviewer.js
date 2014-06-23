@@ -595,7 +595,7 @@ MapViewer.prototype.onEditRecord = function(evt){
         $row = $target;
     }
 
-    var record = $row.attr('track_name');
+    var record = $row.attr('track-name');
 
     loading(true);
     $.ajax({
