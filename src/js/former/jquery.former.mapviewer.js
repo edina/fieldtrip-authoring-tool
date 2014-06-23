@@ -718,7 +718,7 @@ MapViewer.prototype._findClosestTrack = function(node){
     
     $node = $(node);
 
-    if($target.is("td")){
+    if($node.is("td")){
         $row = $node.parent('.record');
     }else{
         $row = $node;
@@ -818,8 +818,14 @@ MapViewer.prototype.filterTableData = function(features){
     $(document).on('rowCollapsed', row, $.proxy(this.onRowCollapsed, this));
 
     // Click the plus/minus symbol
-    $(document).off('click', first_cell);
-    $(document).on('click', first_cell, $.proxy(this.onRowExpanded, this));
+    plus = row + ".track.collapsed td:first-child";
+    $(document).off('click', plus);
+    $(document).on('click', plus, $.proxy(this.onRowExpanded, this));
+
+    minus = row + ".track.expanded td:first-child";
+    $(document).off('click', minus);
+    $(document).on('click', minus, $.proxy(this.onRowCollapsed, this));
+
 }
 
 MapViewer.prototype.enableTableKeyboardNavigation = function(){
