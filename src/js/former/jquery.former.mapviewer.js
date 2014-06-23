@@ -511,11 +511,8 @@ MapViewer.prototype.initTable = function(table_data){
                      .attr("tabindex", "0")
                      .attr("role", "row")
                      .attr("trackid", aData.trackId)
+                     .attr("record-name", aData.name)
                      .addClass(aData.styles.join(' '));
-
-                if(aData.editor == 'track.edtr'){
-                    $nRow.attr("track-name", aData.name);
-                }
             },
             "oLanguage": {
                 "sInfo": "",
@@ -595,7 +592,7 @@ MapViewer.prototype.onEditRecord = function(evt){
         $row = $target;
     }
 
-    var record = $row.attr('track-name');
+    var record = $row.attr('record-name');
 
     loading(true);
     $.ajax({
@@ -603,6 +600,7 @@ MapViewer.prototype.onEditRecord = function(evt){
         type: 'GET',
         dataType: 'json',
         success: function(data) {
+            console.log(data);
             var editor = data.editor;
             var title = editor.split(".")[0];
             var field_values = data.fields;
@@ -611,6 +609,7 @@ MapViewer.prototype.onEditRecord = function(evt){
                 url = "editors/default/"+editor;
             }
             if(editor === "track.edtr"){
+
                 url = "editors/default/text.edtr";
                 //mapviewer.displayGPX(record, data);
             }
@@ -741,7 +740,7 @@ MapViewer.prototype.onRowExpanded = function(evt){
  
     $track = this._findClosestTrack(evt.currentTarget)
 
-    trackName = $track.attr('track-name');
+    trackName = $track.attr('record-name');
 
     if(!$track.is('.expanded')){
         // Collapse any other track expanded
@@ -780,7 +779,7 @@ MapViewer.prototype.onRowCollapsed = function(evt){
     // If click in the control find the row
     $track = this._findClosestTrack(evt.currentTarget)
 
-    trackName = $track.attr('track-name');
+    trackName = $track.attr('record-name');
 
     if($track.is('.expanded')){
         // Collapse it
