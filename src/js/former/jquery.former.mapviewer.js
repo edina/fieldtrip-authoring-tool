@@ -660,28 +660,34 @@ MapViewer.prototype.displayGPX = function(record, data){
         "strokeOpacity": 1
     }
 
+    var gpx;
+    var style;
     for(var i=0; i<data.fields.length; i++){
         if(data.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
             style = data.fields[i]["style"];
+            gpx =data.fields[i]["val"];
+            break; // One gpx only
         }
     }
 
-    $.ajax({
-        type: "GET",
-        url: this.buildUrl('records', '/'+record+'/'+data.fields[1].val),
-        dataType: "xml",
-        success: $.proxy(function(gpx_data){
-            var in_options = {
-                'internalProjection': this.map.baseLayer.projection,
-                'externalProjection': new OpenLayers.Projection("EPSG:4326")
-            };
-            var layers = this.map.getLayersByName("GPX");
-            var gpx_format = new OpenLayers.Format.GPX(in_options);
-            layers[0].removeAllFeatures();
-            layers[0].style = style;
-            layers[0].addFeatures(gpx_format.read(gpx_data))
-        }, this)
-    });
+    if(gpx !== undefined){
+        $.ajax({
+            type: "GET",
+            url: this.buildUrl('records', '/'+record+'/'+ gpx),
+            dataType: "xml",
+            success: $.proxy(function(gpx_data){
+                var in_options = {
+                    'internalProjection': this.map.baseLayer.projection,
+                    'externalProjection': new OpenLayers.Projection("EPSG:4326")
+                };
+                var layers = this.map.getLayersByName("GPX");
+                var gpx_format = new OpenLayers.Format.GPX(in_options);
+                layers[0].removeAllFeatures();
+                layers[0].style = style;
+                layers[0].addFeatures(gpx_format.read(gpx_data))
+            }, this)
+        });
+    }
 }
 
 MapViewer.prototype.onRowSelected = function(event){
@@ -700,7 +706,7 @@ MapViewer.prototype.onRowSelected = function(event){
             if(this.features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
                 //console.log(this.features[j].cluster[i])
                 this.map.setCenter(this.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
-                this.displayGPX(this.features[j].cluster[i].attributes.name, this.features[j].cluster[i].attributes)
+                this.displayGPX(this.features[j].cluster[i].attributes.name, this.features[j].cluster[i].attributes);
                 break;
             }
         }
