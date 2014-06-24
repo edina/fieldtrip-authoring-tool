@@ -171,9 +171,11 @@ MapViewer.prototype.initMap = function(){
                 return (feature.cluster) ? 2 : 1;
             },
             radius: function(feature) {
-                var pix = 2;
-                if(feature.cluster) {
-                    pix = Math.min(feature.attributes.count, 7) + 10;
+                var pix = 16;
+
+                // Size for clustered markers
+                if(feature.cluster.length > 1) {
+                    pix = Math.min(feature.attributes.count, 10) + pix;
                 }
                 return pix;
             },
