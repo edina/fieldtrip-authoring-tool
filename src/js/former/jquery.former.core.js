@@ -705,7 +705,7 @@
         }
         code = code.replace('"', '\"');
         var text_code = new Array();
-        text_code.push('<form id=\"form'+rand_number+'\" data-ajax=\"false\">\n')
+        text_code.push('<form id=\"form'+rand_number+'\" data-ajax=\"false\"> novalidate\n')
         text_code.push(code);
         name = replaceSpace(simplify_name(name));
         text_code.push('\n<div id=\"'+name.toLowerCase()+'-buttons\" class=\"fieldcontain ui-grid-a\">');
