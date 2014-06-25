@@ -26,6 +26,8 @@
   </style>
 
   <script type="text/javascript">
+    // var _tmp; // TODO remove it - only for testing purposes;
+
     if (typeof console == "undefined") {
       this.console = {log: function() {}};
     }
@@ -130,6 +132,32 @@
               </div>
               <div id="aria-notification" aria-live="assertive" tabindex="-1"></div>
             </div>
+            <div id="animator-content"  style="display: none" aria-hidden="true">
+              <h1>Track Animator</h1>
+              <div id="animator-map_canvas" style="background-color: #eee;"></div>
+              
+              <div class="row">
+                <div class="span12">
+                  <div id="animator-myTable">
+                    
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Description</th>
+                          <th>Date</th>
+                          <th>Animate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                    </table>
+
+                  </div>
+                </div>
+              </div>
+              
+            </div>
           <!--/div-->
         </div><!--/span-->
       </div><!--/row-->
@@ -183,6 +211,7 @@
 
   <script type="text/javascript">
     //var map, oTable;
+
     var provider = 'dropbox';
 
     $(document).ready(function(){

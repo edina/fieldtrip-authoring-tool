@@ -474,6 +474,7 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
         styles.push('track', 'collapsed');
         trackId = record.geofenceId;
         buttons = '<button class="record-edit" title="'+folder+'" row="'+i+'" aria-label="Edit the name and the description of a track">Edit</button>';
+        // buttons += '<button class="track-animate" title="'+folder+'" row="'+i+'" aria-label="Animate the track path">Animate</button>';
     }else{
         styles.push('poi', 'hidden');
         trackId = record.trackId;
@@ -579,6 +580,7 @@ MapViewer.prototype.enableExpandTable = function(){
 MapViewer.prototype.enableRecordActions = function(){
     this.enableRecordEdit();
     this.enableRecordDelete();
+    this.enableTrackAnimation();
 }
 
 
@@ -635,6 +637,18 @@ MapViewer.prototype.onEditRecord = function(evt){
     });
 }
 
+MapViewer.prototype.onTrackAnimate = function(){
+    loading(true);
+    setTimeout(function () {
+        loading(false);
+    }, 1000);
+}
+
+MapViewer.prototype.enableTrackAnimation = function(){
+    row = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
+    $(document).off('click', '.track-animate');
+    $(document).on('click', '.track-animate', $.proxy(this.onTrackAnimate, this));
+}
 
 MapViewer.prototype.enableRecordEdit = function(){
     row = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
@@ -672,6 +686,7 @@ MapViewer.prototype.displayGPX = function(record, data){
         }
     }
 
+<<<<<<< Updated upstream
     if(gpx !== undefined){
         $.ajax({
             type: "GET",
@@ -690,6 +705,26 @@ MapViewer.prototype.displayGPX = function(record, data){
             }, this)
         });
     }
+=======
+    $.ajax({
+        type: "GET",
+        url: this.buildUrl('records', '/'+record+'/'+data.fields[1].val),
+        dataType: "xml",
+        success: $.proxy(function(gpx_data){
+            var in_options = {
+                'internalProjection': this.map.baseLayer.projection,
+                'externalProjection': new OpenLayers.Projection("EPSG:4326")
+            };
+            var layers = this.map.getLayersByName("GPX");
+            var gpx_format = new OpenLayers.Format.GPX(in_options);
+            layers[0].removeAllFeatures();
+            layers[0].style = style;
+            layers[0].addFeatures(gpx_format.read(gpx_data))
+            
+            this.map.zoomToExtent(layers[0].getDataExtent());
+        }, this)
+    });
+>>>>>>> Stashed changes
 }
 
 MapViewer.prototype.onRowSelected = function(event){
@@ -699,14 +734,13 @@ MapViewer.prototype.onRowSelected = function(event){
                .attr('aria-selected', false);
 
     $(event.currentTarget).addClass('row_selected')
-                          .attr('aria-selected', true)
-                          .focus();
+                .attr('aria-selected', true)
+                .focus();
 
     // Center the map
     for(var j=0; j<this.features.length; j++){
         for(var i=0; i<this.features[j].cluster.length; i++){
             if(this.features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
-                //console.log(this.features[j].cluster[i])
                 this.map.setCenter(this.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
                 this.displayGPX(this.features[j].cluster[i].attributes.name, this.features[j].cluster[i].attributes);
                 break;

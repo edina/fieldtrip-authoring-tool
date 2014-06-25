@@ -9,7 +9,9 @@
 // net against concatenated scripts and/or other plugins 
 // that are not closed properly.
 ;(function($, window, document, undefined){
-
+    
+    var mapviewer; //mapviewer container
+    var that = this;
   //the default options in case of not being initialized
     var defaults = {
         select_id: "",
@@ -103,6 +105,7 @@
         var menu = new Array();
         menu.push('<li role="tab" aria-selected="false"><a href="" id="home" class="menu-item" role="button">Home</a></li>');
         menu.push('<li role="tab" class="active" aria-selected="false"><a href="" id="my-records" rel="tooltip" data-placement="bottom" data-original-title="Click here to see your memories" class="menu-item" role="button">Memories Viewer</a></li>');
+        menu.push('<li role="tab" aria-selected="false"><a href="" id="track-animator" rel="tooltip" data-placement="bottom" data-original-title="Click here to animate your tracks" class="menu-item" role="button">Track Animator</a></li>');
         menu.push('<li role="tab" aria-selected="false"><a href="mailto:edina@ed.ac.uk" class="menu-item" role="button">Contact</a></li>');
         return menu;
     }
@@ -112,6 +115,7 @@
         $("#my-editors").tooltip();
         $("#example-editors").tooltip();
         $("#my-records").tooltip();
+        $("#track-animator").tooltip();
     }
   
     //the events relating to the buttons of the create main menu
@@ -133,6 +137,7 @@
         this.enableHomeEvent();
         this.enableCreateFormEvent();
         this.enableMapViewer();
+        this.enableTrackAnimator();
         this.importEvent();
         this.enableImageViewer();
         this.enableLayersEvent();
@@ -254,16 +259,96 @@
             }
         }
         var base_url = $(location).attr('href').split("?")[0];
-        var mapviewer = new MapViewer(options, base_url);
-        mapviewer.init();
+        this.mapviewer = new MapViewer(options, base_url);
+        this.mapviewer.init();
     
         $("#my-records").click($.proxy(function(){
             this.clearAll();
             this.showEditElements("map", false);
+
+            // if container empty (no map in it), then re-render map
+            if($('#map_canvas').children().size() == 0)
+            {
+                // map container resize hack - without removing the max-width, it does not work...
+                if($('#map_canvas').css('max-width') === "100%")
+                    $('#map_canvas').css('max-width','none');
+                this.mapviewer.map.render('map_canvas');
+                // returning back to max-width == 100%
+                if($('#map_canvas').css('max-width') === "none")
+                    $('#map_canvas').css('max-width','100%');
+            }
+            
             $("#options-dialog").remove();
         }, this))
     }
-    
+
+    BuildFormer.prototype.enableTrackAnimator = function(){
+        var oauth = this.options.oauth;
+        // _tmp = this.mapviewer;
+        $("#track-animator").click($.proxy(function(){
+            this.clearAll();
+            this.showEditElements("animator", false);
+            
+            // if container empty (no map in it), then re-render map to new container
+            if($('#animator-map_canvas').children().size() == 0)
+            {
+                // map container resize hack - without removing the max-width, it does not work...
+                if($('#animator-map_canvas').css('max-width') === "100%")
+                    $('#animator-map_canvas').css('max-width','none');
+                $('#animator-map_canvas').width($('#map_canvas').width());
+                $('#animator-map_canvas').height($('#map_canvas').height());
+                this.mapviewer.map.render('animator-map_canvas');
+                if($('#animator-map_canvas').css('max-width') === "none")
+                    $('#animator-map_canvas').css('max-width','100%');
+
+                // copy table with track entries only
+                // $('#animator-myTable').empty();
+                var animatorTableTbodyHTML = '';
+                $('#myTable .track').each(function(index, el) {
+                    animatorTableTbodyHTML += '<tr id="rowek-'+el.id.split("-")[1]+'">';
+                    $(el).find('td').each(function(index, el) {
+                        if(index != 0 && index !=4)
+                            animatorTableTbodyHTML += '<td>'+$(el).text()+'</td>';
+                    });
+                    animatorTableTbodyHTML += '<td><button class="track-animate" title="" row="'+index+'" aria-label="Animate the track path">Animate</button></td>';
+                    animatorTableTbodyHTML += '</tr>';
+                });
+                // console.log(animatorTableTbodyHTML);
+                $('#animator-myTable tbody').html(animatorTableTbodyHTML);
+
+                $('#animator-myTable tbody > tr').on('click', $.proxy(function(e){
+                    // console.log(e);
+                    $(e.currentTarget).parent().find('tr.row_selected')
+                        .removeClass('row_selected')
+                        .attr('aria-selected', false);
+
+                    $(e.currentTarget)
+                        .addClass('row_selected')
+                        .attr('aria-selected', true)
+                        .focus();
+
+                    // Center the map
+                    for(var j=0; j<this.mapviewer.features.length; j++){
+                        for(var i=0; i<this.mapviewer.features[j].cluster.length; i++){
+                            if(this.mapviewer.features[j].cluster[i].data.id === parseInt(e.currentTarget.id.split("-")[1])){
+                                this.mapviewer.map.setCenter(this.mapviewer.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
+                                this.mapviewer.displayGPX(this.mapviewer.features[j].cluster[i].attributes.name, this.mapviewer.features[j].cluster[i].attributes)
+                                // this.mapviewer.map.zoomToExtent(this.mapviewer.map.getLayersByName('GPX')[0].getDataExtent());
+                                break;
+                            }
+                        }
+                    }
+                }, this));
+                
+                // $(document).on('click', row, $.proxy(mapviewer.onRowSelected, this));
+                // $(document).on('row_selected', row, $.proxy(this.onRowSelected, this));
+            }
+
+
+            $("#options-dialog").remove(); //???
+        }, this))
+    }
+
     /**
      * function for displaying the images on the viewer
      */
@@ -845,13 +930,23 @@
                 $("#map-content").hide('fast');
                 $("#mapviewer-fieldset").hide("fast");
                 $("#export-fieldset").hide("fast");
+                $("#animator-content").hide("fast");
                 $("#home-content").show('fast');
                 $("#logout-paragraph").show("fast");
-            }else{
+            }else if(state === "map"){
                 $("#home-content").hide("fast");
+                $("#animator-content").hide("fast");
                 $("#mapviewer-fieldset").show("fast");
                 $("#export-fieldset").show("fast");
                 $("#map-content").show("fast");
+            }else if(state === "animator"){
+                $("#home-content").hide("fast");
+                $("#map-content").hide('fast');
+                $("#mapviewer-fieldset").hide("fast");
+                $("#export-fieldset").hide("fast");
+                $("#animator-content").show("fast");
+                // $("#export-fieldset").show("fast");
+                // $("#map-content").show("fast");
             }
         }
         
