@@ -114,13 +114,12 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                 var splits = obj.fields[i].id.split("-");
                 var new_value = getValueFromEditForm(splits[1], dialog_id, fid);
 
-                // TODO: Temp fix for records that hasn't been copied into the dialog
                 if(new_value !== undefined){
                     obj.fields[i].val = new_value;
                 }
             }
             obj.name = $("#"+dialog_id+" #form-text-1").val();
-            var data = JSON.stringify(obj);
+            var data = JSON.stringify(obj, null, '\t');
             loading(true);
             if(rename == false){
                 $.ajax({
