@@ -103,14 +103,14 @@ function makeDialogButtons(dialog_id, former_id){
 }
 
 
-function makeEditDialogButtons(dialogId, record, oTable, features, row){
+function makeEditDialogButtons(dialogId, record, mapviewer, features, row){
     return buttons = {
         "Save": function(){
-            var dialogDiv = "#"+dialogId
+            var dialogDiv = "#"+dialogId;
 
             // Get all the values from the form as records in an array
             var formFields = $.map($('.fieldcontain', dialogDiv), function(div){
-                                    return getFieldFromEditForm(dialogId, div.id)
+                                    return getFieldFromEditForm(dialogId, div.id);
                                 });
 
             // Create an inverse index for the actual fields in the record
@@ -121,7 +121,7 @@ function makeEditDialogButtons(dialogId, record, oTable, features, row){
 
             // Update the record with the new values
             for(var i=0; i<formFields.length; i++){
-                var j = fieldsIndex[formFields[i].id]
+                var j = fieldsIndex[formFields[i].id];
                 if(j === undefined){
                     record.fields.push(formFields[i]);
                 }else{
@@ -135,52 +135,47 @@ function makeEditDialogButtons(dialogId, record, oTable, features, row){
             // NEW name
             record.name = $("#form-text-1", dialogDiv).val();
 
-            // If the name didn't change
-            if(oldName == record.name){
-                loading(true);
-                success = function(data){
-                    $row = $(row);
-                    description = findLabel(record.fields, "Description")
-                    oTable.fnUpdate(description, $row.index(), 2, false);
-                    $row.focus();
-                    loading(false);
-                    $("#"+dialogId).dialog('close');                    
-                };
-                error = function(data){
-                    console.warn('Error uploading the record')
-                    loading(false);
-                    $("#"+dialogId).dialog('close');
-                };
-                PCAPI.putRecord(record.name, record, success, error);
-            }else{
-                loading(true);
-                success = function(data){
-                    $row = $(row);
-                    index = $row.index();
-                    description = findLabel(record.fields, "Description");
 
+            var success = function(data){
+                $row = $(row);
+                var index = $row.index();
+                var description = findLabel(record.fields, "Description");
+
+                // if its a new record
+                if(row === null){
+                    var nRecords = mapviewer.oTable.fnGetData().length;
+                    var data_obj = mapviewer.prepareSingleTableData(record.name, record, nRecords, '');
+                    var index = mapviewer.oTable.fnAddData(data_obj.data)[0];
+                }else{
                     // Update the table
-                    oTable.fnUpdate(record.name, index, 1, false);
-                    oTable.fnUpdate(description, index, 2, false);
+                    mapviewer.oTable.fnUpdate(record.name, index, 1, false);
+                    mapviewer.oTable.fnUpdate(description, index, 2, false);
 
                     // Update the table elements
                     $row.attr('record-name', record.name);
                     $(".record-edit", $row).attr("title", record.name);
                     $(".record-delete", $row).attr("title", record.name);
                     $row.focus();
-                    // Update the feature in the map
-                    features[0].cluster[index].attributes = record;
-                    features[0].cluster[index].attributes.id = index;
+                }
+                // Update the feature in the map
+                //features[0].cluster[index].attributes = record;
+                //features[0].cluster[index].attributes.id = index;
 
-                    loading(false);
-                    $("#"+dialogId).dialog('close');
-                };
-                error = function(data){
-                    console.warn('Error uploading the record')
-                    loading(false);
-                    $("#"+dialogId).dialog('close');
-                };
+                loading(false);
+                $("#"+dialogId).dialog('close');
+            };
+            var error = function(data){
+                console.warn('Error uploading the record')
+                loading(false);
+                $("#"+dialogId).dialog('close');
+            };
 
+            // If record is new or the name didn't change 
+            if(oldName === '' || oldName == record.name){
+                loading(true);
+                PCAPI.putRecord(record.name, record, success, error);
+            }else{
+                loading(true);
                 PCAPI.renameRecord(oldName, record, success, error);                
             }
         },
@@ -502,6 +497,31 @@ function isTouchDevice(){
         return false;
     }
 };
+
+/*
+    Find a feature by attribute in an array of features
+    or array of clustered features
+*/
+function findFeaturesByAttribute(features, attr, value){
+    var feature = null;
+    for(var j=0; j<features.length; j++){
+        // If it is a cluster, iterate over the clustered features
+        if(features[j].cluster !== undefined){
+            for(var i=0; i<features[j].cluster.length; i++){
+                if(features[j].cluster[i].attributes[attr] === value){
+                    feature = features[j].cluster[i];
+                    break;
+                }
+            }
+        }else if(features[j].attributes[attr] === value){
+                feature = features[j];
+        }
+        if(feature !== null){
+            break;
+        }
+    }
+    return feature;
+}
 
 //function for adding touch event on html elements. It's for old android devices where the scrolling of html elements is not working
 function touchScroll(selector) {

@@ -157,16 +157,27 @@ MapViewer.prototype.initMap = function(){
     var findThumbnail = function(param){
         var suffix = param || '';
 
-        // Generate a function for get the right det of icons using a suffix.
+        // Generate a function for get the right set of icons using a suffix.
         return function(feature){
-            var selected = feature.layer.selectedFeatures;
+            var img;
 
-            if(feature.cluster &&
-               feature.cluster.length == 1){
-                var img;
-                var editor = feature.cluster[0].data.editor;
-                //console.log(feature.cluster[0].data.editor)
-                switch(editor){
+            if(feature.cluster !== undefined && feature.cluster.length > 1){
+                if(feature.cluster.length < 10){
+                    img = 'cluster1';
+                }else if(feature.cluster.length < 20){
+                    img = 'cluster1';
+                }else{
+                    img = 'cluster3';
+                }
+            }else{
+                var record;
+                if(feature.cluster){
+                    record = feature.cluster[0].attributes;
+                }else{
+                    record = feature.attributes;
+                }
+
+                switch(record.editor){
                     case "text.edtr":
                         img = "textmarker";
                         break;
@@ -182,15 +193,8 @@ MapViewer.prototype.initMap = function(){
                     default:
                         img = "custommarker";
                 }
-                return base_url+"img/"+img+suffix+".png";
-
-            }else if(feature.cluster.length < 10){
-                return base_url+"img/cluster1.png";
-            }else if(feature.cluster.length < 20){
-                return base_url+"img/cluster2.png";
-            }else{
-                return base_url+"img/cluster3.png";
             }
+            return base_url+"img/"+img+suffix+".png";
         };
     };
 
@@ -209,7 +213,7 @@ MapViewer.prototype.initMap = function(){
                 var pix = 16;
 
                 // Size for clustered markers
-                if(feature.cluster.length > 1) {
+                if(feature.cluster && feature.cluster.length > 1) {
                     pix = Math.min(feature.attributes.count, 10) + pix;
                 }
                 return pix;
@@ -230,7 +234,7 @@ MapViewer.prototype.initMap = function(){
             },
             thumbnail: findThumbnail(),
             number: function(feature){
-                if(feature.cluster.length > 1){
+                if(feature.cluster && feature.cluster.length > 1){
                     return feature.cluster.length;
                 }
                 return "";
@@ -246,10 +250,12 @@ MapViewer.prototype.initMap = function(){
             thumbnail: findThumbnail('_selected'),
     }});
     
+    var clustering = new OpenLayers.Strategy.Cluster();
+
     var clusters = new OpenLayers.Layer.Vector("Clusters", {
         strategies: [
-          //new OpenLayers.Strategy.Fixed(),
-          new OpenLayers.Strategy.Cluster()
+          //new OpenLayers.Strategy.Fixed()
+          clustering
         ],
         styleMap: new OpenLayers.StyleMap({
             "default": defaultStyle,
@@ -269,7 +275,6 @@ MapViewer.prototype.initMap = function(){
     map.addControl(new OpenLayers.Control.PanZoom());
     map.addControl(new OpenLayers.Control.Attribution());
     
-    var feat;
     var select = new OpenLayers.Control.SelectFeature(clusters, {hover: false});
     this.select_id = select.id;
     map.addControl(select);
@@ -278,20 +283,90 @@ MapViewer.prototype.initMap = function(){
     clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)});
     
     map.addLayers([osopenlayer, gpx, clusters]);
-    
+
+    var snap = new OpenLayers.Control.Snapping({
+        layer: clusters,
+        targets: [gpx],
+        greedy: false
+    });
+    snap.activate();
+
+    // Add panel
+    var panel = new OpenLayers.Control.Panel({
+                displayClass: "olControlEditingToolbar"
+            });
+    var draw = new OpenLayers.Control.DrawFeature(clusters,
+                                                  OpenLayers.Handler.Point, 
+                                                  {persist: true});
+    var navigation = new OpenLayers.Control.Navigation({title: "Navigate"});
+    panel.addControls([navigation, draw]);
+    map.addControl(panel);
+    draw.events.register("featureadded", null, $.proxy(this.onFeatureAdded, this));
+
     if (!map.getCenter()) map.zoomToMaxExtent();
     return map;
 };
 
-MapViewer.prototype.feature_select = function(event){
-    //this.oTable.fnClearTable();
-    for(var i=0; i<event.feature.cluster.length; ++i) {
-        var id = event.feature.cluster[i].data.id;
-        var data = {"id": event.feature.cluster[i].data.id, "name": event.feature.cluster[i].data.name, "editor": event.feature.cluster[i].data.editor, "buttons": event.feature.cluster[i].data.buttons};
-        //this.oTable.fnAddData(data)
+MapViewer.prototype.onFeatureAdded = function(evt){
+    var mapviewer = this;
+    var feature = evt.feature;
+    var layer = this.map.getLayersByName("Clusters")[0];
+    var url = "editors/default/text.edtr";
+    var record = {};
+    var title = {
+                    'id': 'fieldcontain-text-1',
+                    'label': 'Title',
+                    'val': ''
+                };
+    var date = new Date(Date.now());
+    var coord =  feature.geometry.clone()
+                        .transform(new OpenLayers.Projection("EPSG:27700"), new OpenLayers.Projection("EPSG:4326"))
+                        .getVertices()[0];
+    var point = {};
+    var trackLayer = this.map.getLayersByName("GPX")[0];
+
+    point.lat = coord.y;
+    point.lon = coord.x;
+
+    record.editor = 'text.edtr';
+    record.fields = [title];
+    record.name = ''; 
+    record.timestamp = date.toISOString();
+    record.geofenceId = date.getTime().toString();
+    record.point = point;
+    record.trackId = trackLayer.features[0].attributes.trackId;
+    
+    feature.attributes = record;
+    feature.data = record;
+
+    $.ajax({
+        type: "GET",
+        url: url,
+        dataType: "html",
+        success: function(edit_data){
+            //var path = mapviewer.options.version+'/'+mapviewer.options.provider+'/'+oauth;
+            var path = '';
+            var features = [feature];
+
+            var recorder = new RecordRenderer(path, record.name, record.editor, 
+                                              'edit-record-dialog', record.fields);
+            var buttons = makeEditDialogButtons('edit-record-dialog', record, mapviewer, features, null);
+
+            makeAlertWindow(edit_data, "Edit", 300, 400, "edit-record-dialog", 1000, "middle", buttons);
+            recorder.render();
+        }
+    });
+
+    // Release the draw control
+    evt.object.deactivate();
+    layer.redraw();
+};
+
+MapViewer.prototype.feature_select = function(evt){
+    //$.each(event.featureselectedFeatures)
+    for(var i=0; i<evt.feature.cluster.length; ++i) {
         $("#row-"+id).addClass("row_selected");
     }
-    //this.enableRecordEdit();
 };
 
 MapViewer.prototype.feature_unselect = function(event){
@@ -524,6 +599,7 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
                  'point' : point,
                  'control': control,
                  'trackId': trackId,
+                 'recordId' : record.geofenceId,
                  'styles': styles,
                  'buttons': buttons,
                  'editor' : record.editor
@@ -549,6 +625,7 @@ MapViewer.prototype.initTable = function(table_data){
                      .attr("tabindex", "0")
                      .attr("role", "row")
                      .attr("trackid", aData.trackId)
+                     .attr("recordid", aData.recordId)
                      .attr("record-name", aData.name)
                      .addClass(aData.styles.join(' '));
             },
@@ -633,11 +710,11 @@ MapViewer.prototype.onEditRecord = function(evt){
         $row = $target;
     }
 
-    var record = $row.attr('record-name');
+    var recordName = $row.attr('record-name');
 
     loading(true);
     $.ajax({
-        url: mapviewer.buildUrl('records', '/'+record),
+        url: mapviewer.buildUrl('records', '/'+recordName),
         type: 'GET',
         dataType: 'json',
         success: function(data) {
@@ -659,8 +736,8 @@ MapViewer.prototype.onEditRecord = function(evt){
                 dataType: "html",
                 success: function(edit_data){
                     var path = mapviewer.options.version+'/'+mapviewer.options.provider+'/'+oauth;
-                    var recorder = new RecordRenderer(path, record, editor, 'edit-record-dialog', field_values)
-                    var buttons = makeEditDialogButtons('edit-record-dialog', data, oTable, features, $row.get(0));
+                    var recorder = new RecordRenderer(path, recordName, editor, 'edit-record-dialog', field_values);
+                    var buttons = makeEditDialogButtons('edit-record-dialog', data, mapviewer, features, $row.get(0));
 
                     makeAlertWindow(edit_data, "Edit", 300, 400, "edit-record-dialog", 1000, "middle", buttons);
                     recorder.render();
@@ -705,7 +782,6 @@ MapViewer.prototype.enableRecordDelete = function(){
     $(document).off('click', '.record-delete');
     $(document).on('click', '.record-delete', $.proxy(function(event){
         var record = $(event.currentTarget).attr("title");
-        console.log(record)
         this.askForDeletion(record);
     }, this));
 }
@@ -719,6 +795,7 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
 
     var gpx;
     var style;
+    var trackId = data.geofenceId;
     for(var i=0; i<data.fields.length; i++){
         if(data.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
             style = data.fields[i]["style"];
@@ -739,9 +816,12 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
                 };
                 var layers = this.map.getLayersByName("GPX");
                 var gpx_format = new OpenLayers.Format.GPXExt(in_options);
+                var gpx_features = gpx_format.read(gpx_data);
+                gpx_features[0].attributes.trackId = trackId;
+
                 layers[0].removeAllFeatures();
                 layers[0].style = style;
-                layers[0].addFeatures(gpx_format.read(gpx_data))
+                layers[0].addFeatures(gpx_features);
                 // center to the middle of the whole GPX track
                 this.map.zoomToExtent(layers[0].getDataExtent());
                 if(callback !== undefined && typeof(callback) === "function")
@@ -761,17 +841,15 @@ MapViewer.prototype.onRowSelected = function(event){
                 .attr('aria-selected', true)
                 .focus();
 
-    // Center the map
-    for(var j=0; j<this.features.length; j++){
-        for(var i=0; i<this.features[j].cluster.length; i++){
-            if(this.features[j].cluster[i].data.id === parseInt(event.currentTarget.id.split("-")[1])){
-                this.map.setCenter(this.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
-                this.displayGPX(this.features[j].cluster[i].attributes.name, this.features[j].cluster[i].attributes);
-                break;
-            }
-        }
+    //Center the map
+    var recordId = parseInt(event.currentTarget.id.split("-")[1]);
+    var feature = findFeaturesByAttribute(this.features, 'id', recordId);
+
+    if(feature !== null){
+        this.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
+        this.displayGPX(feature.attributes.name, feature.attributes);
     }
-}
+};
 
 /* 
     Find the track to which the element belongs in the table

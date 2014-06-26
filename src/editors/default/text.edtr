@@ -16,8 +16,7 @@
     <label for="form-textarea-1">Description</label>
     <textarea name="form-textarea-1"
               id="form-textarea-1"
-              placeholder="">
-    </textarea>
+              placeholder=""></textarea>
   </div>
 
   <div id="text-buttons" class="fieldcontain ui-grid-a">
