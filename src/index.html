@@ -25,11 +25,15 @@
     }
   </style>
 
+  <!--[if IE]>
   <script type="text/javascript">
-    if (typeof console == "undefined") {
-      this.console = {log: function() {}};
-    }
+    // Dummy console for problems in IE
+    var console = { 
+      log: function (msg) { },
+      warn: function (msg) { }
+    };
   </script>
+<![endif]-->
 
   <!--<script type="text/javascript" src="https://getfirebug.com/firebug-lite-debug.js"></script>-->
   <script type="text/javascript" src="js/ext/jquery.js"></script>
@@ -50,6 +54,7 @@
   <script type="text/javascript" src="js/ext/jPaginator.js"></script>
 
   <script type="text/javascript" src="js/former/jquery.former.accessibility.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.pcapi.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.functions.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.mapviewer.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.statistics.js"></script>
@@ -170,16 +175,6 @@
   <div id="loader">
     <img src="css/images/ajax-loader.gif" alt="Loading data">
   </div>
-
-<!--[if IE]>
-  <script type="text/javascript">
-    // Dummy console for problems in IE
-    var console = { 
-      log: function (msg) { },
-      warn: function (msg) { }
-    };
-  </script>
-<![endif]-->
 
   <script type="text/javascript">
     //var map, oTable;

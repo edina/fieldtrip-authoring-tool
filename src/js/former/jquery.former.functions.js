@@ -102,69 +102,56 @@ function makeDialogButtons(dialog_id, former_id){
     };
 }
 
-function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
+
+function makeEditDialogButtons(dialog_id, record, oTable, row){
     return buttons = {
         "Save": function(){
-            var rename = false;
-            if($("#"+dialog_id+" #form-text-1").val() != $("#"+dialog_id+" #form-text-hidden-1").val()){
-                rename = true;
-            }
-            for(var i=0; i<obj.fields.length; i++){
-                var fid = obj.fields[i].id;
-                var splits = obj.fields[i].id.split("-");
+            // OLD name
+            var oldName = $("#"+dialog_id+" #form-text-hidden-1").val();
+            // NEW name
+            record.name = $("#"+dialog_id+" #form-text-1").val();
+
+            // Update obj.fields with new values
+            for(var i=0; i<record.fields.length; i++){
+                var fid = record.fields[i].id;
+                var splits = record.fields[i].id.split("-");
                 var new_value = getValueFromEditForm(splits[1], dialog_id, fid);
 
                 if(new_value !== undefined){
-                    obj.fields[i].val = new_value;
+                    record.fields[i].val = new_value;
                 }
             }
-            obj.name = $("#"+dialog_id+" #form-text-1").val();
-            var data = JSON.stringify(obj, null, '\t');
-            loading(true);
-            if(rename == false){
-                $.ajax({
-                    url: '/'+version+'/pcapi/records/'+uri+'/'+encodeURIComponent(obj.name)+'/record.json',
-                    type: 'PUT',
-                    data: data,
-                    success: function(data) {
-                        description = findLabel(obj.fields, "Description")
-                        oTable.fnUpdate(description, $row.index(), 2);
-                        $row.focus();
-                        loading(false);
-                    }
-                });
+
+            // If the name didn't change
+            if(oldName == record.name){
+                loading(true);
+                success = function(data){
+                    $row = $(row);
+                    description = findLabel(record.fields, "Description")
+                    oTable.fnUpdate(description, $row.index(), 2);
+                    $row.focus();
+                    loading(false);                    
+                };
+                error = function(data){
+                    console.warn('Error uploading the record')
+                    loading(false);
+                };
+                PCAPI.putRecord(record.name, record, success, error);
             }else{
-                //to be implemented in the next version
-                $.ajax({
-                    url: '/'+version+'/pcapi/records/'+uri+'/'+encodeURIComponent($("#"+dialog_id+" #form-text-hidden-1").val()),
-                    type: 'PUT',
-                    data: obj.name,
-                    success: function(data) {
-                        oTable.fnUpdate(obj.name, $row.index(), 1);
-                        $(".record-edit", $row).attr("title", obj.name);
-                        $(".record-delete", $row).attr("title", obj.name);
-                        $row.focus();
-                        loading(false);
-                    }
-                });
-                
-                /*$.ajax({
-                  url: '/pcapi/records/dropbox/'+oauth+'/'+encodeURIComponent($("#"+dialog_id+" #form-text-hidden-1").val()),
-                  type: 'DELETE',
-                  success: function() {
-                    $.ajax({
-                      url: '/pcapi/records/dropbox/'+oauth+'/'+encodeURIComponent(obj.name)+'/record.json',
-                      type: 'POST',
-                      data: data,
-                      success: function(data) {
-                        oTable.fnUpdate(obj.name, parseInt(row), 1);
-                        $("#row-"+row +" .record-edit").attr("title", obj.name+"-"+row);
-                        $("#row-"+row +" .record-delete").attr("title", obj.name+"-"+row);
-                        loading(false);
-                      }
-                    });
-                  }
-                });*/
+                loading(true);
+                success = function(data){
+                    $row = $(row)
+                    oTable.fnUpdate(record.name, $row.index(), 1);
+                    $(".record-edit", $row).attr("title", record.name);
+                    $(".record-delete", $row).attr("title", record.name);
+                    $row.focus();
+                };
+                error = function(data){
+                    console.warn('Error uploading the record')
+                    loading(false);
+                };
+
+                PCAPI.renameRecord(oldName, record, success, error);                
             }
             $("#"+dialog_id).dialog('close');
         },
