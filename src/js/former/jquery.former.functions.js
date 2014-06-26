@@ -103,7 +103,7 @@ function makeDialogButtons(dialog_id, former_id){
 }
 
 
-function makeEditDialogButtons(dialog_id, record, oTable, row){
+function makeEditDialogButtons(dialog_id, record, oTable, features, row){
     return buttons = {
         "Save": function(){
             // OLD name
@@ -140,11 +140,16 @@ function makeEditDialogButtons(dialog_id, record, oTable, row){
             }else{
                 loading(true);
                 success = function(data){
-                    $row = $(row)
-                    oTable.fnUpdate(record.name, $row.index(), 1);
+                    $row = $(row);
+                    index = $row.index();
+                    oTable.fnUpdate(record.name, index, 1);
                     $(".record-edit", $row).attr("title", record.name);
                     $(".record-delete", $row).attr("title", record.name);
                     $row.focus();
+                    // Update the feature in the map
+                    features[0].cluster[index].attributes = record;
+                    features[0].cluster[index].attributes.id = index;
+
                     loading(false);
                 };
                 error = function(data){

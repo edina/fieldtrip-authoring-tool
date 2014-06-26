@@ -589,6 +589,7 @@ MapViewer.prototype.onEditRecord = function(evt){
     var mapviewer = this;
     var oTable = this.oTable;
     var $row;
+    var features = this.features;
 
     $target = $(evt.currentTarget);
     if($target.is("button")){
@@ -624,7 +625,7 @@ MapViewer.prototype.onEditRecord = function(evt){
                 success: function(edit_data){
                     var path = mapviewer.options.version+'/'+mapviewer.options.provider+'/'+oauth;
                     var recorder = new RecordRenderer(path, record, editor, 'edit-record-dialog', field_values)
-                    var buttons = makeEditDialogButtons('edit-record-dialog', data, oTable, $row.get(0));
+                    var buttons = makeEditDialogButtons('edit-record-dialog', data, oTable, features, $row.get(0));
 
                     makeAlertWindow(edit_data, "Edit", 300, 400, "edit-record-dialog", 1000, "middle", buttons);
                     recorder.render();
