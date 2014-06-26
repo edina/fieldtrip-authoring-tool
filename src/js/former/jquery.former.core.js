@@ -41,6 +41,11 @@
         this.version = this.options.version;
         this.provider = this.options.provider;
         this.image_pages = undefined;
+
+        window.PCAPI = new PCAPI({
+                                   'provider': this.provider,
+                                   'version': this.version
+                                });
     }
   
     BuildFormer.prototype.defaults = {
@@ -230,6 +235,7 @@
     //map viewer
     BuildFormer.prototype.enableMapViewer = function(){
         var oauth = this.options.oauth;
+        PCAPI.options.oauth = this.options.oauth;
         //var bformer = this;
     
         var options = {
