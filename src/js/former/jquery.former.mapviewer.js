@@ -686,7 +686,6 @@ MapViewer.prototype.displayGPX = function(record, data){
         }
     }
 
-<<<<<<< Updated upstream
     if(gpx !== undefined){
         $.ajax({
             type: "GET",
@@ -702,29 +701,11 @@ MapViewer.prototype.displayGPX = function(record, data){
                 layers[0].removeAllFeatures();
                 layers[0].style = style;
                 layers[0].addFeatures(gpx_format.read(gpx_data))
+                // center to the middle of the whole GPX track
+                this.map.zoomToExtent(layers[0].getDataExtent());
             }, this)
         });
     }
-=======
-    $.ajax({
-        type: "GET",
-        url: this.buildUrl('records', '/'+record+'/'+data.fields[1].val),
-        dataType: "xml",
-        success: $.proxy(function(gpx_data){
-            var in_options = {
-                'internalProjection': this.map.baseLayer.projection,
-                'externalProjection': new OpenLayers.Projection("EPSG:4326")
-            };
-            var layers = this.map.getLayersByName("GPX");
-            var gpx_format = new OpenLayers.Format.GPX(in_options);
-            layers[0].removeAllFeatures();
-            layers[0].style = style;
-            layers[0].addFeatures(gpx_format.read(gpx_data))
-            
-            this.map.zoomToExtent(layers[0].getDataExtent());
-        }, this)
-    });
->>>>>>> Stashed changes
 }
 
 MapViewer.prototype.onRowSelected = function(event){
