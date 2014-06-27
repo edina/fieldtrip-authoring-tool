@@ -157,8 +157,12 @@ function makeEditDialogButtons(dialogId, record, oTable, features, row){
                     index = $row.index();
                     description = findLabel(record.fields, "Description");
 
+                    // Update the table
                     oTable.fnUpdate(record.name, index, 1, false);
                     oTable.fnUpdate(description, index, 2, false);
+
+                    // Update the table elements
+                    $row.attr('record-name', record.name);
                     $(".record-edit", $row).attr("title", record.name);
                     $(".record-delete", $row).attr("title", record.name);
                     $row.focus();
