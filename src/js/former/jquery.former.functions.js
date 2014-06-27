@@ -141,7 +141,7 @@ function makeEditDialogButtons(dialogId, record, oTable, features, row){
                 success = function(data){
                     $row = $(row);
                     description = findLabel(record.fields, "Description")
-                    oTable.fnUpdate(description, $row.index(), 2);
+                    oTable.fnUpdate(description, $row.index(), 2, false);
                     $row.focus();
                     loading(false);                    
                 };
@@ -155,7 +155,10 @@ function makeEditDialogButtons(dialogId, record, oTable, features, row){
                 success = function(data){
                     $row = $(row);
                     index = $row.index();
-                    oTable.fnUpdate(record.name, index, 1);
+                    description = findLabel(record.fields, "Description");
+
+                    oTable.fnUpdate(record.name, index, 1, false);
+                    oTable.fnUpdate(description, index, 2, false);
                     $(".record-edit", $row).attr("title", record.name);
                     $(".record-delete", $row).attr("title", record.name);
                     $row.focus();
