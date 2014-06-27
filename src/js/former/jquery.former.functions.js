@@ -103,24 +103,37 @@ function makeDialogButtons(dialog_id, former_id){
 }
 
 
-function makeEditDialogButtons(dialog_id, record, oTable, features, row){
+function makeEditDialogButtons(dialogId, record, oTable, features, row){
     return buttons = {
         "Save": function(){
-            // OLD name
-            var oldName = $("#"+dialog_id+" #form-text-hidden-1").val();
-            // NEW name
-            record.name = $("#"+dialog_id+" #form-text-1").val();
+            var dialogDiv = "#"+dialogId
 
-            // Update obj.fields with new values
-            for(var i=0; i<record.fields.length; i++){
-                var fid = record.fields[i].id;
-                var splits = record.fields[i].id.split("-");
-                var new_value = getValueFromEditForm(splits[1], dialog_id, fid);
+            // Get all the values from the form as records in an array
+            var formFields = $.map($('.fieldcontain', dialogDiv), function(div){
+                                    return getFieldFromEditForm(dialogId, div.id)
+                                });
 
-                if(new_value !== undefined){
-                    record.fields[i].val = new_value;
+            // Create an inverse index for the actual fields in the record
+            var fieldsIndex = {};
+            for(var i = 0; i < record.fields.length; i++){
+                fieldsIndex[record.fields[i].id] = i;
+            }
+
+            // Update the record with the new values
+            for(var i=0; i<formFields.length; i++){
+                var j = fieldsIndex[formFields[i].id]
+                if(j === undefined){
+                    record.fields.push(formFields[i]);
+                }else{
+                    // Change only the val ?
+                    record.fields[j].val = formFields[i].val;
                 }
             }
+
+            // OLD name
+            var oldName = $("#form-text-hidden-1", dialogDiv).val();
+            // NEW name
+            record.name = $("#form-text-1", dialogDiv).val();
 
             // If the name didn't change
             if(oldName == record.name){
@@ -159,47 +172,60 @@ function makeEditDialogButtons(dialog_id, record, oTable, features, row){
 
                 PCAPI.renameRecord(oldName, record, success, error);                
             }
-            $("#"+dialog_id).dialog('close');
+            $("#"+dialogId).dialog('close');
         },
         "Cancel": function(){
-            $("#"+dialog_id).dialog('close');
+            $("#"+dialogId).dialog('close');
         }
     };
 }
 
-function getValueFromEditForm(type, dialog_id, fid){
-  var updateValues = {
-    text: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input").val();
-    },
-    textarea: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" textarea").val();
-    },
-    checkbox: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input[type=checkbox]:checked").val();
-    },
-    radio: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input[type=radio]:checked").val();
-    },
-    select: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" select option:selected").val();
-    },
-    image: function(dialog_id, fid){
-      var splits = $("#"+dialog_id+" #"+fid+" img").attr("src").split("/");
-      return splits[splits.length-1];
-    },
-    audio: function(dialog_id, fid){
-      var splits = $("#"+dialog_id+" #"+fid+" a").attr("href").split("/");
-      return splits[splits.length-1];
-    },
-    range: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input").val();
-    },
-    track: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input").val();
+/*
+*   Get a record from the edit form
+*   @param{String} dialogId div id of the dialog
+*   @param{String} fieldId: div id of the field
+*   @return{Object} return a field (id, val, label) 
+*/
+function getFieldFromEditForm(dialogId, fieldId){
+    var type;
+    var fieldDiv;
+    var val;
+    var field = {};
+    
+    type = fieldId.split("-")[1];
+    fieldDiv = "#" + dialogId + " #"+ fieldId; 
+    field.id = fieldId;
+    field.label = $("label", fieldDiv).text();
+
+    switch(type){
+        case 'text':
+        case 'range':
+        case 'track':
+            val = $("input", fieldDiv).val();
+            break;
+        case 'textarea': 
+            val = $("textarea", fieldDiv).val();
+            break;
+        case 'checkbox':
+            val = $("input[type=checkbox]:checked", fieldDiv).val();
+            break;
+        case 'radio':
+            val = $("input[type=radio]:checked", fieldDiv).val();
+            break;
+        case 'select':
+            val = $("select option:selected", fieldDiv).val();
+            break;
+        case 'image':
+            var splits = $("img", fieldDiv).attr("src").split("/");
+            val = splits[splits.length-1];
+            break;
+        case 'audio':
+            var splits = $("a", fieldDiv).attr("href").split("/");
+            val = splits[splits.length-1];
+            break;
     }
-  }
-  return updateValues[type](dialog_id, fid);
+    field.val = val;
+    return field;
 }
 
 function findIForFieldcontain(div_id, where, type){
