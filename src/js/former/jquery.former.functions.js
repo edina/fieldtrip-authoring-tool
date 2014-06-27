@@ -143,11 +143,13 @@ function makeEditDialogButtons(dialogId, record, oTable, features, row){
                     description = findLabel(record.fields, "Description")
                     oTable.fnUpdate(description, $row.index(), 2, false);
                     $row.focus();
-                    loading(false);                    
+                    loading(false);
+                    $("#"+dialogId).dialog('close');                    
                 };
                 error = function(data){
                     console.warn('Error uploading the record')
                     loading(false);
+                    $("#"+dialogId).dialog('close');
                 };
                 PCAPI.putRecord(record.name, record, success, error);
             }else{
@@ -171,15 +173,16 @@ function makeEditDialogButtons(dialogId, record, oTable, features, row){
                     features[0].cluster[index].attributes.id = index;
 
                     loading(false);
+                    $("#"+dialogId).dialog('close');
                 };
                 error = function(data){
                     console.warn('Error uploading the record')
                     loading(false);
+                    $("#"+dialogId).dialog('close');
                 };
 
                 PCAPI.renameRecord(oldName, record, success, error);                
             }
-            $("#"+dialogId).dialog('close');
         },
         "Cancel": function(){
             $("#"+dialogId).dialog('close');
