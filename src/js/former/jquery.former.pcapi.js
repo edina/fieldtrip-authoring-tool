@@ -4,14 +4,14 @@ var PCAPI = function(options){
         provider: 'dropbox',
         oauth: '',
         records: 'records',
-        pcapi: 'pcapi'
+        pcapi: 'pcapi',
+        host: location.origin
 	};
 
 	this.options = $.extend(defaults, options || {});
 };
 
 PCAPI.prototype.init = function(){
-
 }
 
 
@@ -19,20 +19,18 @@ if (!String.prototype.format) {
   String.prototype.format = function() {
     var args = arguments;
     return this.replace(/{(\d+)}/g, function(match, number) { 
-      return typeof args[number] != 'undefined'
-        ? args[number]
-        : match
-      ;
-    });
-  };
+      	return typeof args[number] != 'undefined' ? args[number] : match;
+    	});
+  	};
 }
 
 PCAPI.prototype._url = function(){
-	return '{0}/{1}/{2}/{3}/{4}/'.format(this.options.version,
-										this.options.pcapi,
-								        this.options.records,
-								        this.options.provider,
-								        this.options.oauth);
+	return '{0}/{1}/{2}/{3}/{4}/{5}/'.format(this.options.host,
+										     this.options.version,
+									         this.options.pcapi,
+									         this.options.records,
+									         this.options.provider,
+									         this.options.oauth);
 }
 
 PCAPI.prototype.putRecord = function(key, record, success, error){
@@ -53,7 +51,7 @@ PCAPI.prototype.putRecord = function(key, record, success, error){
 
 PCAPI.prototype.renameRecord = function(key, record, success, error){
     $.ajax({
-	    url: this._url() + '/' + encodeURIComponent(key),
+	    url: this._url() + encodeURIComponent(key),
 	    type: 'PUT',
 	    data: record.name,
 	    success: function(data) {
