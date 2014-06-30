@@ -154,16 +154,51 @@ MapViewer.prototype.initMap = function(){
         /*{attribution: attr}*/);
     
     var base_url = this.base_url;
-    
-    //var vector_layer = new OpenLayers.Layer.Vector("Points");
-    var style = new OpenLayers.Style({
+    var findThumbnail = function(param){
+        var suffix = param || '';
+
+        // Generate a function for get the right det of icons using a suffix.
+        return function(feature){
+            var selected = feature.layer.selectedFeatures;
+
+            if(feature.cluster &&
+               feature.cluster.length == 1){
+                var img;
+                var editor = feature.cluster[0].data.editor;
+                //console.log(feature.cluster[0].data.editor)
+                switch(editor){
+                    case "text.edtr":
+                        img = "textmarker";
+                        break;
+                    case "image.edtr":
+                        img = "imagemarker";
+                        break;
+                    case "audio.edtr":
+                        img = "audiomarker";
+                        break;
+                    case "track.edtr":
+                        img = "routemarker";
+                        break;
+                    default:
+                        img = "custommarker";
+                }
+                return base_url+"img/"+img+suffix+".png";
+
+            }else if(feature.cluster.length < 10){
+                return base_url+"img/cluster1.png";
+            }else if(feature.cluster.length < 20){
+                return base_url+"img/cluster2.png";
+            }else{
+                return base_url+"img/cluster3.png";
+            }
+        };
+    };
+
+    var defaultStyle = new OpenLayers.Style({
         pointRadius: "${radius}",
-        /*fillColor: "#ffcc66",
-        fillOpacity: 0.8,
-        strokeColor: "#cc6633",
-        strokeWidth: "${width}",
-        strokeOpacity: 0.8,*/
         'externalGraphic': '${thumbnail}',
+        'graphicXOffset': '${offset_x}',
+        'graphicYOffset': '${offset_y}',
         label: "${number}"
     }, {
         context: {
@@ -179,27 +214,21 @@ MapViewer.prototype.initMap = function(){
                 }
                 return pix;
             },
-            thumbnail: function(feature){
-                //console.log(feature)
-                if(feature.cluster.length == 1){
-                    var img = base_url+"img/custommarker.png";
-                    //console.log(feature.cluster[0].data.editor)
-                    if(feature.cluster[0].data.editor === "text.edtr"){
-                        img = base_url+"img/textmarker.png"
-                    }else if(feature.cluster[0].data.editor === "image.edtr"){
-                        img = base_url+"img/imagemarker.png"
-                    }else if(feature.cluster[0].data.editor === "audio.edtr"){
-                        img = base_url+"img/audiomarker.png"
-                    }
-                    return img;
-                }else if(feature.cluster.length < 10){
-                    return base_url+"img/cluster1.png";
-                }else if(feature.cluster.length < 20){
-                    return base_url+"img/cluster2.png";
-                }else{
-                    return base_url+"img/cluster3.png";
+            offset_x: function(feature){
+                var x = 16;
+                if(feature.cluster && feature.cluster.length > 1){
+                    x = Math.min(feature.attributes.count, 10) + x;
                 }
+                return -x;
             },
+            offset_y: function(feature){
+                var y = 32;
+                if(feature.cluster && feature.cluster.length > 1){
+                    y = Math.min(feature.attributes.count, 10) + y - 16;
+                }
+                return -y;
+            },
+            thumbnail: findThumbnail(),
             number: function(feature){
                 if(feature.cluster.length > 1){
                     return feature.cluster.length;
@@ -207,7 +236,15 @@ MapViewer.prototype.initMap = function(){
                 return "";
             }
         }
-    });
+    }); 
+
+
+    var selectStyle = new OpenLayers.Style({
+        'externalGraphic': '${thumbnail}'
+    }, {
+        context: {
+            thumbnail: findThumbnail('_selected'),
+    }});
     
     var clusters = new OpenLayers.Layer.Vector("Clusters", {
         strategies: [
@@ -215,11 +252,8 @@ MapViewer.prototype.initMap = function(){
           new OpenLayers.Strategy.Cluster()
         ],
         styleMap: new OpenLayers.StyleMap({
-            "default": style,
-            "select": {
-                fillColor: "#8aeeef",
-                strokeColor: "#32a8a9"
-            }
+            "default": defaultStyle,
+            "select": selectStyle
         })
     });
     
@@ -233,20 +267,18 @@ MapViewer.prototype.initMap = function(){
     map.addControl(new OpenLayers.Control.Attribution());
     
     var feat;
-    
-    var select = new OpenLayers.Control.SelectFeature(clusters, {hover: true});
-    //console.log(select.id)
+    var select = new OpenLayers.Control.SelectFeature(clusters, {hover: false});
     this.select_id = select.id;
     map.addControl(select);
     select.activate();
     clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
-    clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)})
+    clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)});
     
     map.addLayers([osopenlayer, gpx, clusters]);
     
     if (!map.getCenter()) map.zoomToMaxExtent();
     return map;
-}
+};
 
 MapViewer.prototype.feature_select = function(event){
     //this.oTable.fnClearTable();
@@ -257,11 +289,11 @@ MapViewer.prototype.feature_select = function(event){
         $("#row-"+id).addClass("row_selected");
     }
     //this.enableRecordEdit();
-}
+};
 
 MapViewer.prototype.feature_unselect = function(event){
     $(".row_selected").removeClass('row_selected');
-}
+};
 
 MapViewer.prototype.enableFiltering = function(){
     $("#"+this.options["filter-elements"]["filter-btn"]).click($.proxy(function(){
