@@ -26,8 +26,6 @@
   </style>
 
   <script type="text/javascript">
-    // var _tmp; // TODO remove it - only for testing purposes;
-
     if (typeof console == "undefined") {
       this.console = {log: function() {}};
     }
@@ -45,11 +43,14 @@
   <script type="text/javascript">
     Proj4js.defs["EPSG:27700"] = "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs";
   </script>
-  <script type="text/javascript" src="js/ext/openlayers.js"></script>
+  <!-- Downloading remote OpenLayers API as in the local one was missing implementation of Marker layer -->
+  <!-- <script type="text/javascript" src="js/ext/openlayers.js"></script> -->
+  <script src="http://openlayers.org/api/OpenLayers.js"></script>
   <script type="text/javascript" src="js/ext/d3.js"></script>
   <script type="text/javascript" src="js/ext/bootstrap.js"></script>
   <script type="text/javascript" src="js/ext/jquery.swipebox.js"></script>
   <script type="text/javascript" src="js/ext/jPaginator.js"></script>
+  <script type="text/javascript" src="js/ext/openlayers-GPXExt.js"></script>
 
   <script type="text/javascript" src="js/former/jquery.former.accessibility.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.functions.js"></script>
@@ -69,6 +70,7 @@
   <script type="text/javascript" src="js/former/jquery.former.audio.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.capture.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.optionsform.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.animator.js"></script>
 </head>
 
 <body>
@@ -132,10 +134,19 @@
               </div>
               <div id="aria-notification" aria-live="assertive" tabindex="-1"></div>
             </div>
+
+            <!-- CONTENT FOR TRACK ANIMATOR -->
             <div id="animator-content"  style="display: none" aria-hidden="true">
-              <h1>Track Animator</h1>
               <div id="animator-map_canvas" style="background-color: #eee;"></div>
-              
+
+              <div class="row">
+                <div class="offset3 span6">
+                  <button disabled id="track-animate" class="track-animate btn btn-block" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
+                  <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn btn-block" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
+                </div>
+                
+              </div>
+
               <div class="row">
                 <div class="span12">
                   <div id="animator-myTable">
@@ -146,7 +157,7 @@
                           <th>Name</th>
                           <th>Description</th>
                           <th>Date</th>
-                          <th>Animate</th>
+                          <th>Number of POIs</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -157,7 +168,7 @@
                 </div>
               </div>
               
-            </div>
+            </div><!-- END CONTENT FOR TRACK ANIMATOR -->
           <!--/div-->
         </div><!--/span-->
       </div><!--/row-->

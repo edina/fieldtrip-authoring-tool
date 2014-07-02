@@ -223,9 +223,12 @@ MapViewer.prototype.initMap = function(){
         })
     });
     
+    gpxFormat = new OpenLayers.Format.GPXExt();
+
     var gpx = new OpenLayers.Layer.Vector("GPX", {
         style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 1},
-        projection: new OpenLayers.Projection("EPSG:4326")
+        projection: new OpenLayers.Projection("EPSG:4326"),
+        format: gpxFormat
     });
     
     map.addControl(new OpenLayers.Control.Navigation());
@@ -648,6 +651,8 @@ MapViewer.prototype.enableTrackAnimation = function(){
     row = "#"+this.options["table-elements"]["tableId"]+" tbody tr";
     $(document).off('click', '.track-animate');
     $(document).on('click', '.track-animate', $.proxy(this.onTrackAnimate, this));
+
+
 }
 
 MapViewer.prototype.enableRecordEdit = function(){
@@ -669,7 +674,7 @@ MapViewer.prototype.enableRecordDelete = function(){
     }, this));
 }
 
-MapViewer.prototype.displayGPX = function(record, data){
+MapViewer.prototype.displayGPX = function(record, data, callback){
     var style = {
         "strokeColor": "rgb(255, 255, 0)",
         "strokeWidth": 5,
@@ -697,12 +702,14 @@ MapViewer.prototype.displayGPX = function(record, data){
                     'externalProjection': new OpenLayers.Projection("EPSG:4326")
                 };
                 var layers = this.map.getLayersByName("GPX");
-                var gpx_format = new OpenLayers.Format.GPX(in_options);
+                var gpx_format = new OpenLayers.Format.GPXExt(in_options);
                 layers[0].removeAllFeatures();
                 layers[0].style = style;
                 layers[0].addFeatures(gpx_format.read(gpx_data))
                 // center to the middle of the whole GPX track
                 this.map.zoomToExtent(layers[0].getDataExtent());
+                if(callback !== undefined && typeof(callback) === "function")
+                    callback();
             }, this)
         });
     }

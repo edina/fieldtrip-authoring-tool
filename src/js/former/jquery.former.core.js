@@ -11,6 +11,7 @@
 ;(function($, window, document, undefined){
     
     var mapviewer; //mapviewer container
+    var track_animator;
     var that = this;
   //the default options in case of not being initialized
     var defaults = {
@@ -265,6 +266,17 @@
         $("#my-records").click($.proxy(function(){
             this.clearAll();
             this.showEditElements("map", false);
+// cleaning after track animation
+            if(this.track_animator !== undefined)
+            {
+                this.track_animator.destroy();
+            }
+            if($('#track-animate').css('display') === "none")
+            {
+                $('#track-animate').attr('disabled', 'disabled');
+                $('#track-pause-animate').hide();
+                $('#track-animate').show();
+            }
 
             // if container empty (no map in it), then re-render map
             if($('#map_canvas').children().size() == 0)
@@ -282,12 +294,15 @@
         }, this))
     }
 
+/**
+ * Enabling all features related to the Track Animator
+ */
     BuildFormer.prototype.enableTrackAnimator = function(){
-        var oauth = this.options.oauth;
-        // _tmp = this.mapviewer;
+        var oauth = this.options.oauth; // TODO probably not needed - could be removed
+        
         $("#track-animator").click($.proxy(function(){
-            this.clearAll();
-            this.showEditElements("animator", false);
+            this.clearAll(); // not sure
+            this.showEditElements("animator", false); // switching to Track Animator view
             
             // if container empty (no map in it), then re-render map to new container
             if($('#animator-map_canvas').children().size() == 0)
@@ -301,23 +316,34 @@
                 if($('#animator-map_canvas').css('max-width') === "none")
                     $('#animator-map_canvas').css('max-width','100%');
 
-                // copy table with track entries only
-                // $('#animator-myTable').empty();
                 var animatorTableTbodyHTML = '';
                 $('#myTable .track').each(function(index, el) {
-                    animatorTableTbodyHTML += '<tr id="rowek-'+el.id.split("-")[1]+'">';
+                    var trackId = $(el).attr('trackid');
+                    animatorTableTbodyHTML += '<tr id="rowek-'+el.id.split("-")[1]+'" trackid="'+trackId+'">';
+
                     $(el).find('td').each(function(index, el) {
                         if(index != 0 && index !=4)
                             animatorTableTbodyHTML += '<td>'+$(el).text()+'</td>';
                     });
-                    animatorTableTbodyHTML += '<td><button class="track-animate" title="" row="'+index+'" aria-label="Animate the track path">Animate</button></td>';
+
+                    var numberOfPOIs = $('#myTable').find('tr[trackid='+trackId+']').size()-1;
+                    animatorTableTbodyHTML += '<td>'+numberOfPOIs+'</td>';
                     animatorTableTbodyHTML += '</tr>';
                 });
-                // console.log(animatorTableTbodyHTML);
                 $('#animator-myTable tbody').html(animatorTableTbodyHTML);
 
                 $('#animator-myTable tbody > tr').on('click', $.proxy(function(e){
-                    // console.log(e);
+                    if(this.track_animator !== undefined)
+                        this.track_animator.destroy();
+                        
+                    if($('#track-animate').css('display') === "none")
+                    {
+                        $('#track-animate').attr('disabled', 'disabled');
+                        $('#track-pause-animate').hide();
+                        $('#track-animate').show();
+                    }
+                    // loading(true); // would be useful to add loading, but removing it later on could be tricky (as other events also controls the loading state...)
+                    $(e.currentTarget).parent().find('button.track-animate').hide();
                     $(e.currentTarget).parent().find('tr.row_selected')
                         .removeClass('row_selected')
                         .attr('aria-selected', false);
@@ -327,21 +353,68 @@
                         .attr('aria-selected', true)
                         .focus();
 
-                    // Center the map
+                    // Load and display selected GPX track.
                     for(var j=0; j<this.mapviewer.features.length; j++){
                         for(var i=0; i<this.mapviewer.features[j].cluster.length; i++){
                             if(this.mapviewer.features[j].cluster[i].data.id === parseInt(e.currentTarget.id.split("-")[1])){
                                 this.mapviewer.map.setCenter(this.mapviewer.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
-                                this.mapviewer.displayGPX(this.mapviewer.features[j].cluster[i].attributes.name, this.mapviewer.features[j].cluster[i].attributes)
-                                // this.mapviewer.map.zoomToExtent(this.mapviewer.map.getLayersByName('GPX')[0].getDataExtent());
+                                this.mapviewer.displayGPX(this.mapviewer.features[j].cluster[i].attributes.name, 
+                                    this.mapviewer.features[j].cluster[i].attributes, 
+                                    function(){
+                                        $('#track-animate').removeAttr('disabled');
+                                    }
+                                )
                                 break;
                             }
                         }
                     }
+
                 }, this));
+
+                $('#track-animate').on('click', $.proxy(function(e){
+                    e.preventDefault();
+                    
+                    var trackName = $('#animator-myTable').find('tr.row_selected td:first-child').text();
+
+                    this.track_animator = new TrackAnimator(this.mapviewer.map, trackName);
+                    
+                    this.track_animator.init();
+                    var POIs = Array();
+                    $('#myTable').find('tr.poi[trackid='+$('#animator-myTable').find('tr.row_selected').attr('trackid')+']').each(function(index, el) {
+                        POIs[index] = el;
+                    });
+
+                    for(var i in POIs)
+                    {
+                        var poiName = $(POIs[i]).attr('record-name');
+                        var poiLonLat = new OpenLayers.LonLat(
+                            this.mapviewer.map.getLayersByName("Clusters")[0].features[POIs[i].id.split("-")[1]].geometry.x, 
+                            this.mapviewer.map.getLayersByName("Clusters")[0].features[POIs[i].id.split("-")[1]].geometry.y);
+                        var poi = new POI(poiName, null, poiLonLat, this.track_animator.map);
+                        this.track_animator.walk.addPOI(poi);
+                    }
+                    this.track_animator.walk.playAnimation();
+
+                    $('#track-animate').hide();
+                    $('#track-pause-animate').show();
+                },this));
                 
-                // $(document).on('click', row, $.proxy(mapviewer.onRowSelected, this));
-                // $(document).on('row_selected', row, $.proxy(this.onRowSelected, this));
+                $('#track-pause-animate').on('click', $.proxy(function(e){
+                    e.preventDefault();
+                    if(this.track_animator.walk.animation.isPlaying)
+                    {
+                        $('#track-pause-animate').html('Resume <i class="icon-play"></i>');
+                        this.track_animator.walk.animation.isPlaying = false;
+                    }
+                    else
+                    {
+                        this.track_animator.walk.animation.isPlaying = true;
+                        $('#track-pause-animate').html('Pause Animation <i class="icon-pause"></i>');
+                        this.track_animator.walk.animation.anim();
+                    }
+                    
+                },this));
+
             }
 
 
