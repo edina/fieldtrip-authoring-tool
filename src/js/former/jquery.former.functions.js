@@ -102,112 +102,140 @@ function makeDialogButtons(dialog_id, former_id){
     };
 }
 
-function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
+
+function makeEditDialogButtons(dialogId, record, oTable, features, row){
     return buttons = {
         "Save": function(){
-            var rename = false;
-            if($("#"+dialog_id+" #form-text-1").val() != $("#"+dialog_id+" #form-text-hidden-1").val()){
-                rename = true;
-            }
-            for(var i=0; i<obj.fields.length; i++){
-                var fid = obj.fields[i].id;
-                var splits = obj.fields[i].id.split("-");
-                var new_value = getValueFromEditForm(splits[1], dialog_id, fid);
+            var dialogDiv = "#"+dialogId
 
-                // TODO: Temp fix for records that hasn't been copied into the dialog
-                if(new_value !== undefined){
-                    obj.fields[i].val = new_value;
+            // Get all the values from the form as records in an array
+            var formFields = $.map($('.fieldcontain', dialogDiv), function(div){
+                                    return getFieldFromEditForm(dialogId, div.id)
+                                });
+
+            // Create an inverse index for the actual fields in the record
+            var fieldsIndex = {};
+            for(var i = 0; i < record.fields.length; i++){
+                fieldsIndex[record.fields[i].id] = i;
+            }
+
+            // Update the record with the new values
+            for(var i=0; i<formFields.length; i++){
+                var j = fieldsIndex[formFields[i].id]
+                if(j === undefined){
+                    record.fields.push(formFields[i]);
+                }else{
+                    // Change only the val ?
+                    record.fields[j].val = formFields[i].val;
                 }
             }
-            obj.name = $("#"+dialog_id+" #form-text-1").val();
-            var data = JSON.stringify(obj);
-            loading(true);
-            if(rename == false){
-                $.ajax({
-                    url: '/'+version+'/pcapi/records/'+uri+'/'+encodeURIComponent(obj.name)+'/record.json',
-                    type: 'PUT',
-                    data: data,
-                    success: function(data) {
-                        description = findLabel(obj.fields, "Description")
-                        oTable.fnUpdate(description, $row.index(), 2);
-                        $row.focus();
-                        loading(false);
-                    }
-                });
+
+            // OLD name
+            var oldName = $("#form-text-hidden-1", dialogDiv).val();
+            // NEW name
+            record.name = $("#form-text-1", dialogDiv).val();
+
+            // If the name didn't change
+            if(oldName == record.name){
+                loading(true);
+                success = function(data){
+                    $row = $(row);
+                    description = findLabel(record.fields, "Description")
+                    oTable.fnUpdate(description, $row.index(), 2, false);
+                    $row.focus();
+                    loading(false);
+                    $("#"+dialogId).dialog('close');                    
+                };
+                error = function(data){
+                    console.warn('Error uploading the record')
+                    loading(false);
+                    $("#"+dialogId).dialog('close');
+                };
+                PCAPI.putRecord(record.name, record, success, error);
             }else{
-                //to be implemented in the next version
-                $.ajax({
-                    url: '/'+version+'/pcapi/records/'+uri+'/'+encodeURIComponent($("#"+dialog_id+" #form-text-hidden-1").val()),
-                    type: 'PUT',
-                    data: obj.name,
-                    success: function(data) {
-                        oTable.fnUpdate(obj.name, $row.index(), 1);
-                        $(".record-edit", $row).attr("title", obj.name);
-                        $(".record-delete", $row).attr("title", obj.name);
-                        $row.focus();
-                        loading(false);
-                    }
-                });
-                
-                /*$.ajax({
-                  url: '/pcapi/records/dropbox/'+oauth+'/'+encodeURIComponent($("#"+dialog_id+" #form-text-hidden-1").val()),
-                  type: 'DELETE',
-                  success: function() {
-                    $.ajax({
-                      url: '/pcapi/records/dropbox/'+oauth+'/'+encodeURIComponent(obj.name)+'/record.json',
-                      type: 'POST',
-                      data: data,
-                      success: function(data) {
-                        oTable.fnUpdate(obj.name, parseInt(row), 1);
-                        $("#row-"+row +" .record-edit").attr("title", obj.name+"-"+row);
-                        $("#row-"+row +" .record-delete").attr("title", obj.name+"-"+row);
-                        loading(false);
-                      }
-                    });
-                  }
-                });*/
+                loading(true);
+                success = function(data){
+                    $row = $(row);
+                    index = $row.index();
+                    description = findLabel(record.fields, "Description");
+
+                    // Update the table
+                    oTable.fnUpdate(record.name, index, 1, false);
+                    oTable.fnUpdate(description, index, 2, false);
+
+                    // Update the table elements
+                    $row.attr('record-name', record.name);
+                    $(".record-edit", $row).attr("title", record.name);
+                    $(".record-delete", $row).attr("title", record.name);
+                    $row.focus();
+                    // Update the feature in the map
+                    features[0].cluster[index].attributes = record;
+                    features[0].cluster[index].attributes.id = index;
+
+                    loading(false);
+                    $("#"+dialogId).dialog('close');
+                };
+                error = function(data){
+                    console.warn('Error uploading the record')
+                    loading(false);
+                    $("#"+dialogId).dialog('close');
+                };
+
+                PCAPI.renameRecord(oldName, record, success, error);                
             }
-            $("#"+dialog_id).dialog('close');
         },
         "Cancel": function(){
-            $("#"+dialog_id).dialog('close');
+            $("#"+dialogId).dialog('close');
         }
     };
 }
 
-function getValueFromEditForm(type, dialog_id, fid){
-  var updateValues = {
-    text: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input").val();
-    },
-    textarea: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" textarea").val();
-    },
-    checkbox: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input[type=checkbox]:checked").val();
-    },
-    radio: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input[type=radio]:checked").val();
-    },
-    select: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" select option:selected").val();
-    },
-    image: function(dialog_id, fid){
-      var splits = $("#"+dialog_id+" #"+fid+" img").attr("src").split("/");
-      return splits[splits.length-1];
-    },
-    audio: function(dialog_id, fid){
-      var splits = $("#"+dialog_id+" #"+fid+" a").attr("href").split("/");
-      return splits[splits.length-1];
-    },
-    range: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input").val();
-    },
-    track: function(dialog_id, fid){
-      return $("#"+dialog_id+" #"+fid+" input").val();
+/*
+*   Get a record from the edit form
+*   @param{String} dialogId div id of the dialog
+*   @param{String} fieldId: div id of the field
+*   @return{Object} return a field (id, val, label) 
+*/
+function getFieldFromEditForm(dialogId, fieldId){
+    var type;
+    var fieldDiv;
+    var val;
+    var field = {};
+    
+    type = fieldId.split("-")[1];
+    fieldDiv = "#" + dialogId + " #"+ fieldId; 
+    field.id = fieldId;
+    field.label = $("label", fieldDiv).text();
+
+    switch(type){
+        case 'text':
+        case 'range':
+        case 'track':
+            val = $("input", fieldDiv).val();
+            break;
+        case 'textarea': 
+            val = $("textarea", fieldDiv).val();
+            break;
+        case 'checkbox':
+            val = $("input[type=checkbox]:checked", fieldDiv).val();
+            break;
+        case 'radio':
+            val = $("input[type=radio]:checked", fieldDiv).val();
+            break;
+        case 'select':
+            val = $("select option:selected", fieldDiv).val();
+            break;
+        case 'image':
+            var splits = $("img", fieldDiv).attr("src").split("/");
+            val = splits[splits.length-1];
+            break;
+        case 'audio':
+            var splits = $("a", fieldDiv).attr("href").split("/");
+            val = splits[splits.length-1];
+            break;
     }
-  }
-  return updateValues[type](dialog_id, fid);
+    field.val = val;
+    return field;
 }
 
 function findIForFieldcontain(div_id, where, type){
