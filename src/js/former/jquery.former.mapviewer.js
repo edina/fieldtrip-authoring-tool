@@ -364,8 +364,17 @@ MapViewer.prototype.onFeatureAdded = function(evt){
 
 MapViewer.prototype.feature_select = function(evt){
     //$.each(event.featureselectedFeatures)
-    for(var i=0; i<evt.feature.cluster.length; ++i) {
-        $("#row-"+id).addClass("row_selected");
+    var feature = evt.feature;
+    var $table = $("#"+this.options["table-elements"]["tableDiv"]);
+
+    if(feature.cluster !== undefined){
+        for(var i=0; i<evt.feature.cluster.length; ++i) {
+            $("#row-"+id).addClass("row_selected");
+        }
+    }else{
+        var recordId = feature.attributes.geofenceId;
+        var $record = $('.record[recordid='+recordId+']', $table);
+        $record.trigger('row_selected');
     }
 };
 
@@ -832,14 +841,15 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
 }
 
 MapViewer.prototype.onRowSelected = function(event){
-    // Unselect the row selected and select the new and toggle aria-selected attribute
+    // Unselect the row selected, select the new and toggle aria-selected attribute
     this.oTable.$('tr.row_selected')
                .removeClass('row_selected')
                .attr('aria-selected', false);
 
     $(event.currentTarget).addClass('row_selected')
                 .attr('aria-selected', true)
-                .focus();
+                .focus()
+                .trigger('row_expanded');
 
     //Center the map
     var recordId = parseInt(event.currentTarget.id.split("-")[1]);
@@ -1017,12 +1027,12 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
             case 61: // Plus
             case 107: // Plus Numpad
                 $row = $('.row_selected', $table);
-                $row.trigger('row_expanded', true);
+                $row.trigger('row_expanded');
             break;
             case 173: // Minus
             case 109: // Minus Numpad
                 $row = $('.row_selected', $table);
-                $row.trigger('rowCollapsed', false);
+                $row.trigger('rowCollapsed');
             break;
             case 13: // Enter
                 $row = $('.row_selected', $table);
