@@ -255,7 +255,7 @@ MapViewer.prototype.initMap = function(){
     var clusters = new OpenLayers.Layer.Vector("Clusters", {
         strategies: [
           //new OpenLayers.Strategy.Fixed()
-          clustering
+          //clustering
         ],
         styleMap: new OpenLayers.StyleMap({
             "default": defaultStyle,
