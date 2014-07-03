@@ -360,21 +360,17 @@
                         .focus();
 
                     // Load and display selected GPX track.
-                    for(var j=0; j<this.mapviewer.features.length; j++){
-                        for(var i=0; i<this.mapviewer.features[j].cluster.length; i++){
-                            if(this.mapviewer.features[j].cluster[i].data.id === parseInt(e.currentTarget.id.split("-")[1])){
-                                this.mapviewer.map.setCenter(this.mapviewer.features[j].cluster[i].geometry.bounds.centerLonLat, 11);
-                                this.mapviewer.displayGPX(this.mapviewer.features[j].cluster[i].attributes.name, 
-                                    this.mapviewer.features[j].cluster[i].attributes, 
-                                    function(){
-                                        $('#track-animate').removeAttr('disabled');
-                                    }
-                                )
-                                break;
-                            }
-                        }
-                    }
+                    var recordId = parseInt(e.currentTarget.id.split("-")[1]);
+                    var feature = findFeaturesByAttribute(this.mapviewer.features, 'id', recordId);
 
+                    if(feature !== null){
+                        this.mapviewer.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
+                        this.mapviewer.displayGPX(feature.attributes.name,
+                                                  feature.attributes,
+                                                  function(){
+                                                        $('#track-animate').removeAttr('disabled');
+                                                     });
+                    }
                 }, this));
 
                 $('#track-animate').on('click', $.proxy(function(e){
