@@ -25,7 +25,8 @@
         "d3": "3.3.11",
         "jPaginator": "https://github.com/remylab/jpaginator/archive/master.zip",
         "snippet": "http://www.steamdev.com/snippet/js/jquery.snippet.min.js",
-        "swipebox": "1.2.9"
+        "swipebox": "1.2.9",
+        "audiojs": "*"
     },
     "dependency_locations": {
         "snippet": [
@@ -45,6 +46,11 @@
             "src/js/jquery.swipebox.js",
             "src/css/swipebox.css",
             "src/img"
+        ],
+        "audiojs": [
+            "audiojs/audio.min.js",
+            "audiojs/audiojs.swf",
+            "audiojs/player-graphics.gif"
         ]
     }
 }

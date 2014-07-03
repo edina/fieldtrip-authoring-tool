@@ -286,3 +286,12 @@ hr.style-one {
   width: 90%;
   margin-left: 95px;
 }
+
+
+.audiojs {
+    width: 200px;
+}
+
+.audiojs .scrubber {
+  width: 140px;
+}

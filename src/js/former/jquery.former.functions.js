@@ -225,7 +225,7 @@ function getFieldFromEditForm(dialogId, fieldId){
             val = splits[splits.length-1];
             break;
         case 'audio':
-            var splits = $("a", fieldDiv).attr("href").split("/");
+            var splits = $("audio", fieldDiv).attr("src").split("/");
             val = splits[splits.length-1];
             break;
     }

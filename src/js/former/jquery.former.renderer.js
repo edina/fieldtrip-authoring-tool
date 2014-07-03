@@ -66,7 +66,17 @@ RecordRenderer.prototype.renderType = {
   },
   audio: function(dialog, el_id, obj, name, path){
     var splits = path.split("/");
-    $("#"+obj.id).html('<a href="/'+splits[0]+'/pcapi/records/'+splits[1]+'/'+splits[2]+'/'+name+'/'+obj.val+'">'+obj.val+'</a>')
+    var fieldId = "#"+obj.id;
+    var fieldAudio = fieldId + " audio";
+    var audioFile = '/'+splits[0]+'/pcapi/records/'+splits[1]+'/'+splits[2]+'/'+name+'/'+obj.val;
+    var htmlObj =  '<audio src="'+audioFile+'" preload="auto" />\
+                    <script>\
+                      audiojs.create($("'+fieldAudio+'"),\
+                                     { imageLocation: "css/ext/player-graphics.gif",\
+                                       swfLocation: "css/ext/audiojs.swf"\
+                                     });\
+                    </script>';
+    $(fieldId).html(htmlObj);
   },
   track: function(){
     return "";
