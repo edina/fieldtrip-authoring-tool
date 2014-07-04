@@ -295,3 +295,26 @@ hr.style-one {
 .audiojs .scrubber {
   width: 140px;
 }
+
+.olSpatialMemoriesToolBar{
+  margin: 0 5px 0 0;
+  right: 0px;
+  top: 0px;
+  width: 35px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.olSpatialMemoriesToolBar div{
+  background-image: url("../img/addmarker.png");
+  background-repeat: no-repeat;
+  width: 35px;
+  height: 50px;
+}
+
+.olSpatialMemoriesToolBar .olControlDrawFeatureItemInactive {
+    background-position: 0px 0px;
+}
+.olSpatialMemoriesToolBar .olControlDrawFeatureItemActive {
+    background-position: 0px 0px;
+}

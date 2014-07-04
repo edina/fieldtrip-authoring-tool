@@ -242,7 +242,6 @@ MapViewer.prototype.initMap = function(){
         }
     }); 
 
-
     var selectStyle = new OpenLayers.Style({
         'externalGraphic': '${thumbnail}'
     }, {
@@ -263,49 +262,72 @@ MapViewer.prototype.initMap = function(){
         })
     });
     
-    gpxFormat = new OpenLayers.Format.GPXExt();
-
     var gpx = new OpenLayers.Layer.Vector("GPX", {
         style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 1},
         projection: new OpenLayers.Projection("EPSG:4326"),
-        format: gpxFormat
+        format: new OpenLayers.Format.GPXExt()
     });
-    
-    map.addControl(new OpenLayers.Control.Navigation());
-    map.addControl(new OpenLayers.Control.PanZoom());
-    map.addControl(new OpenLayers.Control.Attribution());
-    
+
     var select = new OpenLayers.Control.SelectFeature(clusters, {hover: false});
     this.select_id = select.id;
-    map.addControl(select);
-    select.activate();
-    clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
-    clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)});
-    
-    map.addLayers([osopenlayer, gpx, clusters]);
+
+    var panel = new OpenLayers.Control.Panel({
+                displayClass: "olSpatialMemoriesToolBar"
+            });
+    var drawControl = new OpenLayers.Control.DrawFeature(clusters,
+                                                  OpenLayers.Handler.Point, 
+                                                  {
+                                                    persist: true,
+                                                  });
 
     var snap = new OpenLayers.Control.Snapping({
         layer: clusters,
         targets: [gpx],
         greedy: false
     });
-    snap.activate();
+    
 
-    // Add panel
-    var panel = new OpenLayers.Control.Panel({
-                displayClass: "olControlEditingToolbar"
-            });
-    var draw = new OpenLayers.Control.DrawFeature(clusters,
-                                                  OpenLayers.Handler.Point, 
-                                                  {persist: true});
-    var navigation = new OpenLayers.Control.Navigation({title: "Navigate"});
-    panel.addControls([navigation, draw]);
+    // Add Layers
+    map.addLayers([osopenlayer, gpx, clusters]);
+
+    // Add controls
+    panel.addControls([drawControl]);
+    map.addControl(new OpenLayers.Control.Navigation());
+    map.addControl(new OpenLayers.Control.PanZoom());
+    map.addControl(new OpenLayers.Control.Attribution());
+    map.addControl(select);
     map.addControl(panel);
-    draw.events.register("featureadded", null, $.proxy(this.onFeatureAdded, this));
 
-    if (!map.getCenter()) map.zoomToMaxExtent();
+    // Activate controls
+    select.activate();
+    snap.activate();
+    panel.deactivate();
+
+    //Register events
+    gpx.events.register("featuresadded", gpx, this.onGPXAdded);
+    gpx.events.register("featuresremoved", gpx, this.onGPXRemoved);
+    drawControl.events.register("featureadded", null, $.proxy(this.onFeatureAdded, this));
+    clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
+    clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)});
+    
+    if (!map.getCenter()){
+        map.zoomToMaxExtent();
+    }
     return map;
 };
+
+MapViewer.prototype.onGPXAdded = function(evt){
+    var gpx = evt.object;
+    var toolbar = gpx.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
+    toolbar.activate();
+};
+
+MapViewer.prototype.onGPXRemoved = function(evt){
+    var gpx = evt.object;
+    var toolbar = gpx.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
+    toolbar.deactivate();
+};
+
 
 MapViewer.prototype.onFeatureAdded = function(evt){
     var mapviewer = this;
@@ -814,6 +836,8 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
     }
 
     if(gpx !== undefined){
+        var gpxLayer = this.map.getLayersByName("GPX")[0];
+        gpxLayer.removeAllFeatures();
         $.ajax({
             type: "GET",
             url: this.buildUrl('records', '/'+record+'/'+ gpx),
@@ -823,16 +847,13 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
                     'internalProjection': this.map.baseLayer.projection,
                     'externalProjection': new OpenLayers.Projection("EPSG:4326")
                 };
-                var layers = this.map.getLayersByName("GPX");
                 var gpx_format = new OpenLayers.Format.GPXExt(in_options);
                 var gpx_features = gpx_format.read(gpx_data);
                 gpx_features[0].attributes.trackId = trackId;
-
-                layers[0].removeAllFeatures();
-                layers[0].style = style;
-                layers[0].addFeatures(gpx_features);
+                gpxLayer.style = style;
+                gpxLayer.addFeatures(gpx_features);
                 // center to the middle of the whole GPX track
-                this.map.zoomToExtent(layers[0].getDataExtent());
+                this.map.zoomToExtent(gpxLayer.getDataExtent());
                 if(callback !== undefined && typeof(callback) === "function")
                     callback();
             }, this)
