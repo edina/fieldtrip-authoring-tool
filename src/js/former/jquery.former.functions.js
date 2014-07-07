@@ -159,7 +159,6 @@ function makeEditDialogButtons(dialogId, record, mapviewer, features, row, callb
                     $row.attr('record-name', record.name);
                     $(".record-edit", $row).attr("title", record.name);
                     $(".record-delete", $row).attr("title", record.name);
-                    $row.focus();
                 }
                 // Update the feature in the map
                 //features[0].cluster[index].attributes = record;

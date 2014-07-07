@@ -363,6 +363,10 @@ MapViewer.prototype.onFeatureAdded = function(evt){
         if(!save){
             feature.state = OpenLayers.State.DELETE;
 
+        }else{
+            var $row = $('.record[recordid='+record.geofenceId+']');
+            $row.trigger('row_expanded')
+                .trigger('row_selected');
         }
         drawControl.deactivate();
         layer.redraw();
@@ -399,7 +403,8 @@ MapViewer.prototype.feature_select = function(evt){
     }else{
         var recordId = feature.attributes.geofenceId;
         var $record = $('.record[recordid='+recordId+']', $table);
-        $record.trigger('row_selected');
+        $record.trigger('row_expanded')
+               .trigger('row_selected');
     }
 };
 
@@ -661,6 +666,7 @@ MapViewer.prototype.initTable = function(table_data){
                      .attr("trackid", aData.trackId)
                      .attr("recordid", aData.recordId)
                      .attr("record-name", aData.name)
+                     .attr("data-sort", aData.trackId)
                      .addClass(aData.styles.join(' '));
             },
             "oLanguage": {
@@ -864,23 +870,40 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
     }
 }
 
-MapViewer.prototype.onRowSelected = function(event){
-    // Unselect the row selected, select the new and toggle aria-selected attribute
-    this.oTable.$('tr.row_selected')
-               .removeClass('row_selected')
-               .attr('aria-selected', false);
+MapViewer.prototype.onRowSelected = function(evt, options){
+    var options = options || {};
+    var $row = $(evt.currentTarget).closest('.record');
+    var layer = this.map.getLayersByName("Clusters")[0];
+    var selectControl = layer.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
 
-    $(event.currentTarget).addClass('row_selected')
-                .attr('aria-selected', true)
-                .focus()
-                .trigger('row_expanded');
+    $row.siblings()
+        .removeClass('row_selected')
+        .attr('aria-selected', false);
+
+    $row.addClass('row_selected')
+        .attr('aria-selected', true);
+
+    // When we are using the keyboard navigation it is important focus on the selected row
+    // but not when we are using the map 
+    if(options.focus === true){
+        $row.focus();
+    }
 
     //Center the map
-    var recordId = parseInt(event.currentTarget.id.split("-")[1]);
-    var feature = findFeaturesByAttribute(this.features, 'id', recordId);
+    var recordId = $row.attr('recordid');
+    var trackId =  $row.attr('trackid');
+    var feature = findFeaturesByAttribute(layer.features, 'geofenceId', recordId);
 
     if(feature !== null){
-        this.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
+        // If it's not selected in the map
+        if(layer.selectedFeatures.indexOf(feature) < 0){
+            selectControl.unselectAll();
+            selectControl.select(feature);
+        }
+
+        if(!feature.onScreen()){
+            this.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
+        }
         this.displayGPX(feature.attributes.name, feature.attributes);
     }
 };
@@ -890,73 +913,63 @@ MapViewer.prototype.onRowSelected = function(event){
     @returns a jquery element
 */
 MapViewer.prototype._findClosestTrack = function(node){
-    // Find the closest record
-    
-    $node = $(node);
-
-    if($node.is("td")){
-        $row = $node.parent('.record');
-    }else{
-        $row = $node;
-    }
-
-    trackid = $row.attr('trackid');
+    // Find the closest record    
+    var $row = $(node).closest('.record');
 
     // Find the closest track
     if($row.is('.record.track')){
         $track = $row;
     }else{
+        var trackid = $row.attr('trackid');
         $track = $row.siblings('.record.track[trackid="' + trackid + '"]');
     }
 
     return $track;
-}
+};
 
 MapViewer.prototype.onRowExpanded = function(evt){
     var ariaMsg = '';
  
-    $track = this._findClosestTrack(evt.currentTarget)
+    var $track = this._findClosestTrack(evt.currentTarget);
+    var trackName = $track.attr('record-name');
+    var trackid = $track.attr('trackid');
 
-    trackName = $track.attr('record-name');
+    // Collapse any other track expanded
+    $track.siblings('.track')
+          .removeClass('expanded')
+          .addClass('collapsed')
+          .attr('aria-expanded', 'false');     
 
-    if(!$track.is('.expanded')){
-        // Collapse any other track expanded
-        $track.siblings('.track')
-              .removeClass('expanded')
-              .addClass('collapsed')
-              .attr('aria-expanded', 'false');     
+    $track.siblings('.poi:not([trackid="' + trackid + '"])')
+          .addClass('hidden');
 
-        $track.siblings('.poi:not([trackid="' + trackid + '"])')
-              .addClass('hidden');
+    // Expand this track
+    $track.removeClass('collapsed')
+          .addClass('expanded')
+          .attr('aria-expanded', 'true');
 
-        // Expand this track
-        $track.removeClass('collapsed')
-              .addClass('expanded')
-              .attr('aria-expanded', 'true');
+    $pois = $track.siblings('[trackid="' + trackid + '"]');
+    $pois.removeClass('hidden');
 
-        $pois = $track.siblings('[trackid="' + trackid + '"]');
-        $pois.removeClass('hidden');
-    
-        switch(n = $pois.length){
-            case 0:
-                ariaMsg = "No memories associated to " + trackName + " track.";
-            break;
-            case 1:
-                ariaMsg = "Showing " + n + " memory for " + trackName + " track.";
-            break;
-            default:
-                ariaMsg = "Showing " + n + " memories for " + trackName + " track.";
-            break;
-        }
-        aria.notify(ariaMsg);
+    switch(n = $pois.length){
+        case 0:
+            ariaMsg = "No memories associated to " + trackName + " track.";
+        break;
+        case 1:
+            ariaMsg = "Showing " + n + " memory for " + trackName + " track.";
+        break;
+        default:
+            ariaMsg = "Showing " + n + " memories for " + trackName + " track.";
+        break;
     }
+    aria.notify(ariaMsg);
 }
 
 MapViewer.prototype.onRowCollapsed = function(evt){
     // If click in the control find the row
-    $track = this._findClosestTrack(evt.currentTarget)
-
-    trackName = $track.attr('record-name');
+    var $track = this._findClosestTrack(evt.target);
+    var trackid = $track.attr('trackid');
+    var trackName = $track.attr('record-name');
 
     if($track.is('.expanded')){
         // Collapse it
@@ -964,9 +977,11 @@ MapViewer.prototype.onRowCollapsed = function(evt){
               .addClass('collapsed');
 
         // Collapse children
-        $track.siblings('[trackid="' + trackid + '"]')
-              .addClass('hidden'); 
-        aria.notify("Hiding memories for " + trackName + " track.")
+        $track.siblings('.poi[trackid=' + trackid + ']')
+              .addClass('hidden');
+        aria.notify("Hiding memories for " + trackName + " track.");
+
+        $track.trigger('row_selected', {focus: true});
     }
 }
 
@@ -1031,7 +1046,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                     if(!$row.is(':last-child')){
                         $row.nextAll('.record:not( .hidden)')
                             .first()
-                            .trigger('row_selected');
+                            .trigger('row_selected', {focus: true});
                     }
                 }
             break;
@@ -1044,7 +1059,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
                     if($row.index() > 0){
                         $row.prevAll('.record:not( .hidden)')
                             .first()
-                            .trigger('row_selected');
+                            .trigger('row_selected', {focus: true});
                     }
                 }
             break;
