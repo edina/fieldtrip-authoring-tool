@@ -225,10 +225,12 @@ hr.style-one {
 
 .record.track.collapsed td:first-child{
   background: url('img/details_open.png') no-repeat scroll center center transparent;
+  width: 40px;
 }
 
 .record.track.expanded td:first-child{
   background: url('img/details_close.png') no-repeat scroll center center transparent;
+  width: 40px;
 }
 
 .record.poi.hidden{
@@ -317,4 +319,8 @@ hr.style-one {
 }
 .olSpatialMemoriesToolBar .olControlDrawFeatureItemActive {
     background-position: 0px 0px;
+}
+
+tr.record{
+  cursor: pointer;
 }
