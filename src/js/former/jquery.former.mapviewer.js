@@ -275,10 +275,7 @@ MapViewer.prototype.initMap = function(){
                 displayClass: "olSpatialMemoriesToolBar"
             });
     var drawControl = new OpenLayers.Control.DrawFeature(clusters,
-                                                  OpenLayers.Handler.Point, 
-                                                  {
-                                                    persist: true,
-                                                  });
+                                                         OpenLayers.Handler.Point);
 
     var snap = new OpenLayers.Control.Snapping({
         layer: clusters,
@@ -306,7 +303,7 @@ MapViewer.prototype.initMap = function(){
     //Register events
     gpx.events.register("featuresadded", gpx, this.onGPXAdded);
     gpx.events.register("featuresremoved", gpx, this.onGPXRemoved);
-    drawControl.events.register("featureadded", null, $.proxy(this.onFeatureAdded, this));
+    drawControl.events.register("featureadded", drawControl, $.proxy(this.onFeatureAdded, this));
     clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
     clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)});
     
@@ -333,6 +330,7 @@ MapViewer.prototype.onFeatureAdded = function(evt){
     var mapviewer = this;
     var feature = evt.feature;
     var layer = this.map.getLayersByName("Clusters")[0];
+    var drawControl = layer.map.getControlsByClass('OpenLayers.Control.DrawFeature')[0];
     var url = "editors/default/text.edtr";
     var record = {};
     var title = {
@@ -361,6 +359,15 @@ MapViewer.prototype.onFeatureAdded = function(evt){
     feature.attributes = record;
     feature.data = record;
 
+    var dialogCallback= function(save){
+        if(!save){
+            feature.state = OpenLayers.State.DELETE;
+
+        }
+        drawControl.deactivate();
+        layer.redraw();
+    };
+
     $.ajax({
         type: "GET",
         url: url,
@@ -372,16 +379,12 @@ MapViewer.prototype.onFeatureAdded = function(evt){
 
             var recorder = new RecordRenderer(path, record.name, record.editor, 
                                               'edit-record-dialog', record.fields);
-            var buttons = makeEditDialogButtons('edit-record-dialog', record, mapviewer, features, null);
+            var buttons = makeEditDialogButtons('edit-record-dialog', record, mapviewer, features, null, dialogCallback);
 
             makeAlertWindow(edit_data, "Edit", 300, 400, "edit-record-dialog", 1000, "middle", buttons);
             recorder.render();
         }
     });
-
-    // Release the draw control
-    evt.object.deactivate();
-    layer.redraw();
 };
 
 MapViewer.prototype.feature_select = function(evt){
