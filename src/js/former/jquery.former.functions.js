@@ -103,7 +103,11 @@ function makeDialogButtons(dialog_id, former_id){
 }
 
 
-function makeEditDialogButtons(dialogId, record, mapviewer, features, row){
+function makeEditDialogButtons(dialogId, record, mapviewer, features, row, callback){
+    if(typeof(callback) !== 'function'){
+        callback = function(){};
+    }
+
     return buttons = {
         "Save": function(){
             var dialogDiv = "#"+dialogId;
@@ -163,11 +167,13 @@ function makeEditDialogButtons(dialogId, record, mapviewer, features, row){
 
                 loading(false);
                 $("#"+dialogId).dialog('close');
+                callback(true);
             };
             var error = function(data){
                 console.warn('Error uploading the record')
                 loading(false);
                 $("#"+dialogId).dialog('close');
+                callback(false);
             };
 
             // If record is new or the name didn't change 
@@ -181,6 +187,7 @@ function makeEditDialogButtons(dialogId, record, mapviewer, features, row){
         },
         "Cancel": function(){
             $("#"+dialogId).dialog('close');
+            callback(false);
         }
     };
 }
@@ -550,6 +557,31 @@ function touchScroll(selector) {
             this.scrollLeft = scrollStartPosX - e.originalEvent.touches[0].pageX;
         });
     }
+}
+
+/* polyfill for old IE */
+if ( !Date.prototype.toISOString ) {
+  ( function() {
+    
+    function pad(number) {
+      if ( number < 10 ) {
+        return '0' + number;
+      }
+      return number;
+    }
+ 
+    Date.prototype.toISOString = function() {
+      return this.getUTCFullYear() +
+        '-' + pad( this.getUTCMonth() + 1 ) +
+        '-' + pad( this.getUTCDate() ) +
+        'T' + pad( this.getUTCHours() ) +
+        ':' + pad( this.getUTCMinutes() ) +
+        ':' + pad( this.getUTCSeconds() ) +
+        '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+        'Z';
+    };
+  
+  }() );
 }
 
 function imgError(image) {
