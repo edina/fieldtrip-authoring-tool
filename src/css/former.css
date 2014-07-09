@@ -321,6 +321,14 @@ hr.style-one {
     background-position: 0px 0px;
 }
 
+.olSpatialMemoriesToolBar .olSpatialMemoriesDrawBoxItemInactive {
+    background-image: url("../img/locationmarker.png");
+}
+.olSpatialMemoriesToolBar .olSpatialMemoriesDrawBoxItemActive {
+    background-image: url("../img/locationmarker_active.png");
+}
+
+
 tr.record{
   cursor: pointer;
 }

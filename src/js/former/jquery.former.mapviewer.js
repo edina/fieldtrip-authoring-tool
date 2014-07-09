@@ -261,7 +261,24 @@ MapViewer.prototype.initMap = function(){
             "select": selectStyle
         })
     });
-    
+
+    var locationLayer = new OpenLayers.Layer.Vector("Location", {visible: false});
+    var drawLocation = new OpenLayers.Control.DrawFeature(locationLayer,
+                                                          OpenLayers.Handler.RegularPolygon,
+                                                          { 
+                                                            displayClass: "olSpatialMemoriesDrawBox",
+                                                            handlerOptions: { 
+                                                                              sides: 4,
+                                                                              irregular:true,
+                                                                              persistent: false
+                                                                            },
+                                                            type: OpenLayers.Control.TYPE_TOGGLE,
+                                                            eventListeners: {
+                                                                                'activate': this.onDrawLocationActivate,
+                                                                                'deactivate': this.onDrawLocationDeactivate
+                                                                            }
+                                                          });
+
     var gpx = new OpenLayers.Layer.Vector("GPX", {
         style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 1},
         projection: new OpenLayers.Projection("EPSG:4326"),
@@ -285,10 +302,10 @@ MapViewer.prototype.initMap = function(){
     
 
     // Add Layers
-    map.addLayers([osopenlayer, gpx, clusters]);
+    map.addLayers([osopenlayer, gpx, clusters, locationLayer]);
 
     // Add controls
-    panel.addControls([drawControl]);
+    panel.addControls([drawControl, drawLocation]);
     map.addControl(new OpenLayers.Control.Navigation());
     map.addControl(new OpenLayers.Control.PanZoom());
     map.addControl(new OpenLayers.Control.Attribution());
@@ -306,7 +323,15 @@ MapViewer.prototype.initMap = function(){
     drawControl.events.register("featureadded", drawControl, $.proxy(this.onFeatureAdded, this));
     clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
     clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)});
-    
+    drawLocation.events.register("featureadded", drawLocation, $.proxy(this.onLocationAdded, this));
+    drawLocation.handler.callbacks.create = function(data) {
+        // Clear any feature befor adding the new one
+        if(locationLayer.features.length > 0)
+        {
+            locationLayer.removeAllFeatures();
+        }
+    };
+
     if (!map.getCenter()){
         map.zoomToMaxExtent();
     }
@@ -325,6 +350,78 @@ MapViewer.prototype.onGPXRemoved = function(evt){
     toolbar.deactivate();
 };
 
+
+MapViewer.prototype.onLocationAdded = function(evt){
+    var layer = this.map.getLayersByName("Location")[0];
+    var feature = evt.feature;
+    var locationControl = layer.map.getControlsByClass('OpenLayers.Control.DrawFeature')[1];
+    var ws = 'http://nominatim.openstreetmap.org/reverse';
+    var query = '?format={0}&lat={1}&lon={2}&zoom={3}&addressdetails=1';
+    var bbox =  feature.geometry.getBounds()
+                       .transform(new OpenLayers.Projection("EPSG:27700"), new OpenLayers.Projection("EPSG:4326")); 
+    var zoom = 18;
+
+    var tile_0 = longlat2tile(bbox.left, bbox.top, zoom);
+    var tile_1 = longlat2tile(bbox.right, bbox.bottom, zoom);
+    
+    var tiles = [];
+    // Generate the url for requesting the information of each tile.
+    for(var x = tile_0.x; x<=tile_1.x; x++){
+        for(var y = tile_0.y; y<=tile_1.y; y++){
+            var center = tile2longlat(y + 0.5, x + 0.5, zoom);
+            var url = ws + query.format('json', center.lat, center.lon, zoom);
+            var tile = {x: x, y: y, url: url};
+            tiles.push(tile);
+        }
+    }
+
+    // Retrieve the reverse geocoding of a tile location and process it.
+    var reverseGeocoding= function(tile){
+        var promise;
+        var request = $.get(tile.url);
+
+        promise = request.pipe(function(data){
+                    var address = data.address;
+                    var location = {};
+                    var value, name;
+                    if(address.road !== undefined){
+                        value = '{0}, {1}'.format(address.road, address.suburb);
+                    }else{
+                        value = address.suburb;
+                    }
+                    name = '{0}-{1}'.format(tile.x, tile.y);
+                    location[name] = value;
+                    return location;
+        });
+        return promise;
+    };
+
+    // request the reverseGeocoding of all tiles
+    loading(true);
+    var promises = $.map(tiles, reverseGeocoding);
+    var processTiles = $.when.apply($, promises);
+
+    // When we ALL the request have finished join the results  
+    var locations = {};
+    processTiles.done(function(){
+        for(var i=0; i<arguments.length; i++){
+            $.extend(locations, arguments[i]);
+        }
+        PCAPI.putJSON('fs', 'locations', 'locations.js', locations);
+        loading(false);
+    });
+};
+
+
+MapViewer.prototype.onDrawLocationActivate = function(evt){
+    var locationLayer = evt.object.layer;
+    locationLayer.setVisibility(true);
+};
+
+MapViewer.prototype.onDrawLocationDeactivate = function(evt){
+    var locationLayer = evt.object.layer;
+    locationLayer.setVisibility(false);
+};
 
 MapViewer.prototype.onFeatureAdded = function(evt){
     var mapviewer = this;
@@ -649,15 +746,21 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
 
 
 MapViewer.prototype.initTable = function(table_data){
-    var header_cols = [{"mData": "control"}, {"mData": "name"}, {"mData": "description"}, {"mData": "date"}, {"mData": "buttons"}];
+    var header_cols = [{"mData": "control", "bSortable": false}, 
+                       {"mData": "name", "bSortable": false},
+                       {"mData": "description", "bSortable": false},
+                       {"mData": "date", "bSortable": false},
+                       {"mData": "buttons", "bSortable": false}];
     if(this.oTable == undefined){
         this.oTable = $("#"+this.options["table-elements"]["tableId"]).dataTable({
             "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
             "sPaginationType": "bootstrap",
             "bPaginate": false,
-            "bSort": false,
+            "bSort": true,
             "aoColumns": header_cols,
             "aaData": table_data,
+            "bSortClasses": false,
+            "aaSorting": [[ 0, "asc" ]],
             "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
                 $nRow = $(nRow);
                 $nRow.attr("id", "row-" + aData.id)
@@ -666,8 +769,12 @@ MapViewer.prototype.initTable = function(table_data){
                      .attr("trackid", aData.trackId)
                      .attr("recordid", aData.recordId)
                      .attr("record-name", aData.name)
-                     .attr("data-sort", aData.trackId)
                      .addClass(aData.styles.join(' '));
+
+                //Add html5 data-sort attribute
+                $nRow.children()
+                     .first()
+                     .attr("data-order", aData.trackId + '_' + aData.recordId);
             },
             "oLanguage": {
                 "sInfo": "",

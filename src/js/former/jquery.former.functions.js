@@ -583,6 +583,53 @@ if ( !Date.prototype.toISOString ) {
   }() );
 }
 
+/*
+    Add formated data method to String
+    Use: "{0} {1}".format('hello', 'world')
+*/
+
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) { 
+        return typeof args[number] != 'undefined' ? args[number] : match;
+        });
+    };
+}
+
+/* Tile to Long/Lat functions from the openstreetmap wiki */
+
+function longlat2tile(lon, lat, zoom){
+    var tile = {};
+    tile.x = lat2tile(lat, zoom);
+    tile.y = long2tile(lon, zoom);
+    return tile;
+}
+
+function tile2longlat(x, y, zoom){
+    var point = {};
+    point.lon = tile2long(x, zoom);
+    point.lat =tile2lat(y, zoom);
+    return point;
+}
+
+function long2tile(lon,zoom) {
+    return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
+}
+
+function lat2tile(lat, zoom)  { 
+    return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); 
+}
+
+function tile2long(x, zoom) {
+    return ((x / Math.pow(2,zoom) * 360) - 180);
+}
+
+function tile2lat(y, zoom) {
+    var n=Math.PI-2*Math.PI*y/Math.pow(2,zoom);
+    return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+}
+
 function imgError(image) {
     image.onerror = "";
     image.src = image.src.replace("_thumb.", ".");
