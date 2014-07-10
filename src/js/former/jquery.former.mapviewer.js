@@ -132,7 +132,7 @@ MapViewer.prototype.destroyMap = function(){
 MapViewer.prototype.initMap = function(){
     var bounds = new OpenLayers.Bounds (0, 0, 700000, 1300000);
     var apikey = "c7d4d08f1734c6e2ea97e554cf67eab709ff0bce6e2f4064ddc67a49";
-    var cache = "true"; 
+    var cache = "true";
     var attr = "Contains Ordnance Survey data. (c) Crown copyright and database right 20XX. Data provided by Digimap OpenStream, an EDINA, University of Edinburgh Service.";
     var os_options = {
         token: apikey,
@@ -141,18 +141,18 @@ MapViewer.prototype.initMap = function(){
         cache: cache
     };
 
-    var map = new OpenLayers.Map(this.mapdiv, {controls: [], 
+    var map = new OpenLayers.Map(this.mapdiv, {controls: [],
         projection: new OpenLayers.Projection("EPSG:27700"),
-        units: "m", 
+        units: "m",
         maxExtent: bounds,
         resolutions: [1763.889,352.778,176.389,88.194,35.278,26.458,17.639,8.819,3.528,1.764,0.882,0.441]
     });
 
-    var osopenlayer = new OpenLayers.Layer.WMS( 
+    var osopenlayer = new OpenLayers.Layer.WMS(
         "Edina OS OpenData WMS","http://openstream.edina.ac.uk/openstream/wms",
-        os_options 
+        os_options
         /*{attribution: attr}*/);
-    
+
     var base_url = this.base_url;
     var findThumbnail = function(param){
         var suffix = param || '';
@@ -240,7 +240,7 @@ MapViewer.prototype.initMap = function(){
                 return "";
             }
         }
-    }); 
+    });
 
     var selectStyle = new OpenLayers.Style({
         'externalGraphic': '${thumbnail}'
@@ -248,7 +248,7 @@ MapViewer.prototype.initMap = function(){
         context: {
             thumbnail: findThumbnail('_selected'),
     }});
-    
+
     var clustering = new OpenLayers.Strategy.Cluster();
 
     var clusters = new OpenLayers.Layer.Vector("Clusters", {
@@ -261,23 +261,6 @@ MapViewer.prototype.initMap = function(){
             "select": selectStyle
         })
     });
-
-    var locationLayer = new OpenLayers.Layer.Vector("Location", {visible: false});
-    var drawLocation = new OpenLayers.Control.DrawFeature(locationLayer,
-                                                          OpenLayers.Handler.RegularPolygon,
-                                                          { 
-                                                            displayClass: "olSpatialMemoriesDrawBox",
-                                                            handlerOptions: { 
-                                                                              sides: 4,
-                                                                              irregular:true,
-                                                                              persistent: false
-                                                                            },
-                                                            type: OpenLayers.Control.TYPE_TOGGLE,
-                                                            eventListeners: {
-                                                                                'activate': this.onDrawLocationActivate,
-                                                                                'deactivate': this.onDrawLocationDeactivate
-                                                                            }
-                                                          });
 
     var gpx = new OpenLayers.Layer.Vector("GPX", {
         style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 1},
@@ -299,13 +282,13 @@ MapViewer.prototype.initMap = function(){
         targets: [gpx],
         greedy: false
     });
-    
+
 
     // Add Layers
-    map.addLayers([osopenlayer, gpx, clusters, locationLayer]);
+    map.addLayers([osopenlayer, gpx, clusters]);
 
     // Add controls
-    panel.addControls([drawControl, drawLocation]);
+    panel.addControls(drawControl);
     map.addControl(new OpenLayers.Control.Navigation());
     map.addControl(new OpenLayers.Control.PanZoom());
     map.addControl(new OpenLayers.Control.Attribution());
@@ -323,14 +306,6 @@ MapViewer.prototype.initMap = function(){
     drawControl.events.register("featureadded", drawControl, $.proxy(this.onFeatureAdded, this));
     clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
     clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)});
-    drawLocation.events.register("featureadded", drawLocation, $.proxy(this.onLocationAdded, this));
-    drawLocation.handler.callbacks.create = function(data) {
-        // Clear any feature befor adding the new one
-        if(locationLayer.features.length > 0)
-        {
-            locationLayer.removeAllFeatures();
-        }
-    };
 
     if (!map.getCenter()){
         map.zoomToMaxExtent();
@@ -348,79 +323,6 @@ MapViewer.prototype.onGPXRemoved = function(evt){
     var gpx = evt.object;
     var toolbar = gpx.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
     toolbar.deactivate();
-};
-
-
-MapViewer.prototype.onLocationAdded = function(evt){
-    var layer = this.map.getLayersByName("Location")[0];
-    var feature = evt.feature;
-    var locationControl = layer.map.getControlsByClass('OpenLayers.Control.DrawFeature')[1];
-    var ws = 'http://nominatim.openstreetmap.org/reverse';
-    var query = '?format={0}&lat={1}&lon={2}&zoom={3}&addressdetails=1';
-    var bbox =  feature.geometry.getBounds()
-                       .transform(new OpenLayers.Projection("EPSG:27700"), new OpenLayers.Projection("EPSG:4326")); 
-    var zoom = 18;
-
-    var tile_0 = longlat2tile(bbox.left, bbox.top, zoom);
-    var tile_1 = longlat2tile(bbox.right, bbox.bottom, zoom);
-    
-    var tiles = [];
-    // Generate the url for requesting the information of each tile.
-    for(var x = tile_0.x; x<=tile_1.x; x++){
-        for(var y = tile_0.y; y<=tile_1.y; y++){
-            var center = tile2longlat(y + 0.5, x + 0.5, zoom);
-            var url = ws + query.format('json', center.lat, center.lon, zoom);
-            var tile = {x: x, y: y, url: url};
-            tiles.push(tile);
-        }
-    }
-
-    // Retrieve the reverse geocoding of a tile location and process it.
-    var reverseGeocoding= function(tile){
-        var promise;
-        var request = $.get(tile.url);
-
-        promise = request.pipe(function(data){
-                    var address = data.address;
-                    var location = {};
-                    var value, name;
-                    if(address.road !== undefined){
-                        value = '{0}, {1}'.format(address.road, address.suburb);
-                    }else{
-                        value = address.suburb;
-                    }
-                    name = '{0}-{1}'.format(tile.x, tile.y);
-                    location[name] = value;
-                    return location;
-        });
-        return promise;
-    };
-
-    // request the reverseGeocoding of all tiles
-    loading(true);
-    var promises = $.map(tiles, reverseGeocoding);
-    var processTiles = $.when.apply($, promises);
-
-    // When we ALL the request have finished join the results  
-    var locations = {};
-    processTiles.done(function(){
-        for(var i=0; i<arguments.length; i++){
-            $.extend(locations, arguments[i]);
-        }
-        PCAPI.putJSON('fs', 'locations', 'locations.js', locations);
-        loading(false);
-    });
-};
-
-
-MapViewer.prototype.onDrawLocationActivate = function(evt){
-    var locationLayer = evt.object.layer;
-    locationLayer.setVisibility(true);
-};
-
-MapViewer.prototype.onDrawLocationDeactivate = function(evt){
-    var locationLayer = evt.object.layer;
-    locationLayer.setVisibility(false);
 };
 
 MapViewer.prototype.onFeatureAdded = function(evt){
@@ -447,12 +349,12 @@ MapViewer.prototype.onFeatureAdded = function(evt){
 
     record.editor = 'text.edtr';
     record.fields = [title];
-    record.name = ''; 
+    record.name = '';
     record.timestamp = date.toISOString();
     record.geofenceId = date.getTime().toString();
     record.point = point;
     record.trackId = trackLayer.features[0].attributes.trackId;
-    
+
     feature.attributes = record;
     feature.data = record;
 
@@ -478,7 +380,7 @@ MapViewer.prototype.onFeatureAdded = function(evt){
             var path = '';
             var features = [feature];
 
-            var recorder = new RecordRenderer(path, record.name, record.editor, 
+            var recorder = new RecordRenderer(path, record.name, record.editor,
                                               'edit-record-dialog', record.fields);
             var buttons = makeEditDialogButtons('edit-record-dialog', record, mapviewer, features, null, dialogCallback);
 
@@ -544,26 +446,26 @@ MapViewer.prototype.prepareFiltersString = function(frmt){
     var params = "";
     var filters = new Array();
     var editor = $("#"+this.options["filter-elements"]["editorId"]).val();
-    
+
     if(editor != ""){
         filters.push("editor");
         params += "&id="+editor;
     }
-    
+
     var dateStart = $("#"+this.options["filter-elements"]["date-s-Id"]).val(), dateEnd = $("#"+this.options["filter-elements"]["date-e-Id"]).val();
-    
+
     if(dateStart != ""){
         filters.push("date");
         var splits1 = dateStart.split(" ");
         var splits2 = dateEnd.split(" ");
         params += "&start_date="+splits1[0]+"_"+splits1[1]+"&end_date="+splits2[0]+"_"+splits2[1];
     }
-    
+
     if(frmt != undefined){
         filters.push("format");
         params += "&frmt="+frmt;
     }
-    
+
     var dataString = "";
     if(filters.length > 0){
         dataString = "filter="+filters.join(",")+params;
@@ -707,7 +609,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     record['id'] = i;
-    
+
     point =  new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
     description = findLabel(record.fields, 'Description') || '';
     feature = new OpenLayers.Feature.Vector(point, record);
@@ -746,7 +648,7 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
 
 
 MapViewer.prototype.initTable = function(table_data){
-    var header_cols = [{"mData": "control", "bSortable": false}, 
+    var header_cols = [{"mData": "control", "bSortable": false},
                        {"mData": "name", "bSortable": false},
                        {"mData": "description", "bSortable": false},
                        {"mData": "date", "bSortable": false},
@@ -991,7 +893,7 @@ MapViewer.prototype.onRowSelected = function(evt, options){
         .attr('aria-selected', true);
 
     // When we are using the keyboard navigation it is important focus on the selected row
-    // but not when we are using the map 
+    // but not when we are using the map
     if(options.focus === true){
         $row.focus();
     }
@@ -1015,12 +917,12 @@ MapViewer.prototype.onRowSelected = function(evt, options){
     }
 };
 
-/* 
+/*
     Find the track to which the element belongs in the table
     @returns a jquery element
 */
 MapViewer.prototype._findClosestTrack = function(node){
-    // Find the closest record    
+    // Find the closest record
     var $row = $(node).closest('.record');
 
     // Find the closest track
@@ -1036,7 +938,7 @@ MapViewer.prototype._findClosestTrack = function(node){
 
 MapViewer.prototype.onRowExpanded = function(evt){
     var ariaMsg = '';
- 
+
     var $track = this._findClosestTrack(evt.currentTarget);
     var trackName = $track.attr('record-name');
     var trackid = $track.attr('trackid');
@@ -1045,7 +947,7 @@ MapViewer.prototype.onRowExpanded = function(evt){
     $track.siblings('.track')
           .removeClass('expanded')
           .addClass('collapsed')
-          .attr('aria-expanded', 'false');     
+          .attr('aria-expanded', 'false');
 
     $track.siblings('.poi:not([trackid="' + trackid + '"])')
           .addClass('hidden');
@@ -1133,7 +1035,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
         var $table;
         var $target = $(evt.target);
 
-        table_selector = "#" + this.options["table-elements"]["tableId"];    
+        table_selector = "#" + this.options["table-elements"]["tableId"];
 
         // Ignore events not related to the table or the record
         if($target.is(table_selector)){
@@ -1390,7 +1292,7 @@ MapViewer.prototype.enableDeleteAction = function(){
             }, this)
         });
     }, this));
-  
+
     $("#delete_no").click(function(){
         $('#deleteModal').modal('hide');
     });
