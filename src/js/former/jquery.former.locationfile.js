@@ -1,13 +1,24 @@
+/*
+  Extension for generating location files, a new layer and tool are inserted
+  in the map and a form control is inserted in the DOM.
+
+  @param map An instance of a openlayers map
+  @param selector A div where the control will be inserted
+*/
+
 var LocationFile = function(map, selector, options){
     var defaults = {
-        min_radius: 100
+        min_radius: 100,
+        olToolBarClass: 'olLocationFileToolBar',
+        olToolClass: 'olLocationFileDrawFeature'
     };
 
     this.options = $.extend(defaults, options);
     this.map = map;
     this.controls_selector = selector;
-    // this.layer;
-    // this.control;
+    this.layer = null;
+    this.control = null;
+    this.panel = null;
     this._initMap();
     this._initDomControls();
 };
@@ -16,15 +27,21 @@ LocationFile.prototype._initDomControls = function(){
     this._initLocationControl();
     this._initSpinnerControl();
 
+    var layer = this.layer;
+    var locationFile = this;
+    $('#create-location').click(function(){
+        var feature = layer.features[0];
+        locationFile.generateFile(feature);
+    });
 };
 
 LocationFile.prototype._initMap = function(){
     var map = this.map;
     var layer = new OpenLayers.Layer.Vector("Location", {visible: true});
-
+    var options = this.options;
 
     var controlOptions = {
-            displayClass: "olSpatialMemoriesDrawBox",
+            displayClass: options.olToolClass,
             handlerOptions: {
                 sides: 4,
                 irregular:true,
@@ -37,23 +54,28 @@ LocationFile.prototype._initMap = function(){
             }
         };
 
-    var control = new OpenLayers.Control.DrawFeature(layer,
-                                                     OpenLayers.Handler.RegularPolygon,
-                                                     controlOptions);
+    var panel = new OpenLayers.Control.Panel({
+                    displayClass: options.olToolBarClass
+                });
 
+    var control = new OpenLayers.Control.DrawFeature(layer,
+                                                     OpenLayers.Handler
+                                                               .RegularPolygon,
+                                                     controlOptions);
 
     control.events.register("featureadded", control, this.onLocationAdded);
     control.handler.callbacks.create = this.onCreateFeature;
 
-    map.addLayers(layer);
-
-    var panel = map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
-
-    // Add map controls
+    // Init attributes
     this.control = control;
     this.layer = layer;
-    panel.addControls(control);
+    this.panel = panel;
 
+    // Add map controls
+    panel.addControls(control);
+    map.addControl(panel);
+    panel.deactivate();
+    map.addLayer(layer);
 };
 
 LocationFile.prototype._initLocationControl = function(){
@@ -98,7 +120,7 @@ LocationFile.prototype._initLocationControl = function(){
         return false;
     };
 
-    var renderItem = function( ul, item ) {
+    var renderItem = function(ul, item) {
         var address = item.value.address;
         var place = address.road || address[item.value.type] || address.city;
         var administrative = address.city || address.town || address.county;
@@ -109,7 +131,7 @@ LocationFile.prototype._initLocationControl = function(){
     };
 
     // Autocomplete control
-    $('input[name="location"]',ctx).autocomplete({
+    $('input[name="location"]', ctx).autocomplete({
         source: doQuery,
         select: itemSelected,
         focus: itemFocus,
@@ -122,37 +144,39 @@ LocationFile.prototype._initSpinnerControl = function(){
     var map = this.map;
     var layer = this.layer;
 
-    var onSpin = function(evt){
-        console.log(evt);
+    var onSpin = function(evt, ui){
         var lat = $('input[name="location-lat"]', ctx).val();
         var lon = $('input[name="location-lon"]', ctx).val();
+        var radius = ui.value;
 
-        console.log(lat, lon, evt.target.value);
-
-        var circle = OpenLayers.Geometry.Polygon.createRegularPolygon(
-                        new OpenLayers.Geometry.Point(lon, lat).transform(
+        var point = new OpenLayers.Geometry.Point(lon, lat).transform(
                             new OpenLayers.Projection("EPSG:4326"),
-                            map.getProjectionObject()),
-                    evt.target.value,
-                    30);
+                            map.getProjectionObject());
+
+        var circle = OpenLayers.Geometry
+                               .Polygon.createRegularPolygon(point,
+                                                             radius,
+                                                             50);
+        var feature = new OpenLayers.Feature.Vector(circle);
+
         layer.removeAllFeatures();
-        layer.addFeatures(new OpenLayers.Feature.Vector(circle));
-        console.log(layer);
+        layer.addFeatures(feature);
+
+        map.zoomToExtent(feature.geometry.getBounds(), closest=true);
     };
 
-
     // Spinner control
-    $('input[name="radius"]',ctx).spinner({
+    $('input[name="radius"]', ctx).spinner({
         min: this.options.min_radius,
         max: 5000,
-        step: 100,
+        step: 50,
         spin: onSpin
     });
 };
 
 LocationFile.prototype.onCreateFeature = function() {
     var layer = this.layer;
-    // Clear any feature befor adding the new one
+    // Clear any feature before adding the new one
     if(layer.features.length > 0)
     {
         layer.removeAllFeatures();
@@ -161,10 +185,16 @@ LocationFile.prototype.onCreateFeature = function() {
 
 LocationFile.prototype.onLocationAdded = function(evt){
     var feature = evt.feature;
+    console.log(feature);
+    //this.generateFile(feature);
+};
+
+LocationFile.prototype._calculateTiles = function(feature){
+    var map = this.map;
     var ws = 'http://nominatim.openstreetmap.org/reverse';
     var query = '?format={0}&lat={1}&lon={2}&zoom={3}&addressdetails=1';
-    var bbox =  feature.geometry.getBounds()
-                       .transform(new OpenLayers.Projection("EPSG:27700"),
+    var bbox = feature.geometry.getBounds()
+                       .transform(map.getProjectionObject(),
                                   new OpenLayers.Projection("EPSG:4326"));
     var zoom = 18;
 
@@ -182,6 +212,10 @@ LocationFile.prototype.onLocationAdded = function(evt){
         }
     }
 
+    return tiles;
+};
+
+LocationFile.prototype._requestLocations = function(tiles){
     // Retrieve the reverse geocoding of a tile location and process it.
     var reverseGeocoding= function(tile){
         var promise;
@@ -219,6 +253,28 @@ LocationFile.prototype.onLocationAdded = function(evt){
     });
 };
 
+LocationFile.prototype.generateFile = function(feature){
+    var tiles = this._calculateTiles(feature);
+    var locationFile = this;
+
+    console.log(tiles.length + ' tiles are going to be requested');
+
+
+    $('#location-dialog').dialog({
+        resizable: false,
+        height:140,
+        modal: true,
+        buttons: {
+            Continue: function() {
+                locationFile._requestLocations(tiles);
+                $(this).dialog( "close" );
+            },
+            Cancel: function() {
+                $(this).dialog( "close" );
+            }
+        }
+    });
+};
 
 LocationFile.prototype.onDrawLocationActivate = function(evt){
     var locationLayer = evt.object.layer;
@@ -226,14 +282,16 @@ LocationFile.prototype.onDrawLocationActivate = function(evt){
 };
 
 LocationFile.prototype.onDrawLocationDeactivate = function(evt){
-    var locationLayer = evt.object.layer;
-    locationLayer.setVisibility(false);
+    // var locationLayer = evt.object.layer;
+    // locationLayer.setVisibility(false);
 };
 
 LocationFile.prototype.activate = function(){
-
+    this.layer.setVisibility(true);
+    this.panel.activate();
 };
 
 LocationFile.prototype.deactivate = function(){
-    this.map.removeControl(this.locationControl);
+    this.layer.setVisibility(false);
+    this.panel.deactivate();
 };

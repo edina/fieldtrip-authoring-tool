@@ -303,6 +303,7 @@
             // Show panel with the table
             $('.panel').hide();
             $('.records.panel').show();
+            this.locationFile.deactivate();
 
         }, this))
     }
@@ -432,11 +433,13 @@
     };
 
     BuildFormer.prototype.enableMobileUtilities = function(){
-        this.locationFile = new LocationFile(this.mapviewer.map, '#location-control');
+        var locationFile = new LocationFile(this.mapviewer.map, '#location-control');
+        this.locationFile = locationFile;
 
         $('#mobile-utilities').click(function(){
             $('.panel').hide();
             $('.utilities.panel').show();
+            locationFile.activate();
         });
     };
 
