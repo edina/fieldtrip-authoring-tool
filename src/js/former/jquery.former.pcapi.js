@@ -39,37 +39,38 @@ PCAPI.prototype.putJSON = function(filesystem, path, filename, payload, success,
 };
 
 PCAPI.prototype.putFile = function(filesystem, path, filename, payload, success, error){
-    //var payload = JSON.stringify(record, null, '\t');
+    var pcapi = this;
     $.ajax({
         url: this._url(filesystem) + encodeURIComponent(path) + '/' + filename,
         type: 'PUT',
         data: payload,
         success: function(data) {
             if(data.error === 0){
-                PCAPI._callback(success, data);
+                pcapi._callback(success, data);
             }else{
-                PCAPI._callback(error, data);
+                pcapi._callback(error, data);
             }
         }
     });
 };
 
 PCAPI.prototype.renameRecord = function(key, record, success, error){
+    var pcapi = this;
     $.ajax({
         url: this._url(this.options.records) + encodeURIComponent(key),
         type: 'PUT',
         data: record.name,
         success: function(data) {
                     if(data.error !== 0){
-                        PCAPI._callback(error, data);
+                        pcapi._callback(error, data);
                         return;
                     }
 
-                    /* 
+                    /*
                         PCAPI 1.3 is not updating the name of the record in the json,
                         the record has to be uploaded after renaming
                     */
-                    PCAPI.putRecord(record.name, record, success, error);
+                    pcapi.putRecord(record.name, record, success, error);
                 }
     });
 };
