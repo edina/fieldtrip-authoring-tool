@@ -140,12 +140,22 @@
                 </div>
               </div>
               <div id="location-control" class="utilities panel" style="display: none;">
-                <h4>Create a location file</h4>
-                <input name="location" type="text" placeholder="Location" value=""/>
-                <input name="radius" type="text" placeholder="Radius" value=""/>
                 <input name="location-lat" type="hidden" value=""/>
                 <input name="location-lon" type="hidden" value=""/>
-                <button id="create-location" class="btn btn-primary" type="button">Create</button>
+                <h4>Create a location file</h4>
+                <ol>
+                  <li>Search for a location:<br/>
+                    <input name="location" type="text" placeholder="Location" value=""/>
+                  </li>
+                  <li>Set a radius around that location or create an area in the map:<br/>
+                    <input name="radius" type="text" placeholder="Radius" value=""/>
+                  </li>
+                  <li>
+                    <button id="create-location" class="btn btn-primary" type="button" role="button">Create</button>
+                  </li>
+                </ol>
+
+
                 <div id="location-dialog" style="display:none"></div>
               </div>
               <div id="aria-notification" aria-live="assertive" tabindex="-1"></div>

@@ -162,7 +162,7 @@ LocationFile.prototype._initSpinnerControl = function(){
         layer.removeAllFeatures();
         layer.addFeatures(feature);
 
-        map.zoomToExtent(feature.geometry.getBounds(), closest=true);
+        map.zoomToExtent(feature.geometry.getBounds(), true);
     };
 
     // Spinner control
@@ -170,7 +170,7 @@ LocationFile.prototype._initSpinnerControl = function(){
         min: this.options.min_radius,
         max: 5000,
         step: 50,
-        spin: onSpin
+        spin: onSpin,
     });
 };
 
@@ -193,7 +193,7 @@ LocationFile.prototype._calculateTiles = function(feature){
     var map = this.map;
     var ws = 'http://nominatim.openstreetmap.org/reverse';
     var query = '?format={0}&lat={1}&lon={2}&zoom={3}&addressdetails=1';
-    var bbox = feature.geometry.getBounds()
+    var bbox = feature.geometry.clone().getBounds()
                        .transform(map.getProjectionObject(),
                                   new OpenLayers.Projection("EPSG:4326"));
     var zoom = 18;
@@ -256,24 +256,25 @@ LocationFile.prototype._requestLocations = function(tiles){
 LocationFile.prototype.generateFile = function(feature){
     var tiles = this._calculateTiles(feature);
     var locationFile = this;
+    var msg = tiles.length + ' tiles are going to be requested';
 
-    console.log(tiles.length + ' tiles are going to be requested');
-
-
-    $('#location-dialog').dialog({
-        resizable: false,
-        height:140,
-        modal: true,
-        buttons: {
-            Continue: function() {
-                locationFile._requestLocations(tiles);
-                $(this).dialog( "close" );
-            },
-            Cancel: function() {
-                $(this).dialog( "close" );
+    $('#location-dialog')
+        .html(msg)
+        .dialog({
+            title: 'Info',
+            resizable: false,
+            height:140,
+            modal: true,
+            buttons: {
+                Continue: function() {
+                    locationFile._requestLocations(tiles);
+                    $(this).dialog( "close" );
+                },
+                Cancel: function() {
+                    $(this).dialog( "close" );
+                }
             }
-        }
-    });
+        });
 };
 
 LocationFile.prototype.onDrawLocationActivate = function(evt){
