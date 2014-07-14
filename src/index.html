@@ -60,6 +60,8 @@
   <script type="text/javascript" src="js/former/jquery.former.functions.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.locationfile.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.mapviewer.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.animator.js"></script>
+  <script type="text/javascript" src="js/former/jquery.former.animatorviewer.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.statistics.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.core.js"></script>
   <!--<script type="text/javascript" src="js/former/jquery.former.storage.js"></script>-->
@@ -75,7 +77,6 @@
   <script type="text/javascript" src="js/former/jquery.former.audio.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.capture.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.optionsform.js"></script>
-  <script type="text/javascript" src="js/former/jquery.former.animator.js"></script>
 </head>
 
 <body>
@@ -114,88 +115,93 @@
             <div id="f_title"></div>
             <div id="form-content"></div>
             <div id="home-content" aria-hidden="false"></div>
-            <div id="map-content" style="display: none" aria-hidden="true">
-              <div id="map_canvas"></div>
-              <br><br>
-              <div class="records panel">
-                <div id="filter-area">
-                  <button id="filter-records" class="btn">Get Tracks</button>
-                  <!-- Add two hidden values for using prepareFiltersString -->
-                  <input type="hidden" name="date-start" id="date-start" value=""/>
-                  <input type="hidden" name"by-editor" id="by-editor" value=""/>
-                </div>
-                <div id="myTable" style="clear: both;" >
-                  <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example" tabindex="0" aria-label="List of tracks recorded. Use up and down arrow to move between records. Use Enter to edit the name or the description of each record. Use plus or minus for expanding the memories associated to the track" role="treegrid">
-                    <caption>List of tracks</caption>
-                    <thead>
-                      <tr>
-                        <th class="details-control sorting_disabled" aria-hidden="true"></th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Date</th>
-                        <th>Edit</th>
-                      </tr>
-                    </thead>
-                  </table>
-                </div>
-              </div>
-              <div id="location-control" class="utilities panel" style="display: none;">
-                <input name="location-lat" type="hidden" value=""/>
-                <input name="location-lon" type="hidden" value=""/>
-                <h4>Create a location file</h4>
-                <ol>
-                  <li>Search for a location:<br/>
-                    <input name="location" type="text" placeholder="Location" value=""/>
-                  </li>
-                  <li>Set a radius around that location or create an area in the map:<br/>
-                    <input name="radius" type="text" placeholder="Radius" value=""/>
-                  </li>
-                  <li>
-                    <button id="create-location" class="btn btn-primary" type="button" role="button">Create</button>
-                  </li>
-                </ol>
-
-
-                <div id="location-dialog" style="display:none"></div>
-              </div>
-              <div id="aria-notification" aria-live="assertive" tabindex="-1"></div>
-            </div>
-
-            <!-- CONTENT FOR TRACK ANIMATOR -->
+            <!-- map-content row -->
             <div class="row">
-            <div id="animator-content" class="container" style="display: none" aria-hidden="true">
-              <div class="row">
-                <div id="animator-map_canvas" style="background-color: #eee;"></div>
-              </div>
-              <div class="row">
-                  <div class="btn-group">
-                    <button class="get-tracks btn">Get Tracks</button>
-                    <button disabled id="track-animate" class="track-animate btn" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
-                    <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
+              <div id="map-content" style="display: none" aria-hidden="true">
+                <div id="map_canvas"></div>
+                <br><br>
+                <div class="records panel">
+                  <div id="filter-area">
+                    <button id="filter-records" class="btn">Get Tracks</button>
+                    <!-- Add two hidden values for using prepareFiltersString -->
+                    <input type="hidden" name="date-start" id="date-start" value=""/>
+                    <input type="hidden" name"by-editor" id="by-editor" value=""/>
                   </div>
-              </div>
-              <div class="row">
-                <div class="span12">
-                  <div id="animator-myTable">
-
-                    <table class="table">
+                  <div id="myTable" style="clear: both;" >
+                    <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example" tabindex="0" aria-label="List of tracks recorded. Use up and down arrow to move between records. Use Enter to edit the name or the description of each record. Use plus or minus for expanding the memories associated to the track" role="treegrid">
+                      <caption>List of tracks</caption>
                       <thead>
                         <tr>
+                          <th class="details-control sorting_disabled" aria-hidden="true"></th>
                           <th>Name</th>
                           <th>Description</th>
                           <th>Date</th>
-                          <th>Number of POIs</th>
+                          <th>Edit</th>
                         </tr>
                       </thead>
-                      <tbody>
-                      </tbody>
                     </table>
-
                   </div>
+                </div>
+                <div id="location-control" class="utilities panel" style="display: none;">
+                  <input name="location-lat" type="hidden" value=""/>
+                  <input name="location-lon" type="hidden" value=""/>
+                  <h4>Create a location file</h4>
+                  <ol>
+                    <li>Search for a location:<br/>
+                      <input name="location" type="text" placeholder="Location" value=""/>
+                    </li>
+                    <li>Set a radius around that location or create an area in the map:<br/>
+                      <input name="radius" type="text" placeholder="Radius" value=""/>
+                    </li>
+                    <li>
+                      <button id="create-location" class="btn btn-primary" type="button" role="button">Create</button>
+                    </li>
+                  </ol>
+
+
+                  <div id="location-dialog" style="display:none"></div>
                 </div>
               </div>
             </div>
+            <!-- end map-content row -->
+            <!-- CONTENT FOR TRACK ANIMATOR -->
+            <div class="row">
+              <div id="animator-content" class="container-fluid" style="display: none" aria-hidden="true">
+                <div class="row">
+                  <div id="animator-map_canvas" style="background-color: #eee;"></div>
+                </div>
+                <div id="animation-control" class="row">
+                    <div class="btn-group">
+                      <button class="get-tracks btn">Get Tracks</button>
+                      <button disabled id="track-animate" class="track-animate btn" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
+                      <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
+                    </div>
+                </div>
+                <div class="row">
+                  <div class="span12">
+                    <div id="animator-myTable">
+
+                      <table class="table" tabindex="0">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Number of POIs</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                      </table>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div><!-- END CONTENT FOR TRACK ANIMATOR -->
+            <div class="row">
+              <div id="aria-notification" aria-live="assertive" tabindex="-1"></div>
+            </div>
           <!--/div-->
         </div><!--/span-->
       </div><!--/row-->
