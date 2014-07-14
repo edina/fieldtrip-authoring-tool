@@ -247,7 +247,7 @@ LocationFile.prototype._requestLocations = function(tiles){
         for(var i=0; i<arguments.length; i++){
             $.extend(locations, arguments[i]);
         }
-        PCAPI.putJSON('fs', 'locations', 'locations.js', locations);
+        PCAPI.putJSON('fs', 'locations', 'locations.json', locations);
         loading(false);
     });
 };
