@@ -37,7 +37,7 @@ def install(app='src'):
         elif path.endswith("css"):
             return css_ext
 
-    paths = ast.literal_eval(local('bower list -p', capture=True))
+    paths = ast.literal_eval(local('bower -j list -p', capture=True))
     for path in paths:
         if isinstance(paths[path], list):
             for subpath in paths[path]:
