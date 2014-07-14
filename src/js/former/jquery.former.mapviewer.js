@@ -473,7 +473,7 @@ MapViewer.prototype.prepareFiltersString = function(frmt){
     return {"dataString": dataString};
 }
 
-MapViewer.prototype.getData = function(params){
+MapViewer.prototype.getData = function(params, callback){
     loading(true);
     $.ajax({
         type: "GET",
@@ -500,6 +500,9 @@ MapViewer.prototype.getData = function(params){
                 this.prepareTableDataForEditing(results);
             }
             loading(false);
+            if(callback !== undefined && typeof(callback) === "function"){
+                callback();
+            }
         }, this)
     });
 }

@@ -162,17 +162,18 @@
             </div>
 
             <!-- CONTENT FOR TRACK ANIMATOR -->
-            <div id="animator-content" style="display: none" aria-hidden="true">
-              <div id="animator-map_canvas" style="background-color: #eee;"></div>
-
+            <div class="row">
+            <div id="animator-content" class="container" style="display: none" aria-hidden="true">
               <div class="row">
-                <div class="offset3 span6">
-                  <button disabled id="track-animate" class="track-animate btn btn-block" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
-                  <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn btn-block" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
-                </div>
-
+                <div id="animator-map_canvas" style="background-color: #eee;"></div>
               </div>
-
+              <div class="row">
+                  <div class="btn-group">
+                    <button class="get-tracks btn">Get Tracks</button>
+                    <button disabled id="track-animate" class="track-animate btn" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
+                    <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
+                  </div>
+              </div>
               <div class="row">
                 <div class="span12">
                   <div id="animator-myTable">
@@ -193,7 +194,7 @@
                   </div>
                 </div>
               </div>
-
+            </div>
             </div><!-- END CONTENT FOR TRACK ANIMATOR -->
           <!--/div-->
         </div><!--/span-->
