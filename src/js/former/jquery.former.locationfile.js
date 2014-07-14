@@ -111,7 +111,7 @@ LocationFile.prototype._initLocationControl = function(){
                          map.getProjectionObject());
         map.setCenter(center, 9);
 
-        $('input[name="radius"]',ctx).val(defaultRadius);
+        $('input[name="radius"]',ctx).spinner('value', '');
         return false;
     };
 
@@ -135,7 +135,7 @@ LocationFile.prototype._initLocationControl = function(){
         source: doQuery,
         select: itemSelected,
         focus: itemFocus,
-        minLength: 2,
+        minLength: 2
     }).data('ui-autocomplete')._renderItem = renderItem;
 };
 
@@ -185,7 +185,6 @@ LocationFile.prototype.onCreateFeature = function() {
 
 LocationFile.prototype.onLocationAdded = function(evt){
     var feature = evt.feature;
-    console.log(feature);
     //this.generateFile(feature);
 };
 
