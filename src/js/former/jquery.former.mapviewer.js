@@ -873,8 +873,7 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
             this.requesting_gpx.abort();
         }
 
-        loading(true);
-        aria.notify("Loading track: " + record);
+        loading(true, "Loading track: " + record);
         this.requesting_gpx = $.ajax({ type: "GET",
                                        url: this.buildUrl('records', '/'+record+'/'+ gpx),
                                        dataType: "xml"});
@@ -892,15 +891,15 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
                     gpxLayer.addFeatures(gpx_features);
                     // center to the middle of the whole GPX track
                     this.map.zoomToExtent(gpxLayer.getDataExtent());
-                    if(callback !== undefined && typeof(callback) === "function"){
-                        callback();
-                    }
                 }, this))
             .fail(function(){
                 aria.notify("Cancel loading track: " + record);
             })
             .always(function(){
                 loading(false);
+                if(callback !== undefined && typeof(callback) === "function"){
+                    callback();
+                }
             });
     }
 };

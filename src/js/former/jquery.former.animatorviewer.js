@@ -20,10 +20,11 @@ AnimatorViewer.prototype._initDomControls = function(){
  *   Copy tracks from the mapviewer table to the animator table
  */
 AnimatorViewer.prototype.copy_tracks = function(){
+    var table = this.options.tableSelector;
     var animatorTableTbodyHTML = '';
     $('#myTable .track').each(function(index, el) {
         var trackId = $(el).attr('trackid');
-        animatorTableTbodyHTML += '<tr id="rowek-'+el.id.split("-")[1]+'" trackid="'+trackId+'">';
+        animatorTableTbodyHTML += '<tr id="rowek-'+el.id.split("-")[1]+'" tabindex="0" trackid="'+trackId+'">';
 
         $(el).find('td').each(function(index, el) {
             if(index !== 0 && index !==4){
@@ -35,7 +36,7 @@ AnimatorViewer.prototype.copy_tracks = function(){
         animatorTableTbodyHTML += '<td>'+numberOfPOIs+'</td>';
         animatorTableTbodyHTML += '</tr>';
     });
-    $('#animator-myTable tbody').html(animatorTableTbodyHTML);
+    $('tbody', table).html(animatorTableTbodyHTML);
 };
 
 AnimatorViewer.prototype._initKeyboardNavigation = function(){
@@ -120,6 +121,7 @@ AnimatorViewer.prototype._initEvents = function(){
                                       feature.attributes,
                                       function(){
                                             $('#track-animate').removeAttr('disabled');
+                                            aria.notify('Loaded. Use enter to play the track');
                                          });
         }
     }, this));

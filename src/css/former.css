@@ -210,7 +210,10 @@ hr.style-one {
   clear: both;
 }
 
-:focus {
+a:focus,
+.menu-item:focus,
+.btn:focus,
+:focus{
   outline: 3px solid #f7983a;
 }
 
