@@ -7,6 +7,7 @@ var MapViewer = function(options, base_url){
     this.select_id;
     this.cursor;
     this.features;
+    this.requesting_gpx = null;
 }
 
 MapViewer.prototype.init = function(){
@@ -806,10 +807,10 @@ MapViewer.prototype.onEditRecord = function(evt){
 }
 
 MapViewer.prototype.onTrackAnimate = function(){
-    loading(true);
-    setTimeout(function () {
-        loading(false);
-    }, 1000);
+    // loading(true);
+    // setTimeout(function () {
+    //     loading(false);
+    // }, 1000);
 }
 
 MapViewer.prototype.enableTrackAnimation = function(){
@@ -843,11 +844,18 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
         "strokeColor": "rgb(255, 255, 0)",
         "strokeWidth": 5,
         "strokeOpacity": 1
-    }
+    };
 
     var gpx;
     var style;
-    var trackId = data.geofenceId;
+    var trackId = data.trackId || data.geofenceId;
+    var gpxLayer = this.map.getLayersByName("GPX")[0];
+    var gpxId = null;
+
+    if(gpxLayer && gpxLayer.features.length > 0){
+        gpxId = gpxLayer.features[0].attributes.trackId;
+    }
+
     for(var i=0; i<data.fields.length; i++){
         if(data.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
             style = data.fields[i]["style"];
@@ -856,31 +864,46 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
         }
     }
 
-    if(gpx !== undefined){
-        var gpxLayer = this.map.getLayersByName("GPX")[0];
+    // Display the track if any and it's not already visible
+    if(gpx !== undefined && gpxId !== trackId){
         gpxLayer.removeAllFeatures();
-        $.ajax({
-            type: "GET",
-            url: this.buildUrl('records', '/'+record+'/'+ gpx),
-            dataType: "xml",
-            success: $.proxy(function(gpx_data){
-                var in_options = {
-                    'internalProjection': this.map.baseLayer.projection,
-                    'externalProjection': new OpenLayers.Projection("EPSG:4326")
-                };
-                var gpx_format = new OpenLayers.Format.GPXExt(in_options);
-                var gpx_features = gpx_format.read(gpx_data);
-                gpx_features[0].attributes.trackId = trackId;
-                gpxLayer.style = style;
-                gpxLayer.addFeatures(gpx_features);
-                // center to the middle of the whole GPX track
-                this.map.zoomToExtent(gpxLayer.getDataExtent());
-                if(callback !== undefined && typeof(callback) === "function")
-                    callback();
-            }, this)
-        });
+
+        // Stop the previous query if any
+        if(this.requesting_gpx && this.requesting_gpx.readyState !== 4){
+            this.requesting_gpx.abort();
+        }
+
+        loading(true);
+        aria.notify("Loading track: " + record);
+        this.requesting_gpx = $.ajax({ type: "GET",
+                                       url: this.buildUrl('records', '/'+record+'/'+ gpx),
+                                       dataType: "xml"});
+
+        this.requesting_gpx
+            .done($.proxy(function(gpx_data){
+                    var in_options = {
+                        'internalProjection': this.map.baseLayer.projection,
+                        'externalProjection': new OpenLayers.Projection("EPSG:4326")
+                    };
+                    var gpx_format = new OpenLayers.Format.GPXExt(in_options);
+                    var gpx_features = gpx_format.read(gpx_data);
+                    gpx_features[0].attributes.trackId = trackId;
+                    gpxLayer.style = style;
+                    gpxLayer.addFeatures(gpx_features);
+                    // center to the middle of the whole GPX track
+                    this.map.zoomToExtent(gpxLayer.getDataExtent());
+                    if(callback !== undefined && typeof(callback) === "function"){
+                        callback();
+                    }
+                }, this))
+            .fail(function(){
+                aria.notify("Cancel loading track: " + record);
+            })
+            .always(function(){
+                loading(false);
+            });
     }
-}
+};
 
 MapViewer.prototype.onRowSelected = function(evt, options){
     var options = options || {};
@@ -901,9 +924,7 @@ MapViewer.prototype.onRowSelected = function(evt, options){
         $row.focus();
     }
 
-    //Center the map
     var recordId = $row.attr('recordid');
-    var trackId =  $row.attr('trackid');
     var feature = findFeaturesByAttribute(layer.features, 'geofenceId', recordId);
 
     if(feature !== null){
@@ -913,9 +934,11 @@ MapViewer.prototype.onRowSelected = function(evt, options){
             selectControl.select(feature);
         }
 
+        //Center the map
         if(!feature.onScreen()){
             this.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
         }
+
         this.displayGPX(feature.attributes.name, feature.attributes);
     }
 };
