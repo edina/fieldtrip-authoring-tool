@@ -978,8 +978,9 @@ MapViewer.prototype.onRowExpanded = function(evt){
 }
 
 MapViewer.prototype.onRowCollapsed = function(evt){
-    // If click in the control find the row
+    // If click in the control find the track
     var $track = this._findClosestTrack(evt.target);
+    var table_selector = "#" + this.options["table-elements"]["tableId"];
     var trackid = $track.attr('trackid');
     var trackName = $track.attr('record-name');
 
@@ -1032,27 +1033,16 @@ MapViewer.prototype.filterTableData = function(features){
 }
 
 MapViewer.prototype.enableTableKeyboardNavigation = function(){
+    var table_selector = "#" + this.options['table-elements'].tableId;
 
-    $(document).off('keyup', document);
-    $(document).on('keyup', document, $.proxy(function(evt){
-        var $table;
-        var $target = $(evt.target);
-
-        table_selector = "#" + this.options["table-elements"]["tableId"];
-
-        // Ignore events not related to the table or the record
-        if($target.is(table_selector)){
-            $table = $target;
-        }else if($target.is(table_selector + ' tr.record'))
-            $table = $target.closest(table_selector);
-        else{
-            return;
-        }
+    $(document).off('keyup', table_selector);
+    $(document).on('keyup', table_selector, $.proxy(function(evt){
+        var $table = $(evt.currentTarget);
 
         switch(evt.keyCode){
             case 40: // Down
                 $row = $('.row_selected', $table);
-                if($row.length == 0){
+                if($row.length === 0){
                     $('tbody tr:first', $table).trigger('row_selected');
                 }else{
                     if(!$row.is(':last-child')){
@@ -1064,7 +1054,7 @@ MapViewer.prototype.enableTableKeyboardNavigation = function(){
             break;
             case 38: // Up
                 $row = $('.row_selected', $table);
-                if($row.length == 0){
+                if($row.length === 0){
                     $('tbody tr:last', $table).trigger('row_selected');
                 }
                 else{

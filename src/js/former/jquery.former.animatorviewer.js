@@ -46,7 +46,7 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
         var $row = $('.row_selected', table);
         switch(evt.keyCode){
             case 40: // Down
-                if($row.length == 0){
+                if($row.length === 0){
                     $('tbody tr:first', table).trigger('click');
                 }else{
                     if(!$row.is(':last-child')){
@@ -57,7 +57,7 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
                 }
             break;
             case 38: // Up
-                if($row.length == 0){
+                if($row.length === 0){
                     $('tbody tr:last', table).trigger('click');
                 }
                 else{
@@ -86,7 +86,6 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
  */
 AnimatorViewer.prototype._initEvents = function(){
     $('#animator-myTable tbody').on('click', 'tr', $.proxy(function(e){
-        console.log(this.track_animator);
         if(this.track_animator !== undefined){
             this.track_animator.destroy();
         }
