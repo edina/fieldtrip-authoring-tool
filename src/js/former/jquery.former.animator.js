@@ -548,7 +548,7 @@ var POI = function(name, type, LonLat, map) {
     // endStepNum defines when the popup should disappear (with regards to the step counter inside the WalkAnimation)
     this.endStepNum = null;
     this.map = map;
-    this.popup = new OpenLayers.Popup.FramedCloud(this.name, this.LonLat, OpenLayers.Size(1500, 1500), '<b>' + this.name + '</b>', null, true);
+    this.popup = new OpenLayers.Popup.FramedCloud(this.name, this.LonLat, OpenLayers.Size(500, 500), '<b>' + this.name + '</b>', null, true);
     this.isShown = false;
 };
 
