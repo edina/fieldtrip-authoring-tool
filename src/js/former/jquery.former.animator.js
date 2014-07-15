@@ -570,7 +570,8 @@ POI.prototype.hidePOI = function() {
 };
 
 POI.prototype.destroy = function() {
-    if (this.isShown)
+    if (this.isShown){
         this.map.removePopup(this.popup);
-    this.popup.destroy();
+        this.popup.destroy();
+    }
 };
