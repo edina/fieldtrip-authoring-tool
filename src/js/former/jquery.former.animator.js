@@ -5,7 +5,7 @@ var TrackAnimator = function(map, name) {
     this.markers = null;
     this.walk = null;
     this.walker = new Walker(name, 0.1);
-}
+};
 
 TrackAnimator.prototype.init = function() {
     this.proj = new OpenLayers.Projection("EPSG:4326"); // TODO maybe remove...
@@ -18,20 +18,21 @@ TrackAnimator.prototype.init = function() {
     this.walk.setMarkersLayer(this.markers);
     this.walk.setGPXLayer(this.map.getLayersByName('GPX')[0]);
     this.walk.init();
-}
+};
 
 /**
  * Changes the speed of the animation
  */
 TrackAnimator.prototype.changeSpeed = function(value) {
     this.walk.walker.speed = 0.2 - value; //TODO replace 0.25 with max value from input range
-}
+};
 
 TrackAnimator.prototype.destroy = function() {
     // console.log('TrackAnimator.prototype.destroy CALLED');
     if (this.walk !== null) {
-        for (var i in this.walk.POIs)
+        for (var i in this.walk.POIs){
             this.walk.POIs[i].destroy();
+        }
         if (this.walk.animation !== null) {
             this.walk.animation.isPlaying = false;
             this.walk.animation.counter = 0;
@@ -50,7 +51,7 @@ TrackAnimator.prototype.destroy = function() {
         this.markers.destroy();
         this.markers = null;
     }
-}
+};
 /**
  * If browser does not support requestAnimationFrame (or similar)
  */
@@ -126,14 +127,14 @@ Walk.prototype.setMarkersLayer = function(markersLayer) {
         this.markersLayer = markersLayer;
     else
         console.log('The layer is not instanceof OpenLayers.Layer.Markers');
-}
+};
 
 Walk.prototype.setGPXLayer = function(gpxLayer) {
     if (gpxLayer instanceof OpenLayers.Layer.Vector)
         this.gpxLayer = gpxLayer;
     else
         console.log('The layer is not instanceof OpenLayers.Layer.Vector');
-}
+};
 
 Walk.prototype.init = function() {
     this.extent = this.gpxLayer.getDataExtent();
@@ -164,13 +165,13 @@ Walk.prototype.init = function() {
     this.markerCanvas.id = "namebadge";
 
     this.walker.badgeCanvas = this.markerCanvas;
-    // animation is passed copy of Walk object 
+    // animation is passed copy of Walk object
     this.animation = new WalkAnimation(this);
-}
+};
 
 Walk.prototype.playAnimation = function() {
     this.animation.play();
-}
+};
 
 
 // ----------------------------------------------------------------------
@@ -186,8 +187,8 @@ var WalkAnimation = function(walk) {
     this.counter = 0;
 
     // left and right feet markers
-    this.size = new OpenLayers.Size(45, 41); // TODO pass these into constructor params? 
-    this.offset = new OpenLayers.Pixel(-61 - 23, -61 - 21); // TODO hyoteneuse width, height 
+    this.size = new OpenLayers.Size(45, 41); // TODO pass these into constructor params?
+    this.offset = new OpenLayers.Pixel(-61 - 23, -61 - 21); // TODO hyoteneuse width, height
     this.rfoffset = new OpenLayers.Pixel(-61 - 23 - 5, -61 - 21 - 10);
     this.lfoffset = new OpenLayers.Pixel(-61 - 23 + 5, -61 - 21 + 10);
     this.rf = new OpenLayers.Icon('http://dlib-brown.edina.ac.uk/icons/right_footprint180.png', this.size, this.rfoffset);
@@ -227,7 +228,7 @@ var WalkAnimation = function(walk) {
     rfImage.onload = $.proxy(function() {
         this.markerRightFootprintTempContext.drawImage(rfImage, 0, 0);
     }, this);
-}
+};
 
 
 WalkAnimation.prototype.drawImageRotate = function(c, img, x, y, width, height, remainingIntervalQuotiant, angle) {
@@ -253,17 +254,17 @@ WalkAnimation.prototype.drawImageRotate = function(c, img, x, y, width, height, 
     c.drawImage(img, width / 2 * (-1), height / 2 * (-1), width, adjustedheight);
     c.rotate(angle * (-1));
     c.translate((x + width / 2) * (-1), (y + height / 2) * (-1));
-}
+};
 
 WalkAnimation.prototype.play = function() {
     this.isPlaying = true;
     this.startTime = new Date();
     this.anim();
-}
+};
 
 WalkAnimation.prototype.pause = function() {
     this.isPlaying = false;
-}
+};
 
 /*
  *  This is callback function the browser will invoke every time it refreshes page
@@ -283,7 +284,7 @@ WalkAnimation.prototype.anim = function() {
         var currentTime = new Date();
         var replayTime = Math.round(currentTime - this.startTime);
         var intervalTime = replayTime - this.lastReplayTime;
-        // update journey time in case speed has changed         
+        // update journey time in case speed has changed
         this.walk.journeyTime = this.walk.actualJourneyTime * this.walk.walker.speed;
 
         // we will make a new footprint at roughly every stepInterval seconds
@@ -320,7 +321,7 @@ WalkAnimation.prototype.anim = function() {
             var olLonLat = new OpenLayers.LonLat(lon, lat);
             var icon = null;
             if (this.counter > 0) {
-                // get bearing to next point 
+                // get bearing to next point
                 var p1X = gpxlayer.features[0].geometry.components[this.counter].x;
                 var p1Y = gpxlayer.features[0].geometry.components[this.counter].y;
                 // TODO does below break at upper boundary?
@@ -328,7 +329,7 @@ WalkAnimation.prototype.anim = function() {
                 var p2Y = gpxlayer.features[0].geometry.components[this.counter + 1].y;
                 var bearing = calcAngle((p2Y - p1Y), (p2X - p1X));
 
-                // create footstep maker and add to makers layer   
+                // create footstep maker and add to makers layer
                 icon = this.counter % 2 == 1 ? this.rf : this.lf; // left foot or right foot?
 
                 // double check whether it is still playing before adding new marker
@@ -402,7 +403,7 @@ WalkAnimation.prototype.anim = function() {
 
             } // ( if this.counter > 0)
 
-            // reset intervalTime   
+            // reset intervalTime
             intervalTime = 0;
         } // ends if(intervalTime > stepInterval)
 
@@ -419,7 +420,7 @@ WalkAnimation.prototype.anim = function() {
         OpenLayers.Animation.requestFrame($.proxy(function() {
             this.anim();
         }, this));
-} // ends callback function anim()
+}; // ends callback function anim()
 
 
 // --------------------------------------------------------------------------
@@ -429,7 +430,7 @@ WalkAnimation.prototype.anim = function() {
 
 function calcNextPoint(p, distance, angle) {
     var nextPoint = new OpenLayers.Geometry.Point(0, 0);
-    // TO DO is this necessary? 
+    // TO DO is this necessary?
     if (angle == 90) {
         nextPoint.x = p.x + distance;
         nextPoint.y = p.y;
@@ -480,13 +481,13 @@ function calcNextPoint(p, distance, angle) {
     nextPoint.x = p.x + (deltax * signX);
     nextPoint.y = p.y + (deltay * signY);
     return nextPoint;
-};
+}
 
 function calcCartesianDistance(p1, p2) {
     var deltaX = p2.x - p1.x;
     var deltaY = p2.y - p1.y;
     return Math.sqrt(Math.pow(deltaX, 2), Math.pow(deltaY, 2));
-};
+}
 
 function calcAngle(deltaY, deltaX) {
     var angle = Math.atan2(deltaY, deltaX);
@@ -497,7 +498,7 @@ function calcAngle(deltaY, deltaX) {
         angle = 2 * Math.PI - (angle - (Math.PI / 2));
     }
     return angle;
-};
+}
 
 
 Walk.prototype.addPOI = function(POI) {
@@ -530,7 +531,7 @@ Walk.prototype.addPOI = function(POI) {
     this.POIs[this.POIs.length] = POI;
     // console.log('Added new POI at index ' + (this.POIs.length - 1));
     // console.log(POI);
-}
+};
 
 /**
  * POI is an object for holding the Track POIs
@@ -547,29 +548,29 @@ var POI = function(name, type, LonLat, map) {
     // endStepNum defines when the popup should disappear (with regards to the step counter inside the WalkAnimation)
     this.endStepNum = null;
     this.map = map;
-    this.popup = new OpenLayers.Popup.FramedCloud(this.name, this.LonLat, OpenLayers.Size(500, 500), '<b>' + this.name + '</b>', null, true);
+    this.popup = new OpenLayers.Popup.FramedCloud(this.name, this.LonLat, OpenLayers.Size(1500, 1500), '<b>' + this.name + '</b>', null, true);
     this.isShown = false;
-}
+};
 
 /**
  * TODO sets content for display inside the POI PopUp
  */
 POI.prototype.setContent = function(content) {
     this.content = content;
-}
+};
 
 POI.prototype.showPOI = function() {
     this.map.addPopup(this.popup);
     this.isShown = true;
-}
+};
 
 POI.prototype.hidePOI = function() {
     this.map.removePopup(this.popup);
     this.isShown = false;
-}
+};
 
 POI.prototype.destroy = function() {
     if (this.isShown)
         this.map.removePopup(this.popup);
     this.popup.destroy();
-}
+};
