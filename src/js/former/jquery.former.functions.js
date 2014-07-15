@@ -80,13 +80,13 @@ function openWindow(element, title,  wdth, hght, zindex, position, buttons){
         autoOpen: true,
         height: hght,
         width: wdth,
-        zIndex: zindex, 
+        zIndex: zindex,
         modal: true,
         position: position,
         title: title,
         buttons: buttons
-    }); 
-    
+    });
+
     //$( div ).dialog( "open" );
     return false;
 }
@@ -175,13 +175,13 @@ function makeEditDialogButtons(dialogId, record, mapviewer, features, row, callb
                 callback(false);
             };
 
-            // If record is new or the name didn't change 
+            // If record is new or the name didn't change
             if(oldName === '' || oldName == record.name){
                 loading(true);
                 PCAPI.putRecord(record.name, record, success, error);
             }else{
                 loading(true);
-                PCAPI.renameRecord(oldName, record, success, error);                
+                PCAPI.renameRecord(oldName, record, success, error);
             }
         },
         "Cancel": function(){
@@ -195,16 +195,16 @@ function makeEditDialogButtons(dialogId, record, mapviewer, features, row, callb
 *   Get a record from the edit form
 *   @param{String} dialogId div id of the dialog
 *   @param{String} fieldId: div id of the field
-*   @return{Object} return a field (id, val, label) 
+*   @return{Object} return a field (id, val, label)
 */
 function getFieldFromEditForm(dialogId, fieldId){
     var type;
     var fieldDiv;
     var val;
     var field = {};
-    
+
     type = fieldId.split("-")[1];
-    fieldDiv = "#" + dialogId + " #"+ fieldId; 
+    fieldDiv = "#" + dialogId + " #"+ fieldId;
     field.id = fieldId;
     field.label = $("label", fieldDiv).text();
 
@@ -214,7 +214,7 @@ function getFieldFromEditForm(dialogId, fieldId){
         case 'track':
             val = $("input", fieldDiv).val();
             break;
-        case 'textarea': 
+        case 'textarea':
             val = $("textarea", fieldDiv).val();
             break;
         case 'checkbox':
@@ -409,19 +409,19 @@ function doPreview(id_dragged, id_iframe){
     var w = $("#"+id_dragged).width(), h = $("#"+id_dragged).height();
     $("#"+id_iframe).remove();
     makeAlertWindow(previewCode(w, h), 'Preview', w+60, h+140, id_iframe, 1000, "left");
-    
+
     var $$ = jQuery = null;
-    
+
     var code = $("#"+id_dragged).html();
-    
+
     if($(code).find(".sh_dull").length > 0){
         code = $(".view-code").text();
     }
-    
+
     $("#frame").load(function(){
         $$ = jQuery = window.frames[0].jQuery;
         $$("#home-content").append(code).trigger("create");
-        
+
         var finds = $$("#home-content").find('.button-wrapper');
         for(var i=0;i<finds.length; i++){
             if($$(finds[i]).hasClass("button-camera")){
@@ -442,12 +442,12 @@ function giveFeedback(msg){
     $('#feedback').modal('show');
 }
 
-function loading(param){
+function loading(param, ariamsg){
     $("#loader").toggle(param);
     if(param){
-        aria.notify("Loading");
+        aria.notify(ariamsg || "Loading");
     }else{
-        aria.notify("Loaded");
+        aria.notify(ariamsg || "Loaded");
     }
 }
 
@@ -534,12 +534,12 @@ function touchScroll(selector) {
     if(isTouchDevice()){
         var scrollStartPosY = 0;
         var scrollStartPosX = 0;
-        
+
         $('body').delegate(selector, 'touchstart', function(e) {
             scrollStartPosY = this.scrollTop + e.originalEvent.touches[0].pageY;
             scrollStartPosX = this.scrollLeft + e.originalEvent.touches[0].pageX;
         });
-        
+
         $('body').delegate(selector, 'touchmove', function(e) {
             if ((this.scrollTop < this.scrollHeight - this.offsetHeight &&
                 this.scrollTop + e.originalEvent.touches[0].pageY < scrollStartPosY-5) ||
@@ -551,7 +551,7 @@ function touchScroll(selector) {
                 (this.scrollLeft != 0 && this.scrollLeft+e.originalEvent.touches[0].pageX > scrollStartPosX+5)){
                 e.preventDefault();
             }
-            
+
             this.scrollTop = scrollStartPosY - e.originalEvent.touches[0].pageY;
             this.scrollLeft = scrollStartPosX - e.originalEvent.touches[0].pageX;
         });
@@ -561,14 +561,14 @@ function touchScroll(selector) {
 /* polyfill for old IE */
 if ( !Date.prototype.toISOString ) {
   ( function() {
-    
+
     function pad(number) {
       if ( number < 10 ) {
         return '0' + number;
       }
       return number;
     }
- 
+
     Date.prototype.toISOString = function() {
       return this.getUTCFullYear() +
         '-' + pad( this.getUTCMonth() + 1 ) +
@@ -579,7 +579,7 @@ if ( !Date.prototype.toISOString ) {
         '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
         'Z';
     };
-  
+
   }() );
 }
 
@@ -591,7 +591,7 @@ if ( !Date.prototype.toISOString ) {
 if (!String.prototype.format) {
   String.prototype.format = function() {
     var args = arguments;
-    return this.replace(/{(\d+)}/g, function(match, number) { 
+    return this.replace(/{(\d+)}/g, function(match, number) {
         return typeof args[number] != 'undefined' ? args[number] : match;
         });
     };
@@ -617,8 +617,8 @@ function long2tile(lon,zoom) {
     return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
 }
 
-function lat2tile(lat, zoom)  { 
-    return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); 
+function lat2tile(lat, zoom)  {
+    return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom)));
 }
 
 function tile2long(x, zoom) {
