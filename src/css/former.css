@@ -348,3 +348,14 @@ a:focus,
 tr.record{
   cursor: pointer;
 }
+
+/* Animator popup customisations */
+.olPopupContent img{
+    max-width: 100% !important;
+}
+.olPopupContent {
+    height: 100% !important;
+}
+.olPopup{
+    height: inherit !important;
+}

@@ -538,17 +538,63 @@ Walk.prototype.addPOI = function(POI) {
  * TODO type - sets different PopUp type (i.e. picture, audio, text...)
  */
 
-var POI = function(name, type, LonLat, map) {
+var POI = function(name, type, LonLat, map, mapviewer) {
     this.name = name;
     this.type = type;
     this.LonLat = LonLat;
-    this.content = '';
+    var url = mapviewer.buildUrl('records', '/' + name);
+    var preview = '';   
+    var self = this;
+    var title = '';
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            var editor = data.editor;
+            title = editor.split(".")[0];
+            var field_values = data.fields;
+
+            if(title === 'image'){
+                //Get image
+                $.each(field_values, function(key, value){
+                    var title = value.val;
+                    preview += ('<img src='+encodeURI(url)+'/'+ title +" alt='"+ title +"'>");
+                });
+            }
+            if(title === 'text'){
+                //Get text
+                $.each(field_values, function(key, value){
+                    preview += ('<p>' + value.val +"</p>");
+                });
+            }
+            if(title === 'audio'){
+                //Get audio
+                $.each(field_values, function(key, value){
+                    preview += ('<p><audio controls><source src=' + encodeURI(url) + '/' +  value.val +" type='audio/wav'> Your browser does not support the audio element.</audio></p>");
+                });
+            }
+            self.setContent(self.content += preview);
+            self.popup = new OpenLayers.Popup(title, self.LonLat, new OpenLayers.Size(200,200), self.content, true);
+            self.popup.autoSize=true;
+
+        },
+        error: function(jqXHR, status, error){
+            loading(false);
+            giveFeedback(JSON.parse(jqXHR.responseText)["msg"]);
+        }
+    });
+    this.content = '<b>' + this.name + '</b>'  + preview;
     // startStepNum defines when the popup should appear (with regards to the step counter inside the WalkAnimation)
     this.startStepNum = null;
     // endStepNum defines when the popup should disappear (with regards to the step counter inside the WalkAnimation)
     this.endStepNum = null;
     this.map = map;
-    this.popup = new OpenLayers.Popup.FramedCloud(this.name, this.LonLat, OpenLayers.Size(500, 500), '<b>' + this.name + '</b>', null, true);
+
+    self.popup = new OpenLayers.Popup(this.name, self.LonLat, new OpenLayers.Size(200,200), self.content, true);
+    self.popup.autoSize=true;
+
     this.isShown = false;
 };
 

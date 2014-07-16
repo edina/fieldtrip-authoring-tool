@@ -145,7 +145,7 @@ AnimatorViewer.prototype._initEvents = function(){
             var poiLonLat = new OpenLayers.LonLat(
                 this.mapviewer.map.getLayersByName("Clusters")[0].features[POIs[i].id.split("-")[1]].geometry.x,
                 this.mapviewer.map.getLayersByName("Clusters")[0].features[POIs[i].id.split("-")[1]].geometry.y);
-            var poi = new POI(poiName, null, poiLonLat, this.track_animator.map);
+            var poi = new POI(poiName, null, poiLonLat, this.track_animator.map, this.mapviewer);
             this.track_animator.walk.addPOI(poi);
         }
         this.track_animator.walk.playAnimation();
