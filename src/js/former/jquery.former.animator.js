@@ -366,25 +366,6 @@ WalkAnimation.prototype.anim = function() {
                     this.walk.markersLayer.removeMarker(removeMarker);
                 }
 
-                // remove existing nameBadgeMarker and replace with new one
-
-                this.walk.markersLayer.removeMarker(this.walk.walker.badge);
-                var nameBadgeMarker = new OpenLayers.Marker(olLonLat, this.walk.walker.namebadgeIcon);
-                this.walk.walker.badge = nameBadgeMarker;
-                this.walk.markersLayer.addMarker(nameBadgeMarker);
-                var markerDiv = nameBadgeMarker.icon.imageDiv;
-                var markerImg = markerDiv.firstChild;
-                markerDiv.appendChild(this.walk.walker.badgeCanvas);
-
-                markerImg.style.display = "none";
-                // reset badge canvas ( was initialized in TMS layer loadend event )
-                this.walk.walker.badgeCanvas.width = (this.walk.walker.namebadgeSize.w); // TODO  2 * hypoteneuse img width , height  ;
-                this.walk.walker.badgeCanvas.height = (this.walk.walker.namebadgeSize.h);
-
-                var c = this.walk.walker.badgeCanvas.getContext("2d");
-                c.font = this.walk.walker.badgeFont;
-                c.fillText(this.walk.walker.name, 0, this.walk.walker.namebadgeSize.h - 20);
-
                 // for each POI check if it should be displayed or hidden
                 for (var i in this.walk.POIs) {
 
