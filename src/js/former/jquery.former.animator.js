@@ -543,7 +543,7 @@ var POI = function(name, type, LonLat, map, mapviewer) {
     this.type = type;
     this.LonLat = LonLat;
     var url = mapviewer.buildUrl('records', '/' + name);
-    var preview = '';   
+    var preview = '';
     var self = this;
     var title = '';
 
@@ -560,7 +560,7 @@ var POI = function(name, type, LonLat, map, mapviewer) {
                 //Get image
                 $.each(field_values, function(key, value){
                     var title = value.val;
-                    preview += ('<img src='+encodeURI(url)+'/'+ title +" alt='"+ title +"'>");
+                    preview += ('<img src='+encodeURI(url)+'/'+ title +' alt="'+ title +'" style="image-orientation: from-image">');
                 });
             }
             if(title === 'text'){

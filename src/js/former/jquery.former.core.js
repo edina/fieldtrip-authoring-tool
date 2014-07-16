@@ -257,8 +257,8 @@
                 "clear-btn": "clear-records"
             },
             "table-elements": {
-                "tableDiv": "myTable",
-                "tableId": "example",
+                "tableDiv": "memories-container",
+                "tableId": "memories",
                 "clear-btn": "clear-table"
             },
             "map-elements": {
@@ -313,15 +313,15 @@
  */
     BuildFormer.prototype.enableTrackAnimator = function(){
         var buildFormer = this;
-
-        this.animatorViewer = new AnimatorViewer(this.mapviewer,
+        var animatorViewer = new AnimatorViewer(this.mapviewer,
                                                  "#animation-control");
+        this.animatorViewer = animatorViewer;
 
         $("#track-animator").click($.proxy(function(){
             this.clearAll(); // not sure
             this.showEditElements("animator", false); // switching to Track Animator view
 
-            this.animatorViewer.copy_tracks();
+            this.animatorViewer.copyTracks();
 
             // if container empty (no map in it), then re-render map to new container
             if($('#animator-map_canvas').children().size() == 0)
@@ -340,8 +340,8 @@
 
         $('#animator-content .get-tracks').click($.proxy(function(){
             this.getData(this.prepareFiltersString(),
-                         $.proxy(buildFormer.animatorViewer.copy_tracks,
-                                 buildFormer));
+                         $.proxy(animatorViewer.copyTracks,
+                                 animatorViewer));
         }, this.mapviewer));
 
     };

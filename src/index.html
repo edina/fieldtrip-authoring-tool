@@ -127,8 +127,8 @@
                     <input type="hidden" name="date-start" id="date-start" value=""/>
                     <input type="hidden" name"by-editor" id="by-editor" value=""/>
                   </div>
-                  <div id="myTable" style="clear: both;" >
-                    <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example" tabindex="0" aria-label="List of tracks recorded. Use up and down arrow to move between records. Use Enter to edit the name or the description of each record. Use plus or minus for expanding the memories associated to the track" role="treegrid">
+                  <div id="memories-container" style="clear: both;" >
+                    <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="memories" tabindex="0" aria-label="List of tracks recorded. Use up and down arrow to move between records. Use Enter to edit the name or the description of each record. Use plus or minus for expanding the memories associated to the track" role="treegrid">
                       <caption>List of tracks</caption>
                       <thead>
                         <tr>
@@ -179,9 +179,9 @@
                 </div>
                 <div class="row">
                   <div class="span12">
-                    <div id="animator-myTable">
+                    <div>
 
-                      <table class="table" tabindex="0">
+                      <table id="animator-myTable" class="table" tabindex="0">
                         <thead>
                           <tr>
                             <th>Name</th>

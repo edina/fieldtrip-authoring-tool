@@ -1,6 +1,8 @@
 var AnimatorViewer = function(mapviewer, selector, options){
     var defaults = {
-        tableSelector: '#animator-myTable'
+        tableSelector: '#animator-myTable',
+        tableMemories: '#memories'
+
     };
 
     this.options = $.extend(defaults, options);
@@ -19,10 +21,12 @@ AnimatorViewer.prototype._initDomControls = function(){
 /*
  *   Copy tracks from the mapviewer table to the animator table
  */
-AnimatorViewer.prototype.copy_tracks = function(){
-    var table = this.options.tableSelector;
+AnimatorViewer.prototype.copyTracks = function(){
+    var srcTable = this.options.tableMemories;
+    var dstTable = this.options.tableSelector;
     var animatorTableTbodyHTML = '';
-    $('#myTable .track').each(function(index, el) {
+
+    $('.track', srcTable).each(function(index, el) {
         var trackId = $(el).attr('trackid');
         animatorTableTbodyHTML += '<tr id="rowek-'+el.id.split("-")[1]+'" tabindex="0" trackid="'+trackId+'">';
 
@@ -32,11 +36,11 @@ AnimatorViewer.prototype.copy_tracks = function(){
             }
         });
 
-        var numberOfPOIs = $('#myTable').find('tr[trackid='+trackId+']').size()-1;
+        var numberOfPOIs = $(srcTable).find('tr[trackid='+trackId+']').size()-1;
         animatorTableTbodyHTML += '<td>'+numberOfPOIs+'</td>';
         animatorTableTbodyHTML += '</tr>';
     });
-    $('tbody', table).html(animatorTableTbodyHTML);
+    $('tbody', dstTable).html(animatorTableTbodyHTML);
 };
 
 AnimatorViewer.prototype._initKeyboardNavigation = function(){
@@ -135,10 +139,11 @@ AnimatorViewer.prototype._initEvents = function(){
 
         this.track_animator.init();
         var POIs = Array();
-        $('#myTable').find('tr.poi[trackid='+$('#animator-myTable').find('tr.row_selected').attr('trackid')+']').each(function(index, el) {
+        $(this.options.tableMemories).find('tr.poi[trackid='+$('#animator-myTable')
+                                     .find('tr.row_selected')
+                                     .attr('trackid')+']').each(function(index, el) {
             POIs[index] = el;
         });
-
         for(var i in POIs)
         {
             var poiName = $(POIs[i]).attr('record-name');
