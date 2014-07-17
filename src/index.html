@@ -161,11 +161,14 @@
 
                   <div id="location-dialog" style="display:none"></div>
                 </div>
+                 <!-- CONTENT FOR TRACK ANIMATOR -->
                 <div id="animation-control" class="sm-control" style="display: none;">
                     <div class="btn-group">
                       <button class="get-tracks btn">Get Tracks</button>
                       <button disabled id="track-animate" class="track-animate btn" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
                       <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
+                      <button id="increase-track-speed" class="track-speed btn" title="Increase speed" aria-label="Increase speed">Increase Speed <i class="icon-plus"></i></button>
+                      <button id="decrease-track-speed" class="track-speed btn" title="Decrease speed" aria-label="Decrease speed">Decrease Speed <i class="icon-minus"></i></button>
                     </div>
                     <div>
 
@@ -183,45 +186,10 @@
                       </table>
 
                     </div>
-                </div>
+                </div><!-- END CONTENT FOR TRACK ANIMATOR -->
               </div>
             </div>
             <!-- end map-content row -->
-            <!-- CONTENT FOR TRACK ANIMATOR -->
-            <!--div class="row">
-              <div id="animator-content" class="container-fluid" style="display: none" aria-hidden="true">
-                <div class="row">
-                  <div id="animator-map_canvas" style="background-color: #eee;"></div>
-                </div>
-                <div id="animation-control" class="row">
-                    <div class="btn-group">
-                      <button class="get-tracks btn">Get Tracks</button>
-                      <button disabled id="track-animate" class="track-animate btn" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
-                      <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
-                    </div>
-                </div>
-                <div class="row">
-                  <div class="span12">
-                    <div>
-
-                      <table id="animator-myTable" class="table" tabindex="0">
-                        <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Date</th>
-                            <th>Number of POIs</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                      </table>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div--><!-- END CONTENT FOR TRACK ANIMATOR -->
             <div class="row">
               <div id="aria-notification" aria-live="assertive" tabindex="-1"></div>
             </div>

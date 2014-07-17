@@ -160,6 +160,7 @@ AnimatorViewer.prototype._initEvents = function(){
 
         $('#track-animate').hide();
         $('#track-pause-animate').show();
+        $('.track-speed').show();
     },this));
 
     $('#track-pause-animate').on('click', $.proxy(function(e){
@@ -178,6 +179,17 @@ AnimatorViewer.prototype._initEvents = function(){
             aria.notify("Resume playing track: " + this.track_animator.walker.name);
         }
 
+    },this));
+
+    /**
+     * Increase/Decrease animation speed listener
+     */
+    $('.track-speed').on('click', $.proxy(function(e){
+        if(e.target.id === "increase-track-speed"){
+            this.track_animator.walker.speed -= 0.05;
+        }else{
+            this.track_animator.walker.speed += 0.05;
+        }
     },this));
 };
 
