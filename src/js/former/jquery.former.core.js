@@ -274,40 +274,12 @@
         this.mapviewer.init();
 
         $("#my-records").click($.proxy(function(){
-            this.clearAll();
+            //this.clearAll();
             this.showEditElements("map", false);
-            // cleaning after track animation
-            if(this.track_animator !== undefined)
-            {
-                this.track_animator.destroy();
-            }
-            if($('#track-animate').css('display') === "none")
-            {
-                $('#track-animate').attr('disabled', 'disabled');
-                $('#track-pause-animate').hide();
-                $('#track-animate').show();
-            }
-
-            // if container empty (no map in it), then re-render map
-            if($('#map_canvas').children().size() == 0)
-            {
-                // map container resize hack - without removing the max-width, it does not work...
-                if($('#map_canvas').css('max-width') === "100%")
-                    $('#map_canvas').css('max-width','none');
-                this.mapviewer.map.render('map_canvas');
-                // returning back to max-width == 100%
-                if($('#map_canvas').css('max-width') === "none")
-                    $('#map_canvas').css('max-width','100%');
-            }
-
-            $("#options-dialog").remove();
-
-            // Show panel with the table
-            $('.panel').hide();
-            $('.records.panel').show();
+            this.animatorViewer.deactivate();
             this.locationFile.deactivate();
-
-        }, this))
+            this.mapviewer.activateControls();
+        }, this));
     }
 
 /**
@@ -321,26 +293,14 @@
 
         $("#track-animator").click($.proxy(function(){
             this.clearAll(); // not sure
-            this.showEditElements("animator", false); // switching to Track Animator view
-
+            // switching to Track Animator view
+            this.showEditElements("animator", false);
+            this.locationFile.deactivate();
+            this.mapviewer.deactivateControls();
             this.animatorViewer.copyTracks();
-
-            // if container empty (no map in it), then re-render map to new container
-            if($('#animator-map_canvas').children().size() == 0)
-            {
-                // map container resize hack - without removing the max-width, it does not work...
-                if($('#animator-map_canvas').css('max-width') === "100%")
-                    $('#animator-map_canvas').css('max-width','none');
-                $('#animator-map_canvas').width($('#map_canvas').width());
-                $('#animator-map_canvas').height($('#map_canvas').height());
-                buildFormer.mapviewer.map.render('animator-map_canvas');
-                if($('#animator-map_canvas').css('max-width') === "none")
-                    $('#animator-map_canvas').css('max-width','100%');
-                $("#options-dialog").remove(); //???
-            }
         }, this));
 
-        $('#animator-content .get-tracks').click($.proxy(function(){
+        $('#animation-control .get-tracks').click($.proxy(function(){
             this.getData(this.prepareFiltersString(),
                          $.proxy(animatorViewer.copyTracks,
                                  animatorViewer));
@@ -352,11 +312,13 @@
         var locationFile = new LocationFile(this.mapviewer.map, '#location-control');
         this.locationFile = locationFile;
 
-        $('#mobile-utilities').click(function(){
-            $('.panel').hide();
-            $('.utilities.panel').show();
-            locationFile.activate();
-        });
+        $('#mobile-utilities').click($.proxy(function(){
+            // switching to the mobile utilities view
+            this.showEditElements("locationfile", false);
+            this.locationFile.activate();
+            this.animatorViewer.deactivate();
+            this.mapviewer.deactivateControls();
+        }, this));
     };
 
     /**
@@ -938,25 +900,23 @@
             $("#"+this.options.form_elements_id).hide('fast');
             if(state === "home"){
                 $("#map-content").hide('fast');
-                $("#mapviewer-fieldset").hide("fast");
-                $("#export-fieldset").hide("fast");
-                $("#animator-content").hide("fast");
                 $("#home-content").show('fast');
                 $("#logout-paragraph").show("fast");
             }else if(state === "map"){
                 $("#home-content").hide("fast");
-                $("#animator-content").hide("fast");
-                $("#mapviewer-fieldset").show("fast");
-                $("#export-fieldset").show("fast");
                 $("#map-content").show("fast");
+                $('.sm-control:not(#memories-control)').hide();
+                $('#memories-control').show();
             }else if(state === "animator"){
                 $("#home-content").hide("fast");
-                $("#map-content").hide('fast');
-                $("#mapviewer-fieldset").hide("fast");
-                $("#export-fieldset").hide("fast");
-                $("#animator-content").show("fast");
-                // $("#export-fieldset").show("fast");
-                // $("#map-content").show("fast");
+                $("#map-content").show("fast");
+                $('.sm-control:not(#animation-control)').hide();
+                $('#animation-control').show();
+            }else if(state === "locationfile"){
+                $("#home-content").hide("fast");
+                $("#map-content").show("fast");
+                $('.sm-control:not(#location-control)').hide();
+                $('#location-control').show();
             }
         }
 

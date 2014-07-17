@@ -8,6 +8,7 @@ var AnimatorViewer = function(mapviewer, selector, options){
     this.options = $.extend(defaults, options);
     this.mapviewer = mapviewer;
     this.controls_selector = selector;
+    this.track_animator = null;
     this._initDomControls();
 };
 
@@ -91,7 +92,7 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
  */
 AnimatorViewer.prototype._initEvents = function(){
     $('#animator-myTable tbody').on('click', 'tr', $.proxy(function(e){
-        if(this.track_animator !== undefined){
+        if(this.track_animator !== null){
             this.track_animator.destroy();
         }
 
@@ -178,4 +179,15 @@ AnimatorViewer.prototype._initEvents = function(){
         }
 
     },this));
+};
+
+AnimatorViewer.prototype.deactivate = function(){
+    $('#track-animate').attr('disabled', 'disabled');
+    $('#track-pause-animate').hide();
+    $('#track-animate').show();
+
+    if(this.track_animator !== null)
+    {
+        this.track_animator.destroy();
+    }
 };

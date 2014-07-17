@@ -120,7 +120,7 @@
               <div id="map-content" style="display: none" aria-hidden="true">
                 <div id="map_canvas"></div>
                 <br><br>
-                <div class="records panel">
+                <div id="memories-control" class="sm-control">
                   <div id="filter-area">
                     <button id="filter-records" class="btn">Get Tracks</button>
                     <!-- Add two hidden values for using prepareFiltersString -->
@@ -142,7 +142,7 @@
                     </table>
                   </div>
                 </div>
-                <div id="location-control" class="utilities panel" style="display: none;">
+                <div id="location-control" class="sm-control" style="display: none;">
                   <input name="location-lat" type="hidden" value=""/>
                   <input name="location-lon" type="hidden" value=""/>
                   <h4>Create a location file</h4>
@@ -161,11 +161,34 @@
 
                   <div id="location-dialog" style="display:none"></div>
                 </div>
+                <div id="animation-control" class="sm-control" style="display: none;">
+                    <div class="btn-group">
+                      <button class="get-tracks btn">Get Tracks</button>
+                      <button disabled id="track-animate" class="track-animate btn" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
+                      <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
+                    </div>
+                    <div>
+
+                      <table id="animator-myTable" class="table" tabindex="0">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Number of POIs</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                      </table>
+
+                    </div>
+                </div>
               </div>
             </div>
             <!-- end map-content row -->
             <!-- CONTENT FOR TRACK ANIMATOR -->
-            <div class="row">
+            <!--div class="row">
               <div id="animator-content" class="container-fluid" style="display: none" aria-hidden="true">
                 <div class="row">
                   <div id="animator-map_canvas" style="background-color: #eee;"></div>
@@ -198,7 +221,7 @@
                   </div>
                 </div>
               </div>
-            </div><!-- END CONTENT FOR TRACK ANIMATOR -->
+            </div--><!-- END CONTENT FOR TRACK ANIMATOR -->
             <div class="row">
               <div id="aria-notification" aria-live="assertive" tabindex="-1"></div>
             </div>

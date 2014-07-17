@@ -659,7 +659,7 @@ MapViewer.prototype.initTable = function(table_data){
                        {"mData": "buttons", "bSortable": false}];
     if(this.oTable == undefined){
         this.oTable = $("#"+this.options["table-elements"]["tableId"]).dataTable({
-            "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+            "sDom": "<'row'<'span6'l><'span6'>r>t<'row'<'span6'i><'span6'p>>",
             "sPaginationType": "bootstrap",
             "bPaginate": false,
             "bSort": true,
@@ -901,6 +901,10 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
                     callback();
                 }
             });
+    }else{
+        if(callback !== undefined && typeof(callback) === "function"){
+            callback();
+        }
     }
 };
 
@@ -1311,7 +1315,21 @@ MapViewer.prototype.enableDeleteAction = function(){
     $("#delete_no").click(function(){
         $('#deleteModal').modal('hide');
     });
-}
+};
+
+MapViewer.prototype.deactivateControls = function(){
+    var selectControl = layer.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
+    var toolbar = this.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
+    toolbar.deactivate();
+    selectControl.deactivate();
+};
+
+MapViewer.prototype.activateControls = function(){
+    var selectControl = layer.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
+    var toolbar = this.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
+    toolbar.activate();
+    selectControl.activate();
+};
 
 MapViewer.prototype.getRecordsFromLS = function(){
     return JSON.parse(window.localStorage.getItem("records"));
