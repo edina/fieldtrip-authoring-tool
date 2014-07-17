@@ -1318,14 +1318,14 @@ MapViewer.prototype.enableDeleteAction = function(){
 };
 
 MapViewer.prototype.deactivateControls = function(){
-    var selectControl = layer.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
+    var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
     var toolbar = this.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
     toolbar.deactivate();
     selectControl.deactivate();
 };
 
 MapViewer.prototype.activateControls = function(){
-    var selectControl = layer.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
+    var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
     var toolbar = this.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
     toolbar.activate();
     selectControl.activate();

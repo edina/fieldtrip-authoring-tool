@@ -46,7 +46,7 @@ AnimatorViewer.prototype.copyTracks = function(){
 
 AnimatorViewer.prototype._initKeyboardNavigation = function(){
     var table = this.options.tableSelector;
-
+    var animatorViewer = this;
     $(document).off('keyup', table);
     $(document).on('keyup', table, function(evt){
         var $row = $('.row_selected', table);
@@ -82,6 +82,14 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
                 }else if($pause.is(':visible')){
                     $pause.trigger('click');
                 }
+            break;
+            case 61: // +
+            case 107: // Numpad +
+                animatorViewer.changeSpeed(0.05);
+            break;
+            case 109: // Numpad +
+            case 173: // -
+                 animatorViewer.changeSpeed(-0.05);
             break;
         }
     });
@@ -186,11 +194,20 @@ AnimatorViewer.prototype._initEvents = function(){
      */
     $('.track-speed').on('click', $.proxy(function(e){
         if(e.target.id === "increase-track-speed"){
-            this.track_animator.walker.speed -= 0.05;
+            this.changeSpeed(0.05);
         }else{
-            this.track_animator.walker.speed += 0.05;
+            this.changeSpeed(-0.05);
         }
     },this));
+};
+
+AnimatorViewer.prototype.changeSpeed = function(delta){
+    this.track_animator.walker.speed -= delta;
+    if(delta > 0){
+        aria.notify('Play speed increased');
+    }else{
+        aria.notify('Play speed decreased');
+    }
 };
 
 AnimatorViewer.prototype.deactivate = function(){
