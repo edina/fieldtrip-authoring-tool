@@ -359,3 +359,27 @@ tr.record{
 .olPopup{
     height: inherit !important;
 }
+
+.navbar-inverse .nav > li > a,
+.navbar-inverse .nav > li > span{
+  display: block;
+  float: none;
+  padding: 10px 15px;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.navbar-inverse .nav > li > a .active,
+.navbar-inverse .nav > li > a:hover,
+.navbar-inverse .nav > li > span .active,
+.navbar-inverse .nav > li > span:hover{
+    color: #f7983a;
+}
+
+.navbar-inverse .brand{
+  color: #ffffff;
+}
+
+.navbar-inverse .brand:hover{
+  color: #f7983a;
+}

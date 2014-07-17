@@ -108,21 +108,23 @@
   };
 
     BuildFormer.prototype.createMainMenu = function(){
-        var menu = new Array();
-        menu.push('<li role="tab" aria-selected="false"><a href="" id="home" class="menu-item" role="button">Home</a></li>');
-        menu.push('<li role="tab" class="active" aria-selected="false"><a href="" id="my-records" rel="tooltip" data-placement="bottom" data-original-title="Click here to see your memories" class="menu-item" role="button">Memories Viewer</a></li>');
-        menu.push('<li role="tab" aria-selected="false"><a href="" id="track-animator" rel="tooltip" data-placement="bottom" data-original-title="Click here to animate your tracks" class="menu-item" role="button">Track Animator</a></li>');
-        menu.push('<li role="tab" aria-selected="false"><a href="" id="mobile-utilities" rel="tooltip" data-placement="bottom" data-original-title="" class="menu-item" role="button">Mobile Utilities</a></li>');
-        menu.push('<li role="tab" aria-selected="false"><a href="mailto:edina@ed.ac.uk" class="menu-item" role="button">Contact</a></li>');
+        var menu = [];
+        menu.push('<li id="home" tabindex="0" role="tab" class="menu-item" rel="tooltip" data-placement="bottom" data-original-title="Spatial Memories Home" aria-selected="false"><span>Home</span></li>');
+        menu.push('<li id="my-records" tabindex="0" role="tab" class="active menu-item" rel="tooltip" data-placement="bottom" data-original-title="Click here to see your memories" aria-selected="false"><span>Memories Viewer</span></li>');
+        menu.push('<li id="track-animator" tabindex="0" role="tab" aria-selected="false" rel="tooltip" data-placement="bottom" data-original-title="Click here to animate your tracks" class="menu-item"><span>Track Animator</span></li>');
+        menu.push('<li id="mobile-utilities" tabindex="0" role="tab" aria-selected="false" rel="tooltip" data-placement="bottom" data-original-title="Click here to..." class="menu-item"><span>Mobile Utilities</span></li>');
+        menu.push('<li class="menu-item" role="button"><a href="mailto:edina@ed.ac.uk">Contact</a></li>');
         return menu;
-    }
+    };
 
     BuildFormer.prototype.enableTooltips = function(){
+        $("#home").tooltip();
         $("#create-form").tooltip();
         $("#my-editors").tooltip();
         $("#example-editors").tooltip();
         $("#my-records").tooltip();
         $("#track-animator").tooltip();
+        $("#mobile-utilities").tooltip();
     }
 
     //the events relating to the buttons of the create main menu

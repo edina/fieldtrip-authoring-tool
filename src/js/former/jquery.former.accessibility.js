@@ -11,6 +11,7 @@ var Accesibility = function(options){
 */
 Accesibility.prototype.apply = function(){
 	this.mailto();
+    this.menuItemEnter();
 };
 
 /*
@@ -18,16 +19,31 @@ Accesibility.prototype.apply = function(){
 	about to leave the window.
 */
 Accesibility.prototype.mailto = function(){
-	
-	// Transparent 1x1 gif
-	gif='<span><img alt="' + this.options.msg_mailto +'" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></span>';	
 
-	$("a").each(function(index){
-		$this = $(this);
+	// Transparent 1x1 gif
+	var gif='<span><img alt="' + this.options.msg_mailto +'" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></span>';
+
+	$("a").each(function(index, el){
 		if(this.href.match('^mailto:')){
-			$this.append(gif);
+			$(el).append(gif);
 		}
 	});
+};
+
+/*
+    Trigger click on enter on bootstrap menu items
+*/
+Accesibility.prototype.menuItemEnter = function(){
+    var menuItem = '.menu-item';
+
+    $(document).off('keyup', menuItem);
+    $(document).on('keyup', menuItem, function(evt){
+        switch(evt.keyCode){
+            case 13:
+                $(evt.target).trigger('click');
+            break;
+        }
+    });
 };
 
 /*
@@ -37,7 +53,7 @@ Accesibility.prototype.mailto = function(){
 {
     var _show = $.fn.show;
     var _hide = $.fn.hide;
- 
+
     $.fn.show = function()
     {
         var ret = _show.apply(this, arguments);
