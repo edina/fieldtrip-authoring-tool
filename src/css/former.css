@@ -383,3 +383,7 @@ tr.record{
 .navbar-inverse .brand:hover{
   color: #f7983a;
 }
+.track-speed {
+    display:none;
+}
+
