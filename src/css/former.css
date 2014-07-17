@@ -369,9 +369,9 @@ tr.record{
   text-decoration: none;
 }
 
-.navbar-inverse .nav > li > a .active,
+.navbar-inverse .nav > li.active > a
 .navbar-inverse .nav > li > a:hover,
-.navbar-inverse .nav > li > span .active,
+.navbar-inverse .nav > li.active > span,
 .navbar-inverse .nav > li > span:hover{
     color: #f7983a;
 }
