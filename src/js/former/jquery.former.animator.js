@@ -578,7 +578,7 @@ var POI = function(name, type, LonLat, map, mapviewer) {
             giveFeedback(JSON.parse(jqXHR.responseText)["msg"]);
         }
     });
-    this.content = '<b>' + this.name + '</b>'  + preview;
+    this.content = '<h5>' + this.name + '</h5>'  + preview;
     // startStepNum defines when the popup should appear (with regards to the step counter inside the WalkAnimation)
     this.startStepNum = null;
     // endStepNum defines when the popup should disappear (with regards to the step counter inside the WalkAnimation)
