@@ -383,7 +383,16 @@ tr.record{
 .navbar-inverse .brand:hover{
   color: #f7983a;
 }
-.track-speed {
+.track-speed, .checkbox{
+    display: none;
+}
+.form-actions{
+    width: 95%;
+}
+
+#pause-checkbox{
+    float:right;
     display:none;
+    padding-top: 5px;
 }
 

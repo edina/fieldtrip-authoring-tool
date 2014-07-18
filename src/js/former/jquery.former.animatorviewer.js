@@ -168,7 +168,7 @@ AnimatorViewer.prototype._initEvents = function(){
 
         $('#track-animate').hide();
         $('#track-pause-animate').show();
-        $('.track-speed').show();
+        $('.track-speed, .checkbox').show();
     },this));
 
     $('#track-pause-animate').on('click', $.proxy(function(e){
@@ -199,6 +199,14 @@ AnimatorViewer.prototype._initEvents = function(){
             this.changeSpeed(-0.05);
         }
     },this));
+
+    /**
+     * Listener for toggling animation pause on popup
+     */
+    $('#pause-animation').on('click', $.proxy(function(e){
+        this.track_animator.walk.animation.togglePause();
+    },this));
+
 };
 
 AnimatorViewer.prototype.changeSpeed = function(delta){

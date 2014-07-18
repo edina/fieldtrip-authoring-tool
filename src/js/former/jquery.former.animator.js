@@ -182,6 +182,7 @@ Walk.prototype.playAnimation = function() {
 var WalkAnimation = function(walk) {
     this.walk = walk;
     this.isPlaying = false;
+    this.pauseOnPopup = false;
     this.startTime = new Date();
     this.lastReplayTime = null;
     this.counter = 0;
@@ -264,6 +265,10 @@ WalkAnimation.prototype.play = function() {
 
 WalkAnimation.prototype.pause = function() {
     this.isPlaying = false;
+};
+
+WalkAnimation.prototype.togglePause= function() {
+    this.pauseOnPopup = !this.pauseOnPopup;
 };
 
 /*
@@ -374,6 +379,13 @@ WalkAnimation.prototype.anim = function() {
                         if (!this.walk.POIs[i].isShown) {
                             // console.log('showing POI. startStep: ' + this.walk.POIs[i].startStepNum + ' counter: ' + this.counter);
                             this.walk.POIs[i].showPOI();
+                      
+                            if(this.pauseOnPopup === true){
+                                this.walk.animation.pause();
+                                $('#track-pause-animate').html('Resume <i class="icon-play"></i>');
+                                aria.notify("Pause playing track: " + this.walk.name);
+                            }
+                           
                         }
                     } else if (this.walk.POIs[i].isShown) {
                         // console.log('hiding POI. endStep: ' + this.walk.POIs[i].endStepNum + ' counter: ' + this.counter);

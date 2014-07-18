@@ -121,8 +121,8 @@
                 <div id="map_canvas"></div>
                 <br><br>
                 <div id="memories-control" class="sm-control">
-                  <div id="filter-area">
-                    <button id="filter-records" class="btn">Get Tracks</button>
+                  <div class="btn-group form-actions" id="filter-area">
+                    <button id="filter-records" class="btn btn-primary">Get Tracks</button>
                     <!-- Add two hidden values for using prepareFiltersString -->
                     <input type="hidden" name="date-start" id="date-start" value=""/>
                     <input type="hidden" name"by-editor" id="by-editor" value=""/>
@@ -163,14 +163,19 @@
                 </div>
                  <!-- CONTENT FOR TRACK ANIMATOR -->
                 <div id="animation-control" class="sm-control" style="display: none;">
-                    <div class="btn-group">
-                      <button class="get-tracks btn">Get Tracks</button>
+                    <div class="btn-group form-actions">
+                      <button class="get-tracks btn btn-primary">Get Tracks</button>
                       <button disabled id="track-animate" class="track-animate btn" title="Animate track" aria-label="Animate the track path">Animate <i class="icon-play"></i></button>
                       <button id="track-pause-animate" style="display:none;" class="track-pause-animate btn" title="Pause track animate" aria-label="Pause track animation">Pause Animation <i class="icon-pause"></i></button>
                       <button id="increase-track-speed" class="track-speed btn" title="Increase speed" aria-label="Increase speed">Increase Speed <i class="icon-plus"></i></button>
                       <button id="decrease-track-speed" class="track-speed btn" title="Decrease speed" aria-label="Decrease speed">Decrease Speed <i class="icon-minus"></i></button>
-                    </div>
-                    <div>
+                      <label class="checkbox" id="pause-checkbox">
+                          <input type="checkbox" id="pause-animation" value="Pause animation at each record" aria-label="Pause animation at each record">
+                          Pause animation at each record
+                      </label>
+
+                  </div>
+                  <div>
 
                       <table id="animator-myTable" class="table" tabindex="0">
                         <thead>
