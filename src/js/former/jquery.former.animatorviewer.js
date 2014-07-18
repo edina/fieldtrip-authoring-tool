@@ -149,6 +149,7 @@ AnimatorViewer.prototype._initEvents = function(){
         var trackName = $('#animator-myTable').find('tr.row_selected td:first-child').text();
 
         this.track_animator = new TrackAnimator(this.mapviewer.map, trackName);
+        var self = this.track_animator;
 
         this.track_animator.init();
         var POIs = Array();
@@ -166,9 +167,24 @@ AnimatorViewer.prototype._initEvents = function(){
             var poi = new POI(poiName, null, poiLonLat, this.track_animator.map, this.mapviewer);
             this.track_animator.walk.addPOI(poi);
         }
-        this.track_animator.walk.playAnimation();
 
-        aria.notify("Start playing track: " + this.track_animator.walker.name);
+        this.track_animator.walk.animation.on('pause', function(){
+            $('#track-pause-animate').html('Resume <i class="icon-play"></i>');
+            aria.notify("Pause playing track: " + self.walker.name);
+        });
+
+        this.track_animator.walk.animation.on('play', function(){
+            $('#track-pause-animate').html('Pause Animation <i class="icon-pause"></i>');
+            aria.notify("Start playing track: " + self.walker.name);
+        });
+
+        this.track_animator.walk.animation.on('resume', function(){
+            $('#track-pause-animate').html('Pause Animation <i class="icon-pause"></i>');
+            aria.notify("Resume playing track: " + self.walker.name);
+        });
+
+
+        this.track_animator.walk.playAnimation();
 
         $('#track-animate').hide();
         $('#track-pause-animate').show();
@@ -179,16 +195,11 @@ AnimatorViewer.prototype._initEvents = function(){
         e.preventDefault();
         if(this.track_animator.walk.animation.isPlaying)
         {
-            $('#track-pause-animate').html('Resume <i class="icon-play"></i>');
-            this.track_animator.walk.animation.isPlaying = false;
-            aria.notify("Pause playing track: " + this.track_animator.walker.name);
+            this.track_animator.walk.animation.pause();
         }
         else
         {
-            this.track_animator.walk.animation.isPlaying = true;
-            $('#track-pause-animate').html('Pause Animation <i class="icon-pause"></i>');
-            this.track_animator.walk.animation.anim();
-            aria.notify("Resume playing track: " + this.track_animator.walker.name);
+            this.track_animator.walk.animation.play();
         }
 
     },this));

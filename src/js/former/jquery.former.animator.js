@@ -186,6 +186,7 @@ var WalkAnimation = function(walk) {
     this.startTime = new Date();
     this.lastReplayTime = null;
     this.counter = 0;
+    this.isPaused = false;
 
     // left and right feet markers
     this.size = new OpenLayers.Size(45, 41); // TODO pass these into constructor params?
@@ -286,16 +287,18 @@ WalkAnimation.prototype.drawImageRotate = function(c, img, x, y, width, height, 
 
 WalkAnimation.prototype.play = function() {
     this.isPlaying = true;
-    if(!this.startTime){
+    if(!this.isPaused){
         this.startTime = new Date();
+        this.trigger('play');
+    }else{
         this.trigger('resume');
     }
     this.anim();
-    this.trigger('play');
 };
 
 WalkAnimation.prototype.pause = function() {
     this.isPlaying = false;
+    this.isPaused = true;
     this.trigger('pause');
 };
 
@@ -414,8 +417,6 @@ WalkAnimation.prototype.anim = function() {
 
                             if(this.pauseOnPopup === true){
                                 this.pause();
-                                $('#track-pause-animate').html('Resume <i class="icon-play"></i>');
-                                aria.notify("Pause playing track: " + this.walk.name);
                             }
 
                         }
