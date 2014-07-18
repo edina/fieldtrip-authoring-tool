@@ -195,6 +195,7 @@ var WalkAnimation = function(walk) {
     this.rf = new OpenLayers.Icon('http://dlib-brown.edina.ac.uk/icons/right_footprint180.png', this.size, this.rfoffset);
     this.lf = new OpenLayers.Icon('http://dlib-brown.edina.ac.uk/icons/left_footprint180.png', this.size, this.lfoffset);
 
+    this.events = {};
 
     var markerLeftFootprintTempCanvas = document.createElement("canvas");
     var markerRightFootprintTempCanvas = document.createElement("canvas");
@@ -231,6 +232,32 @@ var WalkAnimation = function(walk) {
     }, this);
 };
 
+/*
+    Publish/Suscribe functions for the animation
+*/
+
+WalkAnimation.prototype.on = function(e, callback){
+    var event = this.events[e];
+    if(!event){
+        event = $.Callbacks();
+        this.events[e] = event;
+    }
+    event.add(event, callback);
+};
+
+WalkAnimation.prototype.off = function(e){
+    var event = this.events[e];
+    if(event){
+        event.remove(event);
+    }
+};
+
+WalkAnimation.prototype.trigger = function(e){
+    var event = this.events[e];
+    if(event){
+        event.fire(e);
+    }
+};
 
 WalkAnimation.prototype.drawImageRotate = function(c, img, x, y, width, height, remainingIntervalQuotiant, angle) {
     // we want foot drawn fully in half the interval time
@@ -259,12 +286,17 @@ WalkAnimation.prototype.drawImageRotate = function(c, img, x, y, width, height, 
 
 WalkAnimation.prototype.play = function() {
     this.isPlaying = true;
-    this.startTime = new Date();
+    if(!this.startTime){
+        this.startTime = new Date();
+        this.trigger('resume');
+    }
     this.anim();
+    this.trigger('play');
 };
 
 WalkAnimation.prototype.pause = function() {
     this.isPlaying = false;
+    this.trigger('pause');
 };
 
 WalkAnimation.prototype.togglePause= function() {
@@ -381,7 +413,7 @@ WalkAnimation.prototype.anim = function() {
                             this.walk.POIs[i].showPOI();
 
                             if(this.pauseOnPopup === true){
-                                this.walk.animation.pause();
+                                this.pause();
                                 $('#track-pause-animate').html('Resume <i class="icon-play"></i>');
                                 aria.notify("Pause playing track: " + this.walk.name);
                             }
