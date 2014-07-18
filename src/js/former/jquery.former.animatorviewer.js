@@ -74,6 +74,9 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
                     }
                 }
             break;
+            case 80: // P Pause
+                $('#pause-animation').trigger('click');
+            break;
             case 13: // Enter
                 var $play = $('#track-animate');
                 var $pause = $('#track-pause-animate');
