@@ -168,7 +168,7 @@ html, body {
 }
 
 #map_canvas{
-  float:left;
+/*  float:left; */
   max-width: 100%;
   background-color: #eee;
 }
@@ -386,8 +386,14 @@ tr.record{
 .track-speed, .checkbox{
     display: none;
 }
+
 .form-actions{
-    width: 95%;
+  width: 100%;
+  padding: 20px 0 20px 0;
+}
+
+.btn-group > .btn:first-child{
+  margin-left: 20px;
 }
 
 #pause-checkbox{
@@ -395,4 +401,3 @@ tr.record{
     display:none;
     padding-top: 5px;
 }
-

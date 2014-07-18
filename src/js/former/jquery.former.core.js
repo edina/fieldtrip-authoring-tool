@@ -297,7 +297,7 @@
             this.showEditElements("animator", false);
             this.locationFile.deactivate();
             this.mapviewer.deactivateControls();
-            this.animatorViewer.copyTracks();
+            this.animatorViewer.activate();
         }, this));
 
         $('#animation-control .get-tracks').click($.proxy(function(){

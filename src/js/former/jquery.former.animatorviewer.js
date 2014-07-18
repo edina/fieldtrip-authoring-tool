@@ -102,6 +102,7 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
  * Enabling all features related to the Track Animator
  */
 AnimatorViewer.prototype._initEvents = function(){
+    var animatorViewer = this;
     $('#animator-myTable tbody').on('click', 'tr', $.proxy(function(e){
         if(this.track_animator !== null){
             this.track_animator.destroy();
@@ -219,6 +220,10 @@ AnimatorViewer.prototype.changeSpeed = function(delta){
     }else{
         aria.notify('Play speed decreased');
     }
+};
+
+AnimatorViewer.prototype.activate = function(){
+    this.copyTracks();
 };
 
 AnimatorViewer.prototype.deactivate = function(){

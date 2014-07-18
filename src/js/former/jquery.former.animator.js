@@ -379,13 +379,13 @@ WalkAnimation.prototype.anim = function() {
                         if (!this.walk.POIs[i].isShown) {
                             // console.log('showing POI. startStep: ' + this.walk.POIs[i].startStepNum + ' counter: ' + this.counter);
                             this.walk.POIs[i].showPOI();
-                      
+
                             if(this.pauseOnPopup === true){
                                 this.walk.animation.pause();
                                 $('#track-pause-animate').html('Resume <i class="icon-play"></i>');
                                 aria.notify("Pause playing track: " + this.walk.name);
                             }
-                           
+
                         }
                     } else if (this.walk.POIs[i].isShown) {
                         // console.log('hiding POI. endStep: ' + this.walk.POIs[i].endStepNum + ' counter: ' + this.counter);
@@ -553,7 +553,7 @@ var POI = function(name, type, LonLat, map, mapviewer) {
                 //Get image
                 $.each(field_values, function(key, value){
                     var title = value.val;
-                    preview += ('<img src='+encodeURI(url)+'/'+ title +' alt="'+ title +'" style="image-orientation: from-image">');
+                    preview += ('<img src="'+encodeURI(url)+'/'+ title +'" alt="'+ title +'" style="image-orientation: from-image">');
                 });
             }
             if(title === 'text'){
@@ -565,7 +565,7 @@ var POI = function(name, type, LonLat, map, mapviewer) {
             if(title === 'audio'){
                 //Get audio
                 $.each(field_values, function(key, value){
-                    preview += ('<p><audio controls><source src=' + encodeURI(url) + '/' +  value.val +" type='audio/wav'> Your browser does not support the audio element.</audio></p>");
+                    preview += ('<p><audio controls><source src="' + encodeURI(url) + '/' +  value.val +'" type="audio/wav"> Your browser does not support the audio element.</audio></p>');
                 });
             }
             self.setContent(self.content += preview);
