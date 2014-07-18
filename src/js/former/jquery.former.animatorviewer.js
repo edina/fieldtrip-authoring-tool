@@ -198,9 +198,9 @@ AnimatorViewer.prototype._initEvents = function(){
      */
     $('.track-speed').on('click', $.proxy(function(e){
         if(e.target.id === "increase-track-speed"){
-            this.changeSpeed(0.05);
+            this.changeSpeed(0.025);
         }else{
-            this.changeSpeed(-0.05);
+            this.changeSpeed(-0.025);
         }
     },this));
 
