@@ -401,6 +401,12 @@ tr.record{
     display:none;
     padding-top: 5px;
 }
-#animator-myTable, #memories-container{
-    display:none;   
+
+#animator-myTable,
+#memories-container{
+    display:none;
+}
+
+#fieldcontain-image-1 > img{
+  image-orientation: from-image;
 }
