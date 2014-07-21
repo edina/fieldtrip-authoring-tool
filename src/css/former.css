@@ -401,3 +401,6 @@ tr.record{
     display:none;
     padding-top: 5px;
 }
+#animator-myTable, #memories-container{
+    display:none;   
+}
