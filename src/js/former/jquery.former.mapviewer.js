@@ -8,6 +8,7 @@ var MapViewer = function(options, base_url){
     this.cursor;
     this.features;
     this.requesting_gpx = null;
+    this.handleClicks = null;
 }
 
 MapViewer.prototype.init = function(){
@@ -131,6 +132,8 @@ MapViewer.prototype.destroyMap = function(){
 
 //init map
 MapViewer.prototype.initMap = function(){
+    var table_selector = "#" + this.options['table-elements'].tableId;
+    var self = this;
     var bounds = new OpenLayers.Bounds (0, 0, 700000, 1300000);
     var apikey = "c7d4d08f1734c6e2ea97e554cf67eab709ff0bce6e2f4064ddc67a49";
     var cache = "true";
@@ -269,8 +272,48 @@ MapViewer.prototype.initMap = function(){
         format: new OpenLayers.Format.GPXExt()
     });
 
-    var select = new OpenLayers.Control.SelectFeature(clusters, {hover: false});
+    var select = new OpenLayers.Control.SelectFeature(clusters, {hover: false,
+                                                                 clickout: true});
     this.select_id = select.id;
+
+    map.addControl(select);
+
+    // Handler to intercept click.
+    var clickHandler = new OpenLayers.Handler.Click(
+        select,  // The select control
+        {
+            click: function(evt){
+                if(!self.handleClicks){
+                    return;
+                }
+
+                var feature = this.layer.getFeatureFromEvent(evt);
+
+                this.unselectAll();
+
+                if(feature){
+                    this.select(feature);
+                }
+            },
+            dblclick: function(evt){
+                if(!self.handleClicks){
+                    return;
+                }
+
+                $row = $('.row_selected', table_selector);
+                $row.trigger('edit_record');
+
+            }
+        },
+        {
+            delay: 200,
+            single: true,
+            double: true,
+            stopDouble: true,
+            stopSingle: true
+        }
+    );
+
 
     var panel = new OpenLayers.Control.Panel({
                 displayClass: "olSpatialMemoriesToolBar"
@@ -293,11 +336,12 @@ MapViewer.prototype.initMap = function(){
     map.addControl(new OpenLayers.Control.Navigation());
     map.addControl(new OpenLayers.Control.PanZoom());
     map.addControl(new OpenLayers.Control.Attribution());
-    map.addControl(select);
     map.addControl(panel);
 
     // Activate controls
-    select.activate();
+    /* Do not activate select or the clickHandler won't intercept the events */
+    //select.activate();
+    clickHandler.activate();
     snap.activate();
     panel.deactivate();
 
@@ -1322,14 +1366,15 @@ MapViewer.prototype.deactivateControls = function(){
     var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
     var toolbar = this.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
     toolbar.deactivate();
-    selectControl.deactivate();
+    selectControl.unselectAll();
+    this.handleClicks = false;
 };
 
 MapViewer.prototype.activateControls = function(){
     var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
     var toolbar = this.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
     toolbar.activate();
-    selectControl.activate();
+    this.handleClicks = true;
 };
 
 MapViewer.prototype.getRecordsFromLS = function(){
