@@ -300,6 +300,14 @@ MapViewer.prototype.initMap = function(){
                     return;
                 }
 
+                var feature = this.layer.getFeatureFromEvent(evt);
+
+                this.unselectAll();
+
+                if(feature){
+                    this.select(feature);
+                }
+
                 $row = $('.row_selected', table_selector);
                 $row.trigger('edit_record');
 
