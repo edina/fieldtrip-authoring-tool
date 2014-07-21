@@ -542,6 +542,7 @@ MapViewer.prototype.getData = function(params, callback){
                     //window.localStorage.setItem("records", JSON.stringify(results));
                 }
                 //console.log(results)
+                $('#memories-container').show();
                 $('#animator-myTable').show();
                 this.prepareTableDataForEditing(results);
             }
