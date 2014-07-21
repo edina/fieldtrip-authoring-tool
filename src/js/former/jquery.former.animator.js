@@ -256,7 +256,7 @@ WalkAnimation.prototype.off = function(e){
 WalkAnimation.prototype.trigger = function(e){
     var event = this.events[e];
     if(event){
-        event.fire(e);
+        event.fire.apply(this, arguments);
     }
 };
 
@@ -414,6 +414,7 @@ WalkAnimation.prototype.anim = function() {
                         if (!this.walk.POIs[i].isShown) {
                             // console.log('showing POI. startStep: ' + this.walk.POIs[i].startStepNum + ' counter: ' + this.counter);
                             this.walk.POIs[i].showPOI();
+                            this.trigger('showPOI', this.walk.POIs[i]);
 
                             if(this.pauseOnPopup === true){
                                 this.pause();
