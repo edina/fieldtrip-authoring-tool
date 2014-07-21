@@ -183,6 +183,15 @@ AnimatorViewer.prototype._initEvents = function(){
             aria.notify("Resume playing track: " + self.walker.name);
         });
 
+        this.track_animator.walk.animation.on('showPOI', function(evt, poi){
+            var checked = $('#pause-animation').prop("checked");
+            if(checked){
+                self.walk.animation.pause();
+                animatorViewer.playRecord(poi.record);
+            }else{
+                aria.notify(poi.record.name);
+            }
+        });
 
         this.track_animator.walk.playAnimation();
 
@@ -215,13 +224,24 @@ AnimatorViewer.prototype._initEvents = function(){
         }
     },this));
 
-    /**
-     * Listener for toggling animation pause on popup
-     */
-    $('#pause-animation').on('click', $.proxy(function(e){
-        this.track_animator.walk.animation.togglePause();
-    },this));
+};
 
+AnimatorViewer.prototype.playRecord = function(record){
+    var fields = record.fields;
+    var description;
+
+    switch(record.editor){
+        case 'audio.edtr':
+            description = findLabel(fields, 'Audio');
+        break;
+        case 'text.edtr':
+            description = findLabel(fields, 'Description');
+        break;
+        case 'image.edtr':
+            description = findLabel(fields, 'Image');
+        break;
+    }
+    aria.notify(description);
 };
 
 AnimatorViewer.prototype.changeSpeed = function(delta){

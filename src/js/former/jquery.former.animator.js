@@ -573,12 +573,14 @@ var POI = function(name, type, LonLat, map, mapviewer) {
     var preview = '';
     var self = this;
     var title = '';
+    var record = null;
 
     $.ajax({
         url: url,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
+            self.record = data;
             var editor = data.editor;
             title = editor.split(".")[0];
             var field_values = data.fields;
