@@ -232,16 +232,22 @@ AnimatorViewer.prototype.playRecord = function(record){
 
     switch(record.editor){
         case 'audio.edtr':
-            description = findLabel(fields, 'Audio');
+            audiojs.create($("audio.popup"),
+                { imageLocation: "css/ext/player-graphics.gif",
+                  swfLocation: "css/ext/audiojs.swf",
+                  autoplay:true
+                });
         break;
         case 'text.edtr':
             description = findLabel(fields, 'Description');
+            aria.notify(description);
         break;
         case 'image.edtr':
-            description = findLabel(fields, 'Image');
+            description = findLabel(fields, 'Description') || record.name;
+            aria.notify(description);
         break;
     }
-    aria.notify(description);
+
 };
 
 AnimatorViewer.prototype.changeSpeed = function(delta){

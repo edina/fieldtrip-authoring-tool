@@ -601,7 +601,7 @@ var POI = function(name, type, LonLat, map, mapviewer) {
             if(title === 'audio'){
                 //Get audio
                 $.each(field_values, function(key, value){
-                    preview += ('<p><audio controls><source src="' + encodeURI(url) + '/' +  value.val +'" type="audio/wav"> Your browser does not support the audio element.</audio></p>');
+                    preview += ('<p><audio class="popup" src="' + encodeURI(url) + '/' +  value.val +'" preload="auto" type="audio/wav"> Your browser does not support the audio element.</audio></p>');
                 });
             }
             self.setContent(self.content += preview);
