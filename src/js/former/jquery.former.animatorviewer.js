@@ -103,6 +103,9 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
  * Enabling all features related to the Track Animator
  */
 AnimatorViewer.prototype._initEvents = function(){
+    // Make popup draggable
+    $( "#popup_container" ).draggable({ containment: "#main", scroll: false });
+
     var animatorViewer = this;
     $('#animator-myTable tbody').on('click', 'tr', $.proxy(function(e){
         if(this.track_animator !== null){
@@ -236,6 +239,13 @@ AnimatorViewer.prototype._initEvents = function(){
         }else{
             this.changeSpeed(-0.025);
         }
+    },this));
+
+    /**
+     * Hide popup on close
+     */
+    $('#close_popup').on('click', $.proxy(function(e){
+        $('#popup_container').hide();
     },this));
 
 };

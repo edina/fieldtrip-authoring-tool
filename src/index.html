@@ -119,7 +119,11 @@
             <div class="row-fluid">
               <div id="map-content" style="display: none" aria-hidden="true">
                 <div id="map_canvas"></div>
-                <div id="memories-control" class="sm-control">
+                <div id="popup_container">
+                    <button type="button" id="close_popup" class="close" >×</button>
+                    <div id="popup_info"></div>
+                </div>    
+                    <div id="memories-control" class="sm-control">
                   <div class="btn-group form-actions" id="filter-area">
                     <button id="filter-records" class="btn btn-primary">Get Tracks</button>
                     <!-- Add two hidden values for using prepareFiltersString -->
