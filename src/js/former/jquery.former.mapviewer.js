@@ -202,13 +202,15 @@ MapViewer.prototype.initMap = function(){
         };
     };
 
-    var defaultStyle = new OpenLayers.Style({
-        pointRadius: "${radius}",
-        'externalGraphic': '${thumbnail}',
-        'graphicXOffset': '${offset_x}',
-        'graphicYOffset': '${offset_y}',
-        label: "${number}"
-    }, {
+    var defaultSymbolizer = {
+            label:           '${number}',
+            pointRadius:     '${radius}',
+            externalGraphic: '${thumbnail}',
+            graphicXOffset:  '${offset_x}',
+            graphicYOffset:  '${offset_y}',
+    };
+
+    var defaultStyle = new OpenLayers.Style(defaultSymbolizer,{
         context: {
             width: function(feature) {
                 return (feature.cluster) ? 2 : 1;
@@ -245,6 +247,38 @@ MapViewer.prototype.initMap = function(){
             }
         }
     });
+
+    // Minimum scale when the POIs are shown
+    var minScalePOI = 10000;
+
+    var ruleDisplayAll= new OpenLayers.Rule({
+        maxScaleDenominator: minScalePOI,
+        symbolizer: defaultSymbolizer
+    });
+
+    var ruleDisplayTrack = new OpenLayers.Rule({
+        minScaleDenominator: minScalePOI,
+        filter: new OpenLayers.Filter.Comparison({
+                type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                property: 'editor',
+                value: 'track.edtr'
+            }),
+        symbolizer: defaultSymbolizer
+    });
+
+    var ruleHideNonTrack = new OpenLayers.Rule({
+        minScaleDenominator: minScalePOI,
+        filter: new OpenLayers.Filter.Comparison({
+                type: OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
+                property: 'editor',
+                value: 'track.edtr'
+            }),
+        symbolizer: {
+            display: 'none'
+        }
+    });
+
+    defaultStyle.addRules([ruleDisplayAll, ruleDisplayTrack, ruleHideNonTrack]);
 
     var selectStyle = new OpenLayers.Style({
         'externalGraphic': '${thumbnail}'
