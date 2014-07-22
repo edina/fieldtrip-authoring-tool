@@ -599,20 +599,26 @@ var POI = function(name, type, LonLat, map, mapviewer) {
             if(title === 'image'){
                 //Get image
                 $.each(field_values, function(key, value){
-                    var title = value.val;
-                    preview += ('<img src="'+encodeURI(url)+'/'+ title +'" alt="'+ title +'" style="image-orientation: from-image">');
+                    if(value.id.startsWith('fieldcontain-image-')){
+                        var title = value.val;
+                        preview += ('<img src="'+encodeURI(url)+'/'+ title +'" alt="'+ title +'" style="image-orientation: from-image">');
+                    }
                 });
             }
             if(title === 'text'){
                 //Get text
                 $.each(field_values, function(key, value){
-                    preview += ('<p>' + value.val +"</p>");
+                    if(value.id.startsWith('fieldcontain-text')){
+                        preview += ('<p>' + value.val +"</p>");
+                    }
                 });
             }
             if(title === 'audio'){
                 //Get audio
                 $.each(field_values, function(key, value){
-                    preview += ('<p><audio class="popup" src="' + encodeURI(url) + '/' +  value.val +'" preload="auto" type="audio/wav"> Your browser does not support the audio element.</audio></p>');
+                    if(value.id.startsWith('fieldcontain-audio-')){
+                        preview += ('<p><audio class="popup" src="' + encodeURI(url) + '/' +  value.val +'" preload="auto" type="audio/wav"> Your browser does not support the audio element.</audio></p>');
+                    }
                 });
             }
             self.setContent(self.content += preview);
