@@ -104,7 +104,7 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
  */
 AnimatorViewer.prototype._initEvents = function(){
     // Make popup draggable
-    $( "#popup_info" ).draggable({ containment: "#main", scroll: false });
+    $( "#popup_container" ).draggable({ containment: "#main", scroll: false });
 
     var animatorViewer = this;
     $('#animator-myTable tbody').on('click', 'tr', $.proxy(function(e){
@@ -239,6 +239,13 @@ AnimatorViewer.prototype._initEvents = function(){
         }else{
             this.changeSpeed(-0.025);
         }
+    },this));
+
+    /**
+     * Hide popup on close
+     */
+    $('#close_popup').on('click', $.proxy(function(e){
+        $('#popup_container').hide();
     },this));
 
 };

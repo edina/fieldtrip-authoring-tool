@@ -648,7 +648,7 @@ POI.prototype.setContent = function(content) {
 POI.prototype.showPOI = function() {
     // Populate popup div
     $('#popup_info').html(this.popup.contentHTML);
-    $('#popup_info').show();
+    $('#popup_container').show();
     // this.map.addPopup(this.popup);
     this.isShown = true;
 };

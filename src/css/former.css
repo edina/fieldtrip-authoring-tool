@@ -412,7 +412,7 @@ tr.record{
   image-orientation: from-image;
 }
 
-#popup_info{
+#popup_container{
     position: absolute;
     top: 0px;
     z-index: 1000;
