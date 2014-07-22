@@ -31,7 +31,7 @@ Accesibility.prototype.mailto = function(){
 };
 
 /*
-    Trigger click on enter on bootstrap menu items
+    Trigger click on space or enter on bootstrap menu items
 */
 Accesibility.prototype.menuItemEnter = function(){
     var menuItem = '.menu-item';
@@ -40,6 +40,7 @@ Accesibility.prototype.menuItemEnter = function(){
     $(document).on('keyup', menuItem, function(evt){
         switch(evt.keyCode){
             case 13:
+            case 32:
                 $(evt.target).trigger('click');
             break;
         }
