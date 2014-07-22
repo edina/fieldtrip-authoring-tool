@@ -882,6 +882,9 @@ MapViewer.prototype.onEditRecord = function(evt){
 
                     makeAlertWindow(edit_data, "Edit", 300, 400, "edit-record-dialog", 1000, "middle", buttons);
                     recorder.render();
+                    $('form', '#edit-record-dialog').submit(function(){
+                        $('.save-button', '#edit-record-dialog').trigger('click');
+                    });
                     loading(false);
                 }
             });

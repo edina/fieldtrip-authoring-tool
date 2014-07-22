@@ -108,8 +108,12 @@ function makeEditDialogButtons(dialogId, record, mapviewer, features, row, callb
         callback = function(){};
     }
 
-    return buttons = {
-        "Save": function(){
+    var buttons = [];
+
+    var saveButton = {
+        'text': 'Save',
+        'class': 'save-button',
+        'click': function(){
             var dialogDiv = "#"+dialogId;
 
             // Get all the values from the form as records in an array
@@ -183,12 +187,20 @@ function makeEditDialogButtons(dialogId, record, mapviewer, features, row, callb
                 loading(true);
                 PCAPI.renameRecord(oldName, record, success, error);
             }
-        },
-        "Cancel": function(){
-            $("#"+dialogId).dialog('close');
-            callback(false);
         }
     };
+
+    var cancelButton = {
+            'text': 'Cancel',
+            'class': 'cancel-button',
+            'click': function(){
+                $("#"+dialogId).dialog('close');
+                callback(false);
+            }
+    };
+
+    buttons.push(saveButton, cancelButton);
+    return buttons;
 }
 
 /*
