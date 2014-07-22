@@ -1,8 +1,9 @@
 var AnimatorViewer = function(mapviewer, selector, options){
     var defaults = {
         tableSelector: '#animator-myTable',
-        tableMemories: '#memories'
-
+        tableMemories: '#memories',
+        leftFootSelector: '#left-foot',
+        rightFootSelector: '#right-foot'
     };
 
     this.options = $.extend(defaults, options);
@@ -190,6 +191,19 @@ AnimatorViewer.prototype._initEvents = function(){
                 animatorViewer.playRecord(poi.record);
             }else{
                 aria.notify(poi.record.name);
+            }
+        });
+
+        var leftFootAudio = $(this.options.leftFootSelector).get(0);
+        var rightFootAudio = $(this.options.rightFootSelector).get(0);
+        this.track_animator.walk.animation.on('step', function(evt, foot){
+            switch(foot){
+                case 'left':
+                    leftFootAudio.play();
+                break;
+                case 'right':
+                    rightFootAudio.play();
+                break;
             }
         });
 

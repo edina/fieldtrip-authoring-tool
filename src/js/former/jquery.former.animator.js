@@ -360,6 +360,7 @@ WalkAnimation.prototype.anim = function() {
 
             var olLonLat = new OpenLayers.LonLat(lon, lat);
             var icon = null;
+            var foot = null;
             if (this.counter > 0) {
                 // get bearing to next point
                 var p1X = gpxlayer.features[0].geometry.components[this.counter].x;
@@ -370,7 +371,15 @@ WalkAnimation.prototype.anim = function() {
                 var bearing = calcAngle((p2Y - p1Y), (p2X - p1X));
 
                 // create footstep maker and add to makers layer
-                icon = this.counter % 2 == 1 ? this.rf : this.lf; // left foot or right foot?
+
+                // left foot or right foot?
+                if(this.counter % 2 === 1){
+                    foot = 'right';
+                    icon = this.rf;
+                }else{
+                    foot = 'left';
+                    icon = this.lf;
+                }
 
                 // double check whether it is still playing before adding new marker
                 if (!this.isPlaying)
@@ -396,6 +405,8 @@ WalkAnimation.prototype.anim = function() {
                 gpxlayer.features[0].geometry.components[this.counter].bearing = bearing;
                 gpxlayer.features[0].geometry.components[this.counter].markerCanvas = markerCanvas;
                 gpxlayer.features[0].geometry.components[this.counter].markerImg = markerImg;
+
+                this.trigger('step', foot);
 
                 //remove trailing footstep markers
                 var removeMarker = null;
