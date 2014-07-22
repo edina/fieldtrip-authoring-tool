@@ -182,7 +182,7 @@ Walk.prototype.playAnimation = function() {
 var WalkAnimation = function(walk) {
     this.walk = walk;
     this.isPlaying = false;
-    this.pauseOnPopup = false;
+    this.pauseOnPopup = true;
     this.startTime = new Date();
     this.lastReplayTime = null;
     this.counter = 0;
@@ -632,8 +632,8 @@ var POI = function(name, type, LonLat, map, mapviewer) {
     this.endStepNum = null;
     this.map = map;
 
-    self.popup = new OpenLayers.Popup(this.name, self.LonLat, new OpenLayers.Size(200,200), self.content, true);
-    self.popup.autoSize=true;
+    // self.popup = new OpenLayers.Popup(this.name, self.LonLat, new OpenLayers.Size(200,200), self.content, true);
+    // self.popup.autoSize=true;
 
     this.isShown = false;
 };
@@ -646,7 +646,10 @@ POI.prototype.setContent = function(content) {
 };
 
 POI.prototype.showPOI = function() {
-    this.map.addPopup(this.popup);
+    // Populate popup div
+    $('#popup_info').html(this.popup.contentHTML);
+    $('#popup_info').show();
+    // this.map.addPopup(this.popup);
     this.isShown = true;
 };
 
