@@ -103,6 +103,9 @@ AnimatorViewer.prototype._initKeyboardNavigation = function(){
  * Enabling all features related to the Track Animator
  */
 AnimatorViewer.prototype._initEvents = function(){
+    // Make popup draggable
+    $( "#popup_info" ).draggable({ containment: "#main", scroll: false });
+
     var animatorViewer = this;
     $('#animator-myTable tbody').on('click', 'tr', $.proxy(function(e){
         if(this.track_animator !== null){
