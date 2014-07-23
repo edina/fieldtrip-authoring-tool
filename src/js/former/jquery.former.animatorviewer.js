@@ -292,6 +292,8 @@ AnimatorViewer.prototype.deactivate = function(){
     $('#track-animate').attr('disabled', 'disabled');
     $('#track-pause-animate').hide();
     $('#track-animate').show();
+    $('#increase-track-speed').hide();
+    $('#decrease-track-speed').hide();
 
     if(this.track_animator !== null)
     {
