@@ -357,7 +357,7 @@ MapViewer.prototype.initMap = function(){
     );
 
 
-    var panel = new OpenLayers.Control.Panel({
+    var toolbar = new OpenLayers.Control.Panel({
                 displayClass: "olSpatialMemoriesToolBar"
             });
     var drawControl = new OpenLayers.Control.DrawFeature(clusters,
@@ -374,21 +374,20 @@ MapViewer.prototype.initMap = function(){
     map.addLayers([osopenlayer, gpx, clusters]);
 
     // Add controls
-    panel.addControls(drawControl);
+    toolbar.addControls(drawControl);
     map.addControl(new OpenLayers.Control.Navigation());
     map.addControl(new OpenLayers.Control.PanZoom());
     map.addControl(new OpenLayers.Control.Attribution());
-    map.addControl(panel);
+    map.addControl(toolbar);
 
     // Activate controls
     /* Do not activate select or the clickHandler won't intercept the events */
     //select.activate();
     clickHandler.activate();
     snap.activate();
-    panel.deactivate();
+    toolbar.deactivate();
 
     //Register events
-    gpx.events.register("featuresadded", gpx, this.onGPXAdded);
     gpx.events.register("featuresremoved", gpx, this.onGPXRemoved);
     drawControl.events.register("featureadded", drawControl, $.proxy(this.onFeatureAdded, this));
     clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
@@ -400,11 +399,6 @@ MapViewer.prototype.initMap = function(){
     return map;
 };
 
-MapViewer.prototype.onGPXAdded = function(evt){
-    var gpx = evt.object;
-    var toolbar = gpx.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
-    toolbar.activate();
-};
 
 MapViewer.prototype.onGPXRemoved = function(evt){
     var gpx = evt.object;
@@ -930,7 +924,7 @@ MapViewer.prototype.enableRecordDelete = function(){
     }, this));
 }
 
-MapViewer.prototype.displayGPX = function(record, data, callback){
+MapViewer.prototype.displayGPX = function(record, data, success, error){
     var style = {
         "strokeColor": "rgb(255, 255, 0)",
         "strokeWidth": 5,
@@ -942,6 +936,8 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
     var trackId = data.trackId || data.geofenceId;
     var gpxLayer = this.map.getLayersByName("GPX")[0];
     var gpxId = null;
+    var success = success || function(){};
+    var error = error || function(){};
 
     if(gpxLayer && gpxLayer.features.length > 0){
         gpxId = gpxLayer.features[0].attributes.trackId;
@@ -982,20 +978,17 @@ MapViewer.prototype.displayGPX = function(record, data, callback){
                     gpxLayer.addFeatures(gpx_features);
                     // center to the middle of the whole GPX track
                     this.map.zoomToExtent(gpxLayer.getDataExtent());
+                    success();
                 }, this))
             .fail(function(){
                 aria.notify("Cancel loading track: " + record);
+                error();
             })
             .always(function(){
                 loading(false);
-                if(callback !== undefined && typeof(callback) === "function"){
-                    callback();
-                }
             });
     }else{
-        if(callback !== undefined && typeof(callback) === "function"){
-            callback();
-        }
+        success();
     }
 };
 
@@ -1004,6 +997,7 @@ MapViewer.prototype.onRowSelected = function(evt, options){
     var $row = $(evt.currentTarget).closest('.record');
     var layer = this.map.getLayersByName("Clusters")[0];
     var selectControl = layer.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
+    var toolbar = this.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
 
     $row.siblings()
         .removeClass('row_selected')
@@ -1033,7 +1027,10 @@ MapViewer.prototype.onRowSelected = function(evt, options){
             this.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
         }
 
-        this.displayGPX(feature.attributes.name, feature.attributes);
+        this.displayGPX(feature.attributes.name,
+                        feature.attributes, function(){
+                            toolbar.activate();
+                        });
     }
 };
 
@@ -1417,9 +1414,6 @@ MapViewer.prototype.deactivateControls = function(){
 };
 
 MapViewer.prototype.activateControls = function(){
-    var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
-    var toolbar = this.map.getControlsBy('displayClass', 'olSpatialMemoriesToolBar')[0];
-    toolbar.activate();
     this.handleClicks = true;
 };
 
