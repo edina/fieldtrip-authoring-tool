@@ -169,8 +169,10 @@ AnimatorViewer.prototype._initEvents = function(){
             var poiLonLat = new OpenLayers.LonLat(
                 this.mapviewer.map.getLayersByName("Clusters")[0].features[POIs[i].id.split("-")[1]].geometry.x,
                 this.mapviewer.map.getLayersByName("Clusters")[0].features[POIs[i].id.split("-")[1]].geometry.y);
-            var poi = new POI(poiName, null, poiLonLat, this.track_animator.map, this.mapviewer, recordId);
-            this.track_animator.walk.addPOI(poi);
+            var poi = new POI(poiName, null, poiLonLat, this.track_animator.map, this.mapviewer, recordId , $.proxy(function (populated_poi) {
+                // Ensure that poi not added until record has been added to it, otherwise we get an error
+                this.track_animator.walk.addPOI(populated_poi);
+            },this));
         }
 
         this.track_animator.walk.animation.on('pause', function(){

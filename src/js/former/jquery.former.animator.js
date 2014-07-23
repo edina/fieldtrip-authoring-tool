@@ -576,7 +576,7 @@ Walk.prototype.addPOI = function(POI) {
  * TODO type - sets different PopUp type (i.e. picture, audio, text...)
  */
 
-var POI = function(name, type, LonLat, map, mapviewer, recordId) {
+var POI = function(name, type, LonLat, map, mapviewer, recordId, callback) {
     this.name = name;
     this.type = type;
     this.LonLat = LonLat;
@@ -596,7 +596,9 @@ var POI = function(name, type, LonLat, map, mapviewer, recordId) {
             var editor = data.editor;
             title = editor.split(".")[0];
             var field_values = data.fields;
-
+            // A bit of a hack, but this ensures that the record has been set for the poi
+            // which is required for AnimatorViewer.prototype.playRecord
+            callback(self);
             if(title === 'image'){
                 //Get image
                 $.each(field_values, function(key, value){
