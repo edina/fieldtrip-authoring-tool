@@ -576,7 +576,7 @@ Walk.prototype.addPOI = function(POI) {
  * TODO type - sets different PopUp type (i.e. picture, audio, text...)
  */
 
-var POI = function(name, type, LonLat, map, mapviewer, recordId) {
+var POI = function(name, type, LonLat, map, mapviewer, recordId, callback) {
     this.name = name;
     this.type = type;
     this.LonLat = LonLat;
@@ -596,14 +596,18 @@ var POI = function(name, type, LonLat, map, mapviewer, recordId) {
             var editor = data.editor;
             title = editor.split(".")[0];
             var field_values = data.fields;
-
+            // A bit of a hack, but this ensures that the record has been set for the poi
+            // which is required for AnimatorViewer.prototype.playRecord
+            callback(self);
             if(title === 'image'){
                 //Get image
                 $.each(field_values, function(key, value){
                     if(value.id.startsWith('fieldcontain-image-')){
                         var title = value.val;
-                        preview += ('<img src="'+encodeURI(url)+'/'+ title +'" alt="'+ title +'" style="image-orientation: from-image">');
-                    }
+                        $('<img id="' + self.recordId + '" src="'+encodeURI(url)+'/'+ title +'" alt="'+ title +'" style="image-orientation: from-image">').load(function() {
+                            $(this).appendTo('#preload');
+                        });
+                     }
                 });
             }
             if(title === 'text'){
@@ -623,9 +627,6 @@ var POI = function(name, type, LonLat, map, mapviewer, recordId) {
                 });
             }
             self.setContent(self.content += preview);
-            self.popup = new OpenLayers.Popup(title, self.LonLat, new OpenLayers.Size(200,200), self.content, true);
-            self.popup.autoSize=true;
-
         },
         error: function(jqXHR, status, error){
             loading(false);
@@ -639,9 +640,6 @@ var POI = function(name, type, LonLat, map, mapviewer, recordId) {
     this.endStepNum = null;
     this.map = map;
 
-    // self.popup = new OpenLayers.Popup(this.name, self.LonLat, new OpenLayers.Size(200,200), self.content, true);
-    // self.popup.autoSize=true;
-
     this.isShown = false;
 };
 
@@ -654,6 +652,7 @@ POI.prototype.setContent = function(content) {
 
 POI.prototype.showPOI = function() {
 
+    // Ensure that the annotation icon corresponding to the popup is highlighted
     var recordId = this.recordId;
     var layer = this.map.getLayersByName("Clusters")[0];
     var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
@@ -665,21 +664,27 @@ POI.prototype.showPOI = function() {
             selectControl.unselectAll();
             selectControl.select(feature);
         }
-
         //Center the map
         if(!feature.onScreen()){
             this.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
         }
     }
+   
     // Populate popup div
-    $('#popup_info').html(this.popup.contentHTML);
-    $('#popup_container').show();
-    // this.map.addPopup(this.popup);
-    this.isShown = true;
+    var content = this.content;
+    if(content !== undefined){
+        $('#popup_info').html(content);
+        // If an image, clone the preloaded image and add to popup_info
+        if(this.record.editor === 'image.edtr'){
+            $('#'+recordId).clone().appendTo("#popup_info");  
+        }
+        $('#popup_container').show();
+        this.isShown = true;
+    }
 };
 
 POI.prototype.hidePOI = function() {
-    this.map.removePopup(this.popup);
+
     this.isShown = false;
 };
 

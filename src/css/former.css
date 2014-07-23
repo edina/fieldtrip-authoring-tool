@@ -431,3 +431,6 @@ tr.record{
 audio{
     width: 100%;
 }
+#preload img{
+    display:none;
+}
