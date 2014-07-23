@@ -604,8 +604,10 @@ var POI = function(name, type, LonLat, map, mapviewer, recordId, callback) {
                 $.each(field_values, function(key, value){
                     if(value.id.startsWith('fieldcontain-image-')){
                         var title = value.val;
-                        preview += ('<img src="'+encodeURI(url)+'/'+ title +'" alt="'+ title +'" style="image-orientation: from-image">');
-                    }
+                        $('<img id="' + self.recordId + '" src="'+encodeURI(url)+'/'+ title +'" alt="'+ title +'" style="image-orientation: from-image">').load(function() {
+                            $(this).appendTo('#preload');
+                        });
+                     }
                 });
             }
             if(title === 'text'){
@@ -672,6 +674,10 @@ POI.prototype.showPOI = function() {
     var content = this.content;
     if(content !== undefined){
         $('#popup_info').html(content);
+        // If an image, clone the preloaded image and add to popup_info
+        if(this.record.editor === 'image.edtr'){
+            $('#'+recordId).clone().appendTo("#popup_info");  
+        }
         $('#popup_container').show();
         this.isShown = true;
     }
