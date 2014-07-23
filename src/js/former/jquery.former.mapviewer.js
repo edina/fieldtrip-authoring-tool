@@ -483,8 +483,7 @@ MapViewer.prototype.feature_select = function(evt){
     }else{
         var recordId = feature.attributes.geofenceId;
         var $record = $('.record[recordid='+recordId+']', $table);
-        $record.trigger('row_expanded')
-               .trigger('row_selected');
+        $record.trigger('row_selected');
     }
 };
 
@@ -987,6 +986,11 @@ MapViewer.prototype.onRowSelected = function(evt, options){
 
     $row.addClass('row_selected')
         .attr('aria-selected', true);
+
+    // Expand only non track records
+    if(!$row.is('.track')){
+        $row.trigger('row_expanded');
+    }
 
     // When we are using the keyboard navigation it is important focus on the selected row
     // but not when we are using the map
