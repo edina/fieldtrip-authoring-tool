@@ -51,7 +51,7 @@ html, body {
 .fieldcontain{
   position: relative;
   margin: 1em 0;
-  padding: 1em 1em 1em 2em;
+  padding: 1em 3em 1em 2em;
   color: #ffffff;background-image: url("images/home-background.png");
   background-repeat: no-repeat;
   background-position: right bottom;
@@ -67,7 +67,9 @@ html, body {
 .fieldcontain_preview{border: 0px solid gray !important;}
 .fieldcontain .handle { position: absolute; left: 0; top: 10px; bottom: 0; padding:8px; }
 .fieldcontain .fieldButtons{ position: absolute; right: 10px; bottom: -10px;}
-.fieldcontain textarea, input{margin-right: 10px;}
+.fieldcontain textarea, input{
+  width: 100%;
+}
 .ui-selecting { background: #eee; }
 .ui-selecting .handle { background: #ddd; }
 .ui-selected { background: #def; }
