@@ -193,8 +193,8 @@ var WalkAnimation = function(walk) {
     this.offset = new OpenLayers.Pixel(-61 - 23, -61 - 21); // TODO hyoteneuse width, height
     this.rfoffset = new OpenLayers.Pixel(-61 - 23 - 5, -61 - 21 - 10);
     this.lfoffset = new OpenLayers.Pixel(-61 - 23 + 5, -61 - 21 + 10);
-    this.rf = new OpenLayers.Icon('http://dlib-brown.edina.ac.uk/icons/right_footprint180.png', this.size, this.rfoffset);
-    this.lf = new OpenLayers.Icon('http://dlib-brown.edina.ac.uk/icons/left_footprint180.png', this.size, this.lfoffset);
+    this.rf = new OpenLayers.Icon('img/animator/right_footprint180.png', this.size, this.rfoffset);
+    this.lf = new OpenLayers.Icon('img/animator/left_footprint180.png', this.size, this.lfoffset);
 
     this.events = {};
 
@@ -221,13 +221,13 @@ var WalkAnimation = function(walk) {
     var markerFootprintTestContext = markerFootprintTestCanvas.getContext("2d");
 
     var lfImage = new Image();
-    lfImage.src = "http://dlib-brown.edina.ac.uk/icons/left_footprint180.png";
+    lfImage.src = "img/animator/left_footprint180.png";
     lfImage.onload = $.proxy(function() {
         this.markerLeftFootprintTempContext.drawImage(lfImage, 0, 0);
     }, this);
 
     var rfImage = new Image();
-    rfImage.src = "http://dlib-brown.edina.ac.uk/icons/right_footprint180.png";
+    rfImage.src = "img/animator/right_footprint180.png";
     rfImage.onload = $.proxy(function() {
         this.markerRightFootprintTempContext.drawImage(rfImage, 0, 0);
     }, this);
@@ -576,7 +576,6 @@ Walk.prototype.addPOI = function(POI) {
  * TODO type - sets different PopUp type (i.e. picture, audio, text...)
  */
 
-var POI = function(name, type, LonLat, map, mapviewer) {
 var POI = function(name, type, LonLat, map, mapviewer, recordId) {
     this.name = name;
     this.type = type;
@@ -654,7 +653,7 @@ POI.prototype.setContent = function(content) {
 };
 
 POI.prototype.showPOI = function() {
-    
+
     var recordId = this.recordId;
     var layer = this.map.getLayersByName("Clusters")[0];
     var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
