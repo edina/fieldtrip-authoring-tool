@@ -577,9 +577,11 @@ Walk.prototype.addPOI = function(POI) {
  */
 
 var POI = function(name, type, LonLat, map, mapviewer) {
+var POI = function(name, type, LonLat, map, mapviewer, recordId) {
     this.name = name;
     this.type = type;
     this.LonLat = LonLat;
+    this.recordId = recordId;
     var url = mapviewer.buildUrl('records', '/' + name);
     var preview = '';
     var self = this;
@@ -652,6 +654,24 @@ POI.prototype.setContent = function(content) {
 };
 
 POI.prototype.showPOI = function() {
+    
+    var recordId = this.recordId;
+    var layer = this.map.getLayersByName("Clusters")[0];
+    var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
+    var feature = findFeaturesByAttribute(layer.features, 'geofenceId', recordId);
+
+    if(feature !== null){
+        // If it's not selected in the map
+        if(layer.selectedFeatures.indexOf(feature) < 0){
+            selectControl.unselectAll();
+            selectControl.select(feature);
+        }
+
+        //Center the map
+        if(!feature.onScreen()){
+            this.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
+        }
+    }
     // Populate popup div
     $('#popup_info').html(this.popup.contentHTML);
     $('#popup_container').show();

@@ -165,10 +165,11 @@ AnimatorViewer.prototype._initEvents = function(){
         for(var i in POIs)
         {
             var poiName = $(POIs[i]).attr('record-name');
+            var recordId = $(POIs[i]).attr('recordid');
             var poiLonLat = new OpenLayers.LonLat(
                 this.mapviewer.map.getLayersByName("Clusters")[0].features[POIs[i].id.split("-")[1]].geometry.x,
                 this.mapviewer.map.getLayersByName("Clusters")[0].features[POIs[i].id.split("-")[1]].geometry.y);
-            var poi = new POI(poiName, null, poiLonLat, this.track_animator.map, this.mapviewer);
+            var poi = new POI(poiName, null, poiLonLat, this.track_animator.map, this.mapviewer, recordId);
             this.track_animator.walk.addPOI(poi);
         }
 
