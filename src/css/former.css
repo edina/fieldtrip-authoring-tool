@@ -415,13 +415,16 @@ tr.record{
 #popup_container{
     position: absolute;
     top: 0px;
-    z-index: 1000;
+    z-index: 11000;
     background: white;
     padding: 7px;
     width: 29%;
     right: 0px;
     cursor:move;
     display:none;
+    border: 2px solid;
+    border-radius: 10px;
+    box-shadow: 2px 2px 2px #888888;
 }
 audio{
     width: 100%;
