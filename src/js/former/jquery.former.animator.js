@@ -625,9 +625,6 @@ var POI = function(name, type, LonLat, map, mapviewer, recordId, callback) {
                 });
             }
             self.setContent(self.content += preview);
-            self.popup = new OpenLayers.Popup(title, self.LonLat, new OpenLayers.Size(200,200), self.content, true);
-            self.popup.autoSize=true;
-
         },
         error: function(jqXHR, status, error){
             loading(false);
@@ -641,9 +638,6 @@ var POI = function(name, type, LonLat, map, mapviewer, recordId, callback) {
     this.endStepNum = null;
     this.map = map;
 
-    // self.popup = new OpenLayers.Popup(this.name, self.LonLat, new OpenLayers.Size(200,200), self.content, true);
-    // self.popup.autoSize=true;
-
     this.isShown = false;
 };
 
@@ -656,6 +650,7 @@ POI.prototype.setContent = function(content) {
 
 POI.prototype.showPOI = function() {
 
+    // Ensure that the annotation icon corresponding to the popup is highlighted
     var recordId = this.recordId;
     var layer = this.map.getLayersByName("Clusters")[0];
     var selectControl = this.map.getControlsByClass('OpenLayers.Control.SelectFeature')[0];
@@ -667,21 +662,23 @@ POI.prototype.showPOI = function() {
             selectControl.unselectAll();
             selectControl.select(feature);
         }
-
         //Center the map
         if(!feature.onScreen()){
             this.map.setCenter(feature.geometry.bounds.getCenterLonLat(), 11);
         }
     }
+   
     // Populate popup div
-    $('#popup_info').html(this.popup.contentHTML);
-    $('#popup_container').show();
-    // this.map.addPopup(this.popup);
-    this.isShown = true;
+    var content = this.content;
+    if(content !== undefined){
+        $('#popup_info').html(content);
+        $('#popup_container').show();
+        this.isShown = true;
+    }
 };
 
 POI.prototype.hidePOI = function() {
-    this.map.removePopup(this.popup);
+
     this.isShown = false;
 };
 
