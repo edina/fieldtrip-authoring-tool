@@ -595,6 +595,19 @@ if ( !Date.prototype.toISOString ) {
   }() );
 }
 
+/* String.startsWith polyfill */
+if (!String.prototype.startsWith) {
+  Object.defineProperty(String.prototype, 'startsWith', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function (searchString, position) {
+      position = position || 0;
+      return this.lastIndexOf(searchString, position) === position;
+    }
+  });
+}
+
 /*
     Add formated data method to String
     Use: "{0} {1}".format('hello', 'world')
