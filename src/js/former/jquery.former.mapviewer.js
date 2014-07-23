@@ -645,53 +645,20 @@ MapViewer.prototype.updateFeaturesOnMap = function(features){
 
 //preparing the object for the table data and the point features
 MapViewer.prototype.prepareManyTableData= function(data, state){
-    var features = new Array();
-    var table_data = new Array();
-
-    // Rearrange the array in order to display it as a tree
-    var tracks = new Array();
-    var pois = new Array();
-    for(var i=0; i<data.length; i++){
-        for(key in data[i]){
-            if(data[i][key]['editor'] == "track.edtr"){
-                tracks.push(data[i]);
-            }else{
-                track_id = data[i][key]['trackId'];
-                if(track_id !== undefined){
-                    if(pois[track_id] === undefined){
-                        pois[track_id] = new Array();
-                    }
-                    pois[track_id].push(data[i]);
-                }else{
-                    console.warn("Not track id for POI: " + key);
-                }
-            }
-            break; // Should be one key only
-        }
-    }
-
-    data = Array();
-    for(var i=0; i<tracks.length; i++){
-        key = getKeys(tracks[i])[0];
-        track_id = tracks[i][key]['geofenceId'];
-
-        data.push(tracks[i]);
-        if(pois[track_id] !== undefined){
-            for(var j=0; j<pois[track_id].length; j++){
-                data.push(pois[track_id][j]);
-            }
-        }
-    }
+    var features = [];
+    var table_data = [];
 
     for(var i=0; i<data.length; i++){
-        for(key in data[i]){
-            var obj = this.prepareSingleTableData(key, data[i][key], i, state);
-            table_data.push(obj.data);
-            features.push(obj.feature);
+        for(var key in data[i]){
+            if (data[i].hasOwnProperty(key)) {
+                var obj = this.prepareSingleTableData(key, data[i][key], i, state);
+                table_data.push(obj.data);
+                features.push(obj.feature);
+            }
         }
     }
     return {"table": table_data, "features": features};
-}
+};
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     record['id'] = i;
@@ -734,7 +701,22 @@ MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
 
 
 MapViewer.prototype.initTable = function(table_data){
-    var header_cols = [{"mData": "control", "bSortable": false},
+    var header_cols = [{"mData": function(source, type, val){
+                            switch(type){
+                                case 'sort':
+                                    var sortId;
+                                    if(source.trackId === source.recordId){
+                                        sortId = source.trackId;
+                                    }else{
+                                        sortId = source.trackId + '_' +
+                                                 source.recordId;
+                                    }
+                                    return sortId;
+                                default: // set, display, filter, type, undefined
+                                    return '';
+                            }
+                        },
+                        "bSortable": false},
                        {"mData": "name", "bSortable": false},
                        {"mData": "description", "bSortable": false},
                        {"mData": "date", "bSortable": false},
