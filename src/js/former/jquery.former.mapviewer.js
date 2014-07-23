@@ -570,7 +570,7 @@ MapViewer.prototype.getData = function(params, callback){
         success: $.proxy(function(results){
             //console.log(results)
             if(results.error == 1){
-                giveFeedback("Something went wrong with your synching. Please try again!");
+                giveFeedback("Something went wrong with the synchronization. Please try again!");
                 //this.clearTableData();
             }else{
                 $("#expand-table").parent().removeClass("disabled");
