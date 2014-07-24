@@ -684,13 +684,12 @@ POI.prototype.showPOI = function() {
 };
 
 POI.prototype.hidePOI = function() {
-
     this.isShown = false;
 };
 
 POI.prototype.destroy = function() {
     if (this.isShown){
-        this.map.removePopup(this.popup);
-        this.popup.destroy();
+        this.isShown = false;
+        $('#popup_container').hide();
     }
 };
