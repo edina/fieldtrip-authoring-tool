@@ -328,7 +328,7 @@ a:focus,
 }
 
 .olLocationFileToolBar{
-  margin: 0 55px 0 0;
+  margin: 5px 5px 0 0;
   right: 0px;
   top: 0px;
   width: 35px;
@@ -339,12 +339,20 @@ a:focus,
 .olLocationFileToolBar div{
   width: 35px;
   height: 50px;
+  margin-top: 5px;
 }
 
 .olLocationFileToolBar .olLocationFileDrawFeatureItemInactive {
     background-image: url("../img/locationmarker.png");
 }
 .olLocationFileToolBar .olLocationFileDrawFeatureItemActive {
+    background-image: url("../img/locationmarker_active.png");
+}
+
+.olLocationFileToolBar .olControlHoverItemInactive {
+    background-image: url("../img/locationmarker.png");
+}
+.olLocationFileToolBar .olControlHoverItemActive {
     background-image: url("../img/locationmarker_active.png");
 }
 
