@@ -42,6 +42,7 @@ LocationFile.prototype.initMap = function(){
     var options = this.options;
 
     var selectAreaOptions = {
+            title: 'Select an area',
             displayClass: options.olSelectAreaClass,
             handlerOptions: {
                 sides: 4,
@@ -50,8 +51,8 @@ LocationFile.prototype.initMap = function(){
             },
             type: OpenLayers.Control.TYPE_TOOL,
             eventListeners: {
-                'activate': this.onSelectAreaActivate,
-                'deactivate': this.onSelectAreaDeactivate
+                activate: this.onSelectAreaActivate,
+                deactivate: this.onSelectAreaDeactivate
             }
         };
 
@@ -63,13 +64,14 @@ LocationFile.prototype.initMap = function(){
     selectArea.handler.callbacks.create = this.onCreateFeature;
 
     var selectTileOptions = {
+            title: 'Select a tile',
             displayClass: options.olSelectTileClass,
-            'onMove': this.onHoverTile,
-            'onDblClick': $.proxy(this.onDblClick, this),
-            'type': OpenLayers.Control.TYPE_TOOL,
+            onMove: this.onHoverTile,
+            onDblClick: $.proxy(this.onDblClick, this),
+            type: OpenLayers.Control.TYPE_TOOL,
             eventListeners: {
-                'activate': $.proxy(this.onSelectTileActivate, this),
-                'deactivate': $.proxy(this.onSelectTileDeactivate, this)
+                activate: $.proxy(this.onSelectTileActivate, this),
+                deactivate: $.proxy(this.onSelectTileDeactivate, this)
             }
         };
 
