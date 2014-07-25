@@ -1,8 +1,18 @@
+/*
+ * This control merge the Click Handler and the Hover handler
+ */
 OpenLayers.Control.Hover = OpenLayers.Class(OpenLayers.Control, {
     defaultHandlerOptions: {
-        'delay': 500,
-        'pixelTolerance': null,
-        'stopMove': false,
+        hover: {
+            'delay': 500,
+            'pixelTolerance': null,
+            'stopMove': false,
+        },
+        click: {
+            delay: 200,
+            double: true,
+            stopDouble: true,
+        }
     },
 
     initialize: function(options) {
@@ -20,11 +30,7 @@ OpenLayers.Control.Hover = OpenLayers.Class(OpenLayers.Control, {
                 click: this.onClick,
                 dblclick: this.onDblClick
             },
-            {
-                delay: 200,
-                double: true,
-                stopDouble: true,
-            }
+            this.handlerOptions.click
         );
 
         var hoverHandler = new OpenLayers.Handler.Hover(
@@ -33,7 +39,7 @@ OpenLayers.Control.Hover = OpenLayers.Class(OpenLayers.Control, {
                 'pause': this.onPause,
                 'move': this.onMove,
             },
-            this.handlerOptions
+            this.handlerOptions.hover
         );
 
 

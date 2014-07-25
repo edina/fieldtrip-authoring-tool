@@ -628,6 +628,7 @@ function lonlat2tile(lon, lat, zoom){
     var tile = {};
     tile.x = lon2tile(lon, zoom);
     tile.y = lat2tile(lat, zoom);
+    tile.z = zoom;
     return tile;
 }
 
@@ -635,10 +636,11 @@ function tile2lonlat(x, y, zoom){
     var point = {};
     point.lon = tile2lon(x, zoom);
     point.lat = tile2lat(y, zoom);
+    point.zoom = zoom;
     return point;
 }
 
-function lon2tile(lon,zoom) {
+function lon2tile(lon, zoom) {
     return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
 }
 
