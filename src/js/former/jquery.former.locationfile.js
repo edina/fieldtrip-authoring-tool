@@ -47,7 +47,7 @@ LocationFile.prototype.initMap = function(){
                 irregular:true,
                 persistent: false
             },
-            type: OpenLayers.Control.TYPE_TOGGLE,
+            type: OpenLayers.Control.TYPE_TOOL,
             eventListeners: {
                 'activate': this.onSelectAreaActivate,
                 'deactivate': this.onSelectAreaDeactivate
@@ -66,7 +66,7 @@ LocationFile.prototype.initMap = function(){
             displayClass: options.olSelectTileClass,
             'onMove': this.onHoverTile,
             'onDblClick': $.proxy(this.onDblClick, this),
-            'type': OpenLayers.Control.TYPE_TOGGLE,
+            'type': OpenLayers.Control.TYPE_TOOL,
             eventListeners: {
                 'activate': $.proxy(this.onSelectTileActivate, this),
                 'deactivate': $.proxy(this.onSelectTileDeactivate, this)
@@ -76,7 +76,8 @@ LocationFile.prototype.initMap = function(){
     var selectTile = new OpenLayers.Control.Hover(selectTileOptions);
 
     var toolbar = new OpenLayers.Control.Panel({
-                    displayClass: options.olToolBarClass
+                    displayClass: options.olToolBarClass,
+                    allowDepress: true
                 });
 
     // Init attributes
