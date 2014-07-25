@@ -1,9 +1,10 @@
 /*
-  Extension for generating location files, a new layer and tool are inserted
-  in the map and a form control is inserted in the DOM.
+  Extension for generating location files, a new layer and a toolbar are
+  inserted in the map and a form control is inserted in the DOM.
 
   @param map An instance of a openlayers map
   @param selector A div where the control will be inserted
+  @param options override the default options
 */
 
 var LocationFile = function(map, selector, options){
@@ -59,7 +60,6 @@ LocationFile.prototype.initMap = function(){
                                                                .RegularPolygon,
                                                      selectAreaOptions);
 
-    selectArea.events.register("featureadded", selectArea, this.onLocationAdded);
     selectArea.handler.callbacks.create = this.onCreateFeature;
 
     var selectTileOptions = {
@@ -80,7 +80,7 @@ LocationFile.prototype.initMap = function(){
                     allowDepress: true
                 });
 
-    // Init attributes
+    // Initialize attributes
     this.layer = layer;
     this.toolbar = toolbar;
 
@@ -186,6 +186,9 @@ LocationFile.prototype.initSpinnerControl = function(){
     });
 };
 
+/*
+ * Draw the tile of the current mouse position
+ */
 LocationFile.prototype.onHoverTile = function(evt){
     var xy = evt.xy;
     var map = this.map;
@@ -233,11 +236,6 @@ LocationFile.prototype.onCreateFeature = function() {
     }
 };
 
-LocationFile.prototype.onLocationAdded = function(evt){
-    var feature = evt.feature;
-    //this.generateFile(feature);
-};
-
 /*
  * Returns an array of objects with x, y, z and url that cover the feature.
  */
@@ -279,6 +277,10 @@ LocationFile.prototype.generateTilesUrls = function(feature){
     return tiles;
 };
 
+/*
+ * Request the reverse geocoding for the tiles and after complete all the
+ * requests creates and upload a location file in the PCAPI service.
+ */
 LocationFile.prototype.requestLocations = function(tiles){
     // Retrieve the reverse geocoding of a tile location and process it.
     var reverseGeocoding= function(tile){
@@ -317,6 +319,9 @@ LocationFile.prototype.requestLocations = function(tiles){
     });
 };
 
+/*
+ * Generate and upload a location file asking first confirmation from the user
+ */
 LocationFile.prototype.generateFile = function(feature){
     var tiles = this.generateTilesUrls(feature);
     var locationFile = this;
