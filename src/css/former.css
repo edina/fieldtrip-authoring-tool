@@ -331,29 +331,29 @@ a:focus,
   margin: 5px 5px 0 0;
   right: 0px;
   top: 0px;
-  width: 35px;
+  width: 50px;
   height: 50px;
   cursor: pointer;
 }
 
 .olLocationFileToolBar div{
-  width: 35px;
+  width: 50px;
   height: 50px;
   margin-top: 5px;
 }
 
 .olLocationFileToolBar .olLocationFileDrawFeatureItemInactive {
-    background-image: url("../img/locationmarker.png");
+    background-image: url("../img/location/select-area_inactive.png");
 }
 .olLocationFileToolBar .olLocationFileDrawFeatureItemActive {
-    background-image: url("../img/locationmarker_active.png");
+    background-image: url("../img/location/select-area_active.png");
 }
 
 .olLocationFileToolBar .olControlHoverItemInactive {
-    background-image: url("../img/locationmarker.png");
+    background-image: url("../img/location/select-tile_inactive.png");
 }
 .olLocationFileToolBar .olControlHoverItemActive {
-    background-image: url("../img/locationmarker_active.png");
+    background-image: url("../img/location/select-tile_active.png");
 }
 
 tr.record{
