@@ -624,21 +624,23 @@ if (!String.prototype.format) {
 
 /* Tile to Long/Lat functions from the openstreetmap wiki */
 
-function longlat2tile(lon, lat, zoom){
+function lonlat2tile(lon, lat, zoom){
     var tile = {};
-    tile.x = lat2tile(lat, zoom);
-    tile.y = long2tile(lon, zoom);
+    tile.x = lon2tile(lon, zoom);
+    tile.y = lat2tile(lat, zoom);
+    tile.z = zoom;
     return tile;
 }
 
-function tile2longlat(x, y, zoom){
+function tile2lonlat(x, y, zoom){
     var point = {};
-    point.lon = tile2long(x, zoom);
-    point.lat =tile2lat(y, zoom);
+    point.lon = tile2lon(x, zoom);
+    point.lat = tile2lat(y, zoom);
+    point.zoom = zoom;
     return point;
 }
 
-function long2tile(lon,zoom) {
+function lon2tile(lon, zoom) {
     return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
 }
 
@@ -646,13 +648,23 @@ function lat2tile(lat, zoom)  {
     return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom)));
 }
 
-function tile2long(x, zoom) {
+function tile2lon(x, zoom) {
     return ((x / Math.pow(2,zoom) * 360) - 180);
 }
 
 function tile2lat(y, zoom) {
     var n=Math.PI-2*Math.PI*y/Math.pow(2,zoom);
     return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+}
+
+/*  Get the closest zoom in Open Street Map to given scale
+    http://wiki.openstreetmap.org/wiki/Zoom_levels
+*/
+
+function getOSMZoom(resolution, latitude){
+    //6378137.0 * 2 * pi / 256 = 156543.034 meters/pixel
+    var zoom = Math.log((156543.034 * Math.cos(latitude*Math.PI/180)) / resolution) / Math.log(2);
+    return Math.ceil(zoom);
 }
 
 function imgError(image) {

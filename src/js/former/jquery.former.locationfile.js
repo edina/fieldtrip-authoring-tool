@@ -8,24 +8,24 @@
 
 var LocationFile = function(map, selector, options){
     var defaults = {
-        min_radius: 100,
+        minRadius: 100,
         olToolBarClass: 'olLocationFileToolBar',
         olToolClass: 'olLocationFileDrawFeature'
     };
 
     this.options = $.extend(defaults, options);
     this.map = map;
-    this.controls_selector = selector;
+    this.controlSelector = selector;
     this.layer = null;
     this.control = null;
     this.panel = null;
-    this._initMap();
-    this._initDomControls();
+    this.initMap();
+    this.initDomControls();
 };
 
-LocationFile.prototype._initDomControls = function(){
-    this._initLocationControl();
-    this._initSpinnerControl();
+LocationFile.prototype.initDomControls = function(){
+    this.initLocationControl();
+    this.initSpinnerControl();
 
     var layer = this.layer;
     var locationFile = this;
@@ -35,7 +35,7 @@ LocationFile.prototype._initDomControls = function(){
     });
 };
 
-LocationFile.prototype._initMap = function(){
+LocationFile.prototype.initMap = function(){
     var map = this.map;
     var layer = new OpenLayers.Layer.Vector("Location", {visible: true});
     var options = this.options;
@@ -66,23 +66,30 @@ LocationFile.prototype._initMap = function(){
     control.events.register("featureadded", control, this.onLocationAdded);
     control.handler.callbacks.create = this.onCreateFeature;
 
+    var selectTileOptions = {'onMove': this.onHoverTile,
+                             'onDblClick': $.proxy(this.onDblClick, this),
+                             'type': OpenLayers.Control.TYPE_TOGGLE
+                            };
+
+    var selectTile = new OpenLayers.Control.Hover(selectTileOptions);
+
     // Init attributes
     this.control = control;
     this.layer = layer;
     this.panel = panel;
 
     // Add map controls
-    panel.addControls(control);
+    panel.addControls([control, selectTile]);
     map.addControl(panel);
     panel.deactivate();
     map.addLayer(layer);
 };
 
-LocationFile.prototype._initLocationControl = function(){
+LocationFile.prototype.initLocationControl = function(){
     var map = this.map;
     var format = 'json';
-    var ctx = this.controls_selector;
-    var defaultRadius = this.options.min_radius;
+    var ctx = this.controlSelector;
+    var defaultRadius = this.options.minRadius;
     var ws = 'http://nominatim.openstreetmap.org/search';
     var url = '{0}?format={1}&countrycodes={2}&addressdetails=1&q={3}';
     var doQuery = function(request, callback){
@@ -139,8 +146,8 @@ LocationFile.prototype._initLocationControl = function(){
     }).data('ui-autocomplete')._renderItem = renderItem;
 };
 
-LocationFile.prototype._initSpinnerControl = function(){
-    var ctx = this.controls_selector;
+LocationFile.prototype.initSpinnerControl = function(){
+    var ctx = this.controlSelector;
     var map = this.map;
     var layer = this.layer;
 
@@ -167,11 +174,49 @@ LocationFile.prototype._initSpinnerControl = function(){
 
     // Spinner control
     $('input[name="radius"]', ctx).spinner({
-        min: this.options.min_radius,
+        min: this.options.minRadius,
         max: 5000,
         step: 50,
         spin: onSpin,
     });
+};
+
+LocationFile.prototype.onHoverTile = function(evt){
+    var xy = evt.xy;
+    var map = this.map;
+    var layer = map.getLayersByName('Location')[0];
+    var point = map.getLonLatFromPixel(xy)
+                   .transform(map.getProjectionObject(),
+                              new OpenLayers.Projection("EPSG:4326"));
+    var zoom = getOSMZoom(map.getResolution(), point.lat) + 1;
+
+    var tile = lonlat2tile(point.lon, point.lat, zoom);
+
+    var nw = tile2lonlat(tile.x, tile.y, zoom);
+    var se = tile2lonlat(tile.x + 1, tile.y + 1, zoom);
+    var bounds = bounds = new OpenLayers.Bounds();
+    bounds.extend(new OpenLayers.LonLat(nw.lon, nw.lat));
+    bounds.extend(new OpenLayers.LonLat(se.lon, se.lat));
+
+    var square = bounds.toGeometry()
+                       .transform(new OpenLayers.Projection("EPSG:4326"),
+                                  map.getProjectionObject());
+
+    var feature = new OpenLayers.Feature.Vector(square);
+    feature.attributes.tiles = [tile];
+
+    layer.removeAllFeatures();
+    layer.addFeatures(feature);
+};
+
+LocationFile.prototype.onDblClick = function(evt){
+    var map = this.map;
+    var layer = map.getLayersByName('Location')[0];
+
+    if(layer.features && layer.features.length > 0){
+        var feature = layer.features[0];
+        this.generateFile(feature, feature.attributes.zoom);
+    }
 };
 
 LocationFile.prototype.onCreateFeature = function() {
@@ -188,33 +233,48 @@ LocationFile.prototype.onLocationAdded = function(evt){
     //this.generateFile(feature);
 };
 
-LocationFile.prototype._calculateTiles = function(feature){
+/*
+ * Returns an array of objects with x, y, z and url that cover the feature.
+ */
+LocationFile.prototype.generateTilesUrls = function(feature){
     var map = this.map;
     var ws = 'http://nominatim.openstreetmap.org/reverse';
-    var query = '?format={0}&lat={1}&lon={2}&zoom={3}&addressdetails=1';
-    var bbox = feature.geometry.clone().getBounds()
-                       .transform(map.getProjectionObject(),
-                                  new OpenLayers.Projection("EPSG:4326"));
-    var zoom = 18;
-
-    var tile_0 = longlat2tile(bbox.left, bbox.top, zoom);
-    var tile_1 = longlat2tile(bbox.right, bbox.bottom, zoom);
+    var query = '?format={0}&lon={1}&lat={2}&zoom={3}&addressdetails=1';
 
     var tiles = [];
-    // Generate the url for requesting the information of each tile.
-    for(var x = tile_0.x; x<=tile_1.x; x++){
-        for(var y = tile_0.y; y<=tile_1.y; y++){
-            var center = tile2longlat(y + 0.5, x + 0.5, zoom);
-            var url = ws + query.format('json', center.lat, center.lon, zoom);
-            var tile = {x: x, y: y, url: url};
-            tiles.push(tile);
+
+    // If the feature has an attribute that contains the tiles that cover it
+    // it's used otherwise it's generated from the bounds of the feature
+    if(feature.attributes.tiles){
+        tiles.push.apply(tiles, feature.attributes.tiles);
+    }else{
+        var bounds = feature.geometry.clone()
+                    .getBounds()
+                    .transform(map.getProjectionObject(),
+                               new OpenLayers.Projection("EPSG:4326"));
+        var zoom = 18;
+        var tile_0 = lonlat2tile(bounds.left, bounds.top, zoom);
+        var tile_1 = lonlat2tile(bounds.right, bounds.bottom, zoom);
+
+        for(var x = tile_0.x; x<=tile_1.x; x++){
+            for(var y = tile_0.y; y<=tile_1.y; y++){
+                var tile = {x: x, y: y, z: zoom};
+                tiles.push(tile);
+            }
         }
+    }
+
+    // Add the url to the list of tiles
+    for(var i=0; i<tiles.length; i++){
+        var center = tile2lonlat(tiles[i].x + 0.5, tiles[i].y + 0.5, tiles[i].z);
+        var url = ws + query.format('json', center.lon, center.lat, center.zoom);
+        tiles[i].url = url;
     }
 
     return tiles;
 };
 
-LocationFile.prototype._requestLocations = function(tiles){
+LocationFile.prototype.requestLocations = function(tiles){
     // Retrieve the reverse geocoding of a tile location and process it.
     var reverseGeocoding= function(tile){
         var promise;
@@ -227,7 +287,7 @@ LocationFile.prototype._requestLocations = function(tiles){
                     if(address.road !== undefined){
                         value = '{0}, {1}'.format(address.road, address.suburb);
                     }else{
-                        value = address.suburb;
+                        value = address.suburb || address.county || address.state;
                     }
                     name = '{0}-{1}'.format(tile.x, tile.y);
                     location[name] = value;
@@ -253,7 +313,7 @@ LocationFile.prototype._requestLocations = function(tiles){
 };
 
 LocationFile.prototype.generateFile = function(feature){
-    var tiles = this._calculateTiles(feature);
+    var tiles = this.generateTilesUrls(feature);
     var locationFile = this;
     var msg = tiles.length + ' tiles are going to be requested';
 
@@ -266,7 +326,7 @@ LocationFile.prototype.generateFile = function(feature){
             modal: true,
             buttons: {
                 Continue: function() {
-                    locationFile._requestLocations(tiles);
+                    locationFile.requestLocations(tiles);
                     $(this).dialog( "close" );
                 },
                 Cancel: function() {
