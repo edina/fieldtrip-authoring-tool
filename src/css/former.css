@@ -67,7 +67,8 @@ html, body {
 .fieldcontain_preview{border: 0px solid gray !important;}
 .fieldcontain .handle { position: absolute; left: 0; top: 10px; bottom: 0; padding:8px; }
 .fieldcontain .fieldButtons{ position: absolute; right: 10px; bottom: -10px;}
-.fieldcontain textarea, input{
+.fieldcontain textarea,
+.fieldcontain input{
   width: 100%;
 }
 .ui-selecting { background: #eee; }
