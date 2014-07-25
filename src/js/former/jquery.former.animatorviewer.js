@@ -221,7 +221,8 @@ AnimatorViewer.prototype._initEvents = function(){
 
         $('#track-animate').hide();
         $('#track-pause-animate').show();
-        $('.track-speed, .checkbox').show();
+        $('.track-speed' ).show();
+        $('.checkbox').css('display', 'inline-block');
     },this));
 
     $('#track-pause-animate').on('click', $.proxy(function(e){
