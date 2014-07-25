@@ -10,15 +10,15 @@ var LocationFile = function(map, selector, options){
     var defaults = {
         minRadius: 100,
         olToolBarClass: 'olLocationFileToolBar',
-        olToolClass: 'olLocationFileDrawFeature'
+        olSelectAreaClass: 'olLocationFileSelectArea',
+        olSelectTileClass: 'olLocationFileSelectTile'
     };
 
     this.options = $.extend(defaults, options);
     this.map = map;
     this.controlSelector = selector;
     this.layer = null;
-    this.control = null;
-    this.panel = null;
+    this.toolbar = null;
     this.initMap();
     this.initDomControls();
 };
@@ -40,8 +40,8 @@ LocationFile.prototype.initMap = function(){
     var layer = new OpenLayers.Layer.Vector("Location", {visible: true});
     var options = this.options;
 
-    var controlOptions = {
-            displayClass: options.olToolClass,
+    var selectAreaOptions = {
+            displayClass: options.olSelectAreaClass,
             handlerOptions: {
                 sides: 4,
                 irregular:true,
@@ -49,39 +49,44 @@ LocationFile.prototype.initMap = function(){
             },
             type: OpenLayers.Control.TYPE_TOGGLE,
             eventListeners: {
-                'activate': this.onDrawLocationActivate,
-                'deactivate': this.onDrawLocationDeactivate
+                'activate': this.onSelectAreaActivate,
+                'deactivate': this.onSelectAreaDeactivate
             }
         };
 
-    var panel = new OpenLayers.Control.Panel({
-                    displayClass: options.olToolBarClass
-                });
-
-    var control = new OpenLayers.Control.DrawFeature(layer,
+    var selectArea = new OpenLayers.Control.DrawFeature(layer,
                                                      OpenLayers.Handler
                                                                .RegularPolygon,
-                                                     controlOptions);
+                                                     selectAreaOptions);
 
-    control.events.register("featureadded", control, this.onLocationAdded);
-    control.handler.callbacks.create = this.onCreateFeature;
+    selectArea.events.register("featureadded", selectArea, this.onLocationAdded);
+    selectArea.handler.callbacks.create = this.onCreateFeature;
 
-    var selectTileOptions = {'onMove': this.onHoverTile,
-                             'onDblClick': $.proxy(this.onDblClick, this),
-                             'type': OpenLayers.Control.TYPE_TOGGLE
-                            };
+    var selectTileOptions = {
+            displayClass: options.olSelectTileClass,
+            'onMove': this.onHoverTile,
+            'onDblClick': $.proxy(this.onDblClick, this),
+            'type': OpenLayers.Control.TYPE_TOGGLE,
+            eventListeners: {
+                'activate': $.proxy(this.onSelectTileActivate, this),
+                'deactivate': $.proxy(this.onSelectTileDeactivate, this)
+            }
+        };
 
     var selectTile = new OpenLayers.Control.Hover(selectTileOptions);
 
+    var toolbar = new OpenLayers.Control.Panel({
+                    displayClass: options.olToolBarClass
+                });
+
     // Init attributes
-    this.control = control;
     this.layer = layer;
-    this.panel = panel;
+    this.toolbar = toolbar;
 
     // Add map controls
-    panel.addControls([control, selectTile]);
-    map.addControl(panel);
-    panel.deactivate();
+    toolbar.addControls([selectArea, selectTile]);
+    map.addControl(toolbar);
+    toolbar.deactivate();
     map.addLayer(layer);
 };
 
@@ -89,7 +94,6 @@ LocationFile.prototype.initLocationControl = function(){
     var map = this.map;
     var format = 'json';
     var ctx = this.controlSelector;
-    var defaultRadius = this.options.minRadius;
     var ws = 'http://nominatim.openstreetmap.org/search';
     var url = '{0}?format={1}&countrycodes={2}&addressdetails=1&q={3}';
     var doQuery = function(request, callback){
@@ -336,22 +340,25 @@ LocationFile.prototype.generateFile = function(feature){
         });
 };
 
-LocationFile.prototype.onDrawLocationActivate = function(evt){
+LocationFile.prototype.onSelectAreaActivate = function(evt){
     var locationLayer = evt.object.layer;
     locationLayer.setVisibility(true);
 };
 
-LocationFile.prototype.onDrawLocationDeactivate = function(evt){
-    // var locationLayer = evt.object.layer;
-    // locationLayer.setVisibility(false);
+LocationFile.prototype.onSelectAreaDeactivate = function(){
+    this.layer.removeAllFeatures();
+};
+
+LocationFile.prototype.onSelectTileDeactivate = function(){
+    this.layer.removeAllFeatures();
 };
 
 LocationFile.prototype.activate = function(){
     this.layer.setVisibility(true);
-    this.panel.activate();
+    this.toolbar.activate();
 };
 
 LocationFile.prototype.deactivate = function(){
     this.layer.setVisibility(false);
-    this.panel.deactivate();
+    this.toolbar.deactivate();
 };

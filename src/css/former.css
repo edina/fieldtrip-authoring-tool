@@ -342,17 +342,17 @@ a:focus,
   margin-top: 5px;
 }
 
-.olLocationFileToolBar .olLocationFileDrawFeatureItemInactive {
+.olLocationFileToolBar .olLocationFileSelectAreaItemInactive {
     background-image: url("../img/location/select-area_inactive.png");
 }
-.olLocationFileToolBar .olLocationFileDrawFeatureItemActive {
+.olLocationFileToolBar .olLocationFileSelectAreaItemActive {
     background-image: url("../img/location/select-area_active.png");
 }
 
-.olLocationFileToolBar .olControlHoverItemInactive {
+.olLocationFileToolBar .olLocationFileSelectTileItemInactive {
     background-image: url("../img/location/select-tile_inactive.png");
 }
-.olLocationFileToolBar .olControlHoverItemActive {
+.olLocationFileToolBar .olLocationFileSelectTileItemActive {
     background-image: url("../img/location/select-tile_active.png");
 }
 
