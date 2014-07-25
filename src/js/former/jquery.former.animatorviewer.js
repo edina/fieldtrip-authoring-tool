@@ -199,6 +199,7 @@ AnimatorViewer.prototype._initEvents = function(){
                 self.walk.animation.pause();
                 animatorViewer.playRecord(poi.record);
             }else{
+                self.walk.animation.pauseOnPopup=false;
                 aria.notify(poi.record.name);
             }
         });
