@@ -443,3 +443,10 @@ audio{
 #preload img{
     display:none;
 }
+
+div.welcome ul.videos,
+div.welcome ul.reports{
+  list-style-type: circle;
+}
+
+
