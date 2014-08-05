@@ -68,6 +68,8 @@ def install(app='src'):
     #extra libs
     #proj4js
     dist_path = os.sep.join((os.environ['HOME'], 'apps'))
+    if not os.path.exists(dist_path):
+        local('mkdir {0}'.format(dist_path))
     proj_dir = 'proj4js'.format(PROJ4JS_VERSION)
     proj_path = os.sep.join((dist_path, proj_dir))
     if not os.path.exists(proj_path):
