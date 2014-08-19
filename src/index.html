@@ -258,7 +258,7 @@
 
   <script type="text/javascript">
     //var map, oTable;
-    var provider;
+    var provider = 'local';
 
     $(document).ready(function(){
       $("#map_canvas").width(0.8*$(".span9").width());
@@ -286,58 +286,42 @@
         modal: false
       });
 
+      var params = getParams();
 
-      var uid = getParam('uid', $(location).attr('href')), token = getParam('oauth_token', $(location).attr('href'));
-      $.ajax({
-        url: "home.html",
-        dataType: "html",
-        success: function(data){
-          $("#home-content").append(data);
-          $("#open-login").click(function(){
-            $("#dialog-login").dialog("open");
-          });
-          $(".redirect-me").click(function(){
-            if(uid == 0){
-              provider = $(this).attr("id");
-              localStorage.setItem("provider", provider);
-              if(provider === 'local'){
-                var url = "/1.3/pcapi/auth/"+provider;
-                $("#dialog-local-login").dialog("open");
-                $("#loginbutton").click(function(){
-                  //$.ajax({
-                  //  method: "POST",
-                  //  data: "user="+$("#useremail").val(),
-                  //  url: url
-                  //}).done(function(data){
-                  //  console.log(data)
-                  //});
-                  var $location = $(location);
-                  $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+$('#user-email').val());
-                  //$.getJSON(url, function(data) {
-                  //  console.log(data);
-                   // console.log($location.attr("href"))
-                  //  $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+data["userid"]);
-                    //$(location).attr('href',data.url);
-                  //});
-                });
-              }else{
-                var url = "/1.3/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
-                $.getJSON(url, function(data) {
-                  $(location).attr('href',data.url);
-                });
-              }
-            }
-          });
-          if(uid != 0){
-            $("#login-paragraph").hide("fast");
-          }
-        }
+      //Events
+      $(document).on('click', '#open-login', function(){
+        $("#dialog-login").dialog("open");
       });
 
-      if(uid != 0){
-        initialize_app(token, localStorage.getItem("provider"));
+      $(document).on('click', '.redirect-me', function(){
+        console.log($(this).attr("id"));
+          provider = $(this).attr("id");
+          localStorage.setItem("provider", provider);
+          if(provider === 'local'){
+            var url = "/1.3/pcapi/auth/"+provider;
+            $("#dialog-local-login").dialog("open");
+            $("#loginbutton").click(function(){
+              var $location = $(location);
+              $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+$('#user-email').val());
+            });
+          }else{
+            var url = "/1.3/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
+            $.getJSON(url, function(data) {
+              $(location).attr('href',data.url);
+            });
+          }
+      });
+
+      if ("group" in params && params["group"] !== undefined) {
+        initialize_app(params["survey"], localStorage.getItem("provider"));
       }
-      
+      else if ("uid" in params && params["uid"] !== undefined) {
+        initialize_app(params["oauth_token"], localStorage.getItem("provider"));
+      }
+      else{
+        loadHomePage();
+      }
+
       if(screen.width < 768){
         $("#fat-menu").hide();
         $("#size-screen").hide();
@@ -382,6 +366,44 @@
         return "";
       else
         return decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+    
+    function getParams (){
+      var query = window.location.search.substring(1);
+      var query_string = {};
+      var params = query.split("&");
+      for(var i=0; i<params.length; i++){
+          var pair = params[i].split("=");
+          if (typeof query_string[pair[0]] === "undefined") {
+              query_string[pair[0]] = pair[1];
+              // If second entry with this name
+          } else if (typeof query_string[pair[0]] === "string") {
+              var arr = [ query_string[pair[0]], pair[1] ];
+              query_string[pair[0]] = arr;
+              // If third or later entry with this name
+          } else {
+              query_string[pair[0]].push(pair[1]);
+          }
+      }
+      return query_string;
+    }
+    
+    function loadHomePage (){
+      $.ajax({
+        url: "home.html",
+        dataType: "html",
+        success: function(data){
+          $("#home-content").append(data);
+          
+          //if(uid != 0){
+          //  $("#login-paragraph").hide("fast");
+          //}
+        }
+      });
+    }
+
+    function name(args) {
+      //code
     }
 
   </script>
