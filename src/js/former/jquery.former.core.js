@@ -976,7 +976,7 @@
     }
     
     BuildFormer.prototype.buildUrl = function(path, ext){
-        var url = config.url+this.version+'/pcapi/'+path+'/'+this.provider+'/'+this.options.oauth;
+        var url = config.baseurl+this.version+'/pcapi/'+path+'/'+this.provider+'/'+this.options.oauth;
         if(ext){
             url = url+ext;
         }
