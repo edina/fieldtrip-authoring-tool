@@ -66,6 +66,8 @@
   <script type="text/javascript" src="js/former/jquery.former.audio.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.capture.js"></script>
   <script type="text/javascript" src="js/former/jquery.former.optionsform.js"></script>
+
+ <script type="text/javascript" src="js/config.js"></script>
 </head>
 
 <body>
@@ -258,7 +260,9 @@
 
   <script type="text/javascript">
     //var map, oTable;
-    var provider = 'local';
+    var provider;
+    var vers = config.versions;
+    var arrvers = vers.split(",");
 
     $(document).ready(function(){
       $("#map_canvas").width(0.8*$(".span9").width());
@@ -286,26 +290,28 @@
         modal: false
       });
 
-      var params = getParams();
-
-      //Events
       $(document).on('click', '#open-login', function(){
         $("#dialog-login").dialog("open");
       });
+
+      var params = getParams();
+
+      //Events
+      
 
       $(document).on('click', '.redirect-me', function(){
         console.log($(this).attr("id"));
           provider = $(this).attr("id");
           localStorage.setItem("provider", provider);
           if(provider === 'local'){
-            var url = "/1.3/pcapi/auth/"+provider;
+            var url = config.baseurl+arrvers[arrvers.length - 1]+"/pcapi/auth/"+provider;
             $("#dialog-local-login").dialog("open");
             $("#loginbutton").click(function(){
               var $location = $(location);
               $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+$('#user-email').val());
             });
           }else{
-            var url = "/1.3/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
+            var url = config.baseurl+arrvers[arrvers.length - 1]+"/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
             $.getJSON(url, function(data) {
               $(location).attr('href',data.url);
             });
@@ -405,6 +411,7 @@
     function name(args) {
       //code
     }
+
 
   </script>
 

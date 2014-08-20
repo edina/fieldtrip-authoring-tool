@@ -2,3 +2,6 @@ tmp
 bower_components
 node_modules
 *.pyc
+*.ini
+.htaccess
+config.js

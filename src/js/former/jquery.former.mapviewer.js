@@ -850,7 +850,7 @@ MapViewer.prototype.resizeMap = function(){
 }
 
 MapViewer.prototype.buildUrl = function(path, record){
-    var url = '/'+this.options.version+'/pcapi/'+path+'/'+this.options.provider+'/'+this.options.oauth;
+    var url = config.urls+this.options.version+'/pcapi/'+path+'/'+this.options.provider+'/'+this.options.oauth;
     if(record){
         url = url+record;
     }

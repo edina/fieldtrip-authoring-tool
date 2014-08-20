@@ -1,6 +1,7 @@
 from fabric.api import env, put, run, task, local, sudo, prompt, lcd, settings
 from fabric.contrib.project import rsync_project
 import datetime, os, json, ast, ConfigParser
+from jinja2 import Environment, PackageLoader, FileSystemLoader
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROJ4JS_VERSION = "1.1.0"
@@ -31,22 +32,27 @@ def install(app='src'):
 
     bower = json.loads(open('bower.json').read())
 
-    def _get_dest_path(path):
-        if path.endswith("js"):
-            return js_ext
-        elif path.endswith("css"):
-            return css_ext
+    # generate config js
+    generate_config_js(version=versions['project'],
+                       fetch_config=False)
+
+
+def _get_dest_path(path):
+    if path.endswith("js"):
+        return js_ext
+    elif path.endswith("css"):
+        return css_ext
 
     paths = ast.literal_eval(local('bower -j list -p', capture=True))
     for path in paths:
-        if isinstance(paths[path], list):
-            for subpath in paths[path]:
-                _copy_lib(npm_bin, subpath, os.sep.join((_get_dest_path(subpath), os.path.basename(subpath))))
-        else:
-            subpath = paths[path]
-            fileName, fileExtension = os.path.splitext(os.path.basename(subpath))
-            if fileExtension != "":
-                _copy_lib(npm_bin, subpath, os.sep.join((_get_dest_path(subpath), os.path.basename(subpath))))
+      if isinstance(paths[path], list):
+          for subpath in paths[path]:
+              _copy_lib(npm_bin, subpath, os.sep.join((_get_dest_path(subpath), os.path.basename(subpath))))
+      else:
+          subpath = paths[path]
+          fileName, fileExtension = os.path.splitext(os.path.basename(subpath))
+          if fileExtension != "":
+              _copy_lib(npm_bin, subpath, os.sep.join((_get_dest_path(subpath), os.path.basename(subpath))))
 
     for dep in bower['dependency_locations']:
         files = bower['dependency_locations'][dep]
@@ -190,6 +196,49 @@ def _symlink():
 
 
 ###Configuration
+def generate_config_js(version=None, fetch_config=True):
+    """ generate config.js """
+    root, proj_home, src_dir = _get_source()
+
+    if fetch_config:
+        _check_config()
+
+    # using config initialises it
+    _config('baseurl', 'config')
+
+    ## convert items list into dictionary
+    values = {}
+    versions = {}
+    # #for entry in config.items('app'):
+    for entry in config.items('config'):
+        print entry
+        values[str(entry[0])] = str(entry[1])
+       # for versionNo in config.get("config", "versions").split(","):
+          #  print "version : " + versionNo
+          #  versions = versionNo
+    templates = os.sep.join((src_dir, 'templates'))
+    #values['version'] = versions
+    out_file = os.sep.join((src_dir, 'js', 'config.js'))
+    environ = Environment(loader=FileSystemLoader(templates))
+    template = environ.get_template("config.js")
+    output = template.render(config=values)
+    _write_data(out_file, output)
+    
+
+def _get_source(app='android'):
+    """
+    Get fieldtip source directories.
+    Returns a tuple containing:
+
+    0) root                   (of source repo)
+    1) project home           (of project repo)
+    2) source code            (src)
+    """
+
+    root = local('pwd', capture=True).strip();
+    proj_home = os.sep.join((root, 'project'))
+    src_dir = os.sep.join((root, 'src'))
+    return root, proj_home, src_dir
 
 def _check_config():
     """
@@ -214,14 +263,38 @@ def _check_config():
     else:
         # pick up any changes
         location = _config('location')
-        local('rsync -avz {0} {1}'.format(location, conf_dir))
+        # local('rsync -avz {0} {1}'.format(location, conf_dir))
+        #local('rsync -avz {0} {1}'.format(location, conf_file))
 
+def _config(key, section='install'):
+    """
+    Get config value for key.
 
-def _config(var, section='install'):
+    key - config key
+    section - config section, e.g install, release or app
+    """
+
     global config
     if config == None:
         config = ConfigParser.ConfigParser()
-        conf_file = os.sep.join((CURRENT_PATH, 'etc', 'config.ini'))
+        conf_file = os.sep.join((_get_source()[0], 'etc', 'config.ini'))
         config.read(conf_file)
 
-    return config.get(section, var)
+    if config.has_section(section):
+        if key == None:
+            return config._sections[section]
+        else:
+            val = None
+            try:
+                val = config.get(section, key)
+            except NoOptionError:
+                pass
+            return val
+    else:
+        return None
+
+def _write_data(fil, filedata):
+    """ TODO """
+    f = open(fil, 'w')
+    f.write(filedata)
+    f.close()
