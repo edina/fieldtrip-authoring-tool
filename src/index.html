@@ -318,11 +318,10 @@
           }
       });
 
-      if ("group" in params && params["group"] !== undefined) {
-        initialize_app(params["survey"], localStorage.getItem("provider"));
-      }
-      else if ("uid" in params && params["uid"] !== undefined) {
-        initialize_app(params["oauth_token"], localStorage.getItem("provider"));
+      if ("oauth_token" in params && params["oauth_token"] !== undefined) {
+        initialize_app(params["oauth_token"], localStorage.getItem("provider"), params);
+      }else if ("group" in params && params["group"] !== undefined) {
+        initialize_app(params["uid"], localStorage.getItem("provider"), params);
       }
       else{
         loadHomePage();
@@ -339,7 +338,7 @@
 
     });
 
-    function initialize_app(oauth, provider){
+    function initialize_app(oauth, provider, params){
       var options = {
         version: "1.3",
         provider: provider,
@@ -360,6 +359,9 @@
         }
       };
 
+      if ("survey" in params) {
+        options["editor"] = params["survey"];
+      }
       $("#form-content").buildformer(options);
     }
 

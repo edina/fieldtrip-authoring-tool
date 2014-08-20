@@ -92,6 +92,9 @@
         this.enableCodeMenuEvents();
         //the events of dragging, dropping, sorting, editing and deleting the elements
         this.enableEvents();
+        if ("editor" in this.options) {
+            $("#create-form").trigger('click');
+        }
     
         return this;
   };
@@ -196,8 +199,14 @@
     //event for creating a form from scratch
     BuildFormer.prototype.enableCreateFormEvent = function(){
         $("#create-form").click($.proxy(function(){
-            this.showEditElements("form", true);
             this.clearAll();
+            if ("editor" in this.options) {
+                this.showEditElements("form", false);
+                this.appendTitle(this.options["editor"], false);
+            }
+            else{
+                this.showEditElements("form", true);
+            }
             this.createMandatoryElement();
             this.enableActionButtons(true, true, false);
         }, this));
