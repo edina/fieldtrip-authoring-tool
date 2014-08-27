@@ -261,8 +261,7 @@
   <script type="text/javascript">
     //var map, oTable;
     var provider;
-    var vers = config.versions;
-    var arrvers = vers.split(",");
+    var versions = config.versions.split(",");
 
     $(document).ready(function(){
       $("#map_canvas").width(0.8*$(".span9").width());
@@ -304,14 +303,15 @@
           provider = $(this).attr("id");
           localStorage.setItem("provider", provider);
           if(provider === 'local'){
-            var url = config.baseurl+arrvers[arrvers.length - 1]+"/pcapi/auth/"+provider;
+            var url = config.baseurl+versions[versions.length - 1]+"/pcapi/auth/"+provider;
             $("#dialog-local-login").dialog("open");
             $("#loginbutton").click(function(){
               var $location = $(location);
               $location.attr('href', $location.attr("href")+"?uid=123&oauth_token="+$('#user-email').val());
             });
           }else{
-            var url = config.baseurl+arrvers[arrvers.length - 1]+"/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
+            var url = config.baseurl+versions[versions.length - 1]+"/pcapi/auth/"+provider+"?callback="+$(location).attr('href');
+            console.log(url);
             $.getJSON(url, function(data) {
               $(location).attr('href',data.url);
             });
