@@ -21,7 +21,7 @@
         "jqueryui-timepicker-addon": "1.4.3",
         "jquery-ui-touch-punch": "*",
         "datatables": "1.9.4",
-        "openlayers": "2.13.1",
+        "openlayers": "https://github.com/openlayers/openlayers/releases/download/release-2.13.1/OpenLayers-2.13.1.tar.gz",
         "d3": "3.3.11",
         "jPaginator": "https://github.com/remylab/jpaginator/archive/master.zip",
         "snippet": "http://www.steamdev.com/snippet/js/jquery.snippet.min.js",

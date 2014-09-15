@@ -25,7 +25,7 @@ def install(app='src'):
         local('rm -r {0}'.format(css_ext))
     local('mkdir {0}'.format(css_ext))
     local('mkdir {0}'.format(os.sep.join((css_ext, 'images'))))
-        
+
     if os.path.exists(js_ext):
         local('rm -r {0}'.format(js_ext))
     local('mkdir {0}'.format(js_ext))
@@ -33,17 +33,17 @@ def install(app='src'):
     bower = json.loads(open('bower.json').read())
 
     # generate config js
-    generate_config_js(version=versions['project'],
-                       fetch_config=False)
+    generate_config_js()
 
 
-def _get_dest_path(path):
-    if path.endswith("js"):
-        return js_ext
-    elif path.endswith("css"):
-        return css_ext
+    def _get_dest_path(path):
+        if path.endswith("js"):
+            return js_ext
+        elif path.endswith("css"):
+            return css_ext
 
     paths = ast.literal_eval(local('bower -j list -p', capture=True))
+    print paths
     for path in paths:
       if isinstance(paths[path], list):
           for subpath in paths[path]:
