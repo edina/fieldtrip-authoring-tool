@@ -8,7 +8,7 @@ PROJ4JS_VERSION = "1.1.0"
 
 config = None
 
-
+@task
 def install(app='src'):
     bower_home = os.sep.join((CURRENT_PATH, 'bower_components'))
     with lcd(CURRENT_PATH):
@@ -119,7 +119,7 @@ def _check_command(cmd):
             print '{0} needs to be installed and in your path'.format(cmd)
             exit(0)
 
-
+@task
 def server(server='beta'):
     """Defines server environment"""
     env.hosts = [_config('hosts', section=server),]
@@ -139,11 +139,13 @@ def _set_server():
     env.releases_path = "%(domain_path)s/releases" % { 'domain_path':env.domain_path }
     env.app_local = "./%(app_name)s" % { 'app_name':env.app_local_name }
 
+@task
 def setup():
     """Prepare server for deployment"""
     run("mkdir -p %(domain_path)s" % { 'domain_path':env.domain_path })
     run("mkdir -p %(releases_path)s" % { 'releases_path':env.releases_path })
 
+@task
 def deploy():
     """Deploys your project, updates the virtual env then restarts"""
     _update()
@@ -196,6 +198,7 @@ def _symlink():
 
 
 ###Configuration
+@task
 def generate_config_js(version=None, fetch_config=True):
     """ generate config.js """
     root, proj_home, src_dir = _get_source()
