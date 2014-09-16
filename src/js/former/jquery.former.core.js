@@ -456,6 +456,7 @@
                                         bformer.appendExistingEditor(data, true, title);
                                         bformer.enableActionButtons(false, false, false);
                                         loading(false);
+                                        makeAlertWindow("If you try and update an editor, you might make it incompatible with the previous records!", "Warning", 300, 200, "warning-dialog", 1000, "middle");
                                     },
                                     error: function(jqXHR, status, error){
                                         loading(false);
