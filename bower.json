@@ -24,7 +24,7 @@
         "openlayers": "https://github.com/openlayers/openlayers/releases/download/release-2.13.1/OpenLayers-2.13.1.tar.gz",
         "d3": "3.3.11",
         "jPaginator": "https://github.com/remylab/jpaginator/archive/master.zip",
-        "snippet": "http://www.steamdev.com/snippet/js/jquery.snippet.min.js",
+        "snippet": "http://fieldtripgb.edina.ac.uk/authoring/js/jquery.snippet.min.js",
         "swipebox": "1.2.9"
     },
     "dependency_locations": {

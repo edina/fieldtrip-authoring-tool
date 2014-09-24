@@ -83,7 +83,7 @@ def install(app='src'):
         with lcd(dist_path):
             local('wget http://download.osgeo.org/proj4js/proj4js-{0}.zip'.format(PROJ4JS_VERSION))
             local('unzip proj4js-{0}.zip'.format(PROJ4JS_VERSION))
-    
+
     #copy it to ext folder
     with lcd(CURRENT_PATH):
         local('cp {0} {1}'.format(os.sep.join((proj_path, 'lib', 'proj4js-compressed.js')), os.sep.join((js_ext, 'proj4js.js'))))
@@ -226,7 +226,7 @@ def generate_config_js(version=None, fetch_config=True):
     template = environ.get_template("config.js")
     output = template.render(config=values)
     _write_data(out_file, output)
-    
+
 
 def _get_source(app='android'):
     """
@@ -247,6 +247,7 @@ def _check_config():
     """
     If config.ini exists update from remote location, otherwise prompt user for location
     """
+    global config
 
     proj_home = _get_source()[0]
     conf_dir = os.sep.join((CURRENT_PATH, 'etc'))
@@ -257,17 +258,20 @@ def _check_config():
         if len(answer) > 0:
             if answer.find('@') == -1:
                 if os.path.exists(answer):
-                    local('cp {0} {1}'.format(answer, conf_dir))
+                    local('cp {0} {1}'.format(answer, conf_file))
                 else:
                     print "File not found, can't continue."
                     exit(0)
             else:
                 local('scp {0} {1}'.format(answer, conf_dir))
-    else:
+
+    location = _config('location')
+    if location.find('@') != -1:
         # pick up any changes
         location = _config('location')
-        # local('rsync -avz {0} {1}'.format(location, conf_dir))
-        #local('rsync -avz {0} {1}'.format(location, conf_file))
+        local('scp {0} {1}'.format(location, conf_file))
+
+    config = None # make sure it is re-read
 
 def _config(key, section='install'):
     """
