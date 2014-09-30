@@ -129,31 +129,42 @@ MapViewer.prototype.destroyMap = function(){
 
 //init map
 MapViewer.prototype.initMap = function(){
-    var bounds = new OpenLayers.Bounds (0, 0, 700000, 1300000);
-    var apikey = "c7d4d08f1734c6e2ea97e554cf67eab709ff0bce6e2f4064ddc67a49";
-    var cache = "true"; 
-    var attr = "Contains Ordnance Survey data. (c) Crown copyright and database right 20XX. Data provided by Digimap OpenStream, an EDINA, University of Edinburgh Service.";
-    var os_options = {
-        token: apikey,
-        format: "image/png",
-        layers: "osopendata",
-        cache: cache
+    var baseLayer = new OpenLayers.Layer.OSM();
+    var bounds = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508.34);
+    var options = {
+        controls: [],
+        projection: 'EPSG:900913',
+        displayProjection: 'EPSG:4326',
+        units: 'm',
+        resolutions: [156543.03390625,
+                      78271.516953125,
+                      39135.7584765625,
+                      19567.87923828125,
+                      9783.939619140625,
+                      4891.9698095703125,
+                      2445.9849047851562,
+                      1222.9924523925781,
+                      611.4962261962891,
+                      305.74811309814453,
+                      152.87405654907226,
+                      76.43702827453613,
+                      38.218514137268066,
+                      19.109257068634033,
+                      9.554628534317017,
+                      4.777314267158508,
+                      2.388657133579254,
+                      1.194328566789627,
+                      0.5971642833948135,
+                      0.25,
+                      0.1,
+                      0.05],
+        maxExtent: bounds,
+        theme: null,
     };
 
-    var map = new OpenLayers.Map(this.mapdiv, {controls: [], 
-        projection: new OpenLayers.Projection("EPSG:27700"),
-        units: "m", 
-        maxExtent: bounds,
-        resolutions: [1763.889,352.778,176.389,88.194,35.278,26.458,17.639,8.819,3.528,1.764,0.882,0.441]
-    });
-
-    var osopenlayer = new OpenLayers.Layer.WMS( 
-        "Edina OS OpenData WMS","http://openstream.edina.ac.uk/openstream/wms",
-        os_options 
-        /*{attribution: attr}*/);
-    
+    var map = new OpenLayers.Map(this.mapdiv, options);
     var base_url = this.base_url;
-    
+
     //var vector_layer = new OpenLayers.Layer.Vector("Points");
     var style = new OpenLayers.Style({
         pointRadius: "${radius}",
@@ -205,7 +216,7 @@ MapViewer.prototype.initMap = function(){
             }
         }
     });
-    
+
     var clusters = new OpenLayers.Layer.Vector("Clusters", {
         strategies: [
           //new OpenLayers.Strategy.Fixed(),
@@ -219,18 +230,18 @@ MapViewer.prototype.initMap = function(){
             }
         })
     });
-    
+
     var gpx = new OpenLayers.Layer.Vector("GPX", {
         style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 1},
         projection: new OpenLayers.Projection("EPSG:4326")
     });
-    
+
     map.addControl(new OpenLayers.Control.Navigation());
     map.addControl(new OpenLayers.Control.PanZoom());
     map.addControl(new OpenLayers.Control.Attribution());
-    
+
     var feat;
-    
+
     var select = new OpenLayers.Control.SelectFeature(clusters, {hover: true});
     //console.log(select.id)
     this.select_id = select.id;
@@ -238,9 +249,9 @@ MapViewer.prototype.initMap = function(){
     select.activate();
     clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
     clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)})
-    
-    map.addLayers([osopenlayer, gpx, clusters]);
-    
+
+    map.addLayers([baseLayer, gpx, clusters]);
+
     if (!map.getCenter()) map.zoomToMaxExtent();
     return map;
 }
@@ -295,26 +306,26 @@ MapViewer.prototype.prepareFiltersString = function(frmt){
     var params = "";
     var filters = new Array();
     var editor = $("#"+this.options["filter-elements"]["editorId"]).val();
-    
+
     if(editor != ""){
         filters.push("editor");
         params += "&id="+editor;
     }
-    
+
     var dateStart = $("#"+this.options["filter-elements"]["date-s-Id"]).val(), dateEnd = $("#"+this.options["filter-elements"]["date-e-Id"]).val();
-    
+
     if(dateStart != ""){
         filters.push("date");
         var splits1 = dateStart.split(" ");
         var splits2 = dateEnd.split(" ");
         params += "&start_date="+splits1[0]+"_"+splits1[1]+"&end_date="+splits2[0]+"_"+splits2[1];
     }
-    
+
     if(frmt != undefined){
         filters.push("format");
         params += "&frmt="+frmt;
     }
-    
+
     var dataString = "";
     if(filters.length > 0){
         dataString = "filter="+filters.join(",")+params;
@@ -421,7 +432,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 }
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
-    var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
+    var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
     var data_obj = {id: i, name: folder, editor: record.editor, date: record.timestamp.split("T")[0]};
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
     if(state === "edit"){
@@ -533,13 +544,13 @@ MapViewer.prototype.enableRecordEdit = function(){
                         "strokeWidth": 5,
                         "strokeOpacity": 1
                     }
-                    
+
                     for(var i=0; i<data.fields.length; i++){
                         if(data.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
                             style = data.fields[i]["style"];
                         }
                     }
-                    
+
                     $.ajax({
                         type: "GET",
                         url: mapviewer.buildUrl('records', '/'+record+'/'+data.fields[1].val),
@@ -810,7 +821,7 @@ MapViewer.prototype.enableDeleteAction = function(){
             }, this)
         });
     }, this));
-  
+
     $("#delete_no").click(function(){
         $('#deleteModal').modal('hide');
     });
