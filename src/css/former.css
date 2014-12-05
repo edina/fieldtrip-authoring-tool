@@ -28,6 +28,11 @@ body {
   min-height: 550px;
 }
 
+footer img.jisc-logo{
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
 .element{
   float: left;
   width: 200px;
