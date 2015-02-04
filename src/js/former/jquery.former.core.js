@@ -159,7 +159,7 @@
         }, this));
         
         var file;
-        var url = this.buildUrl("tiles", "/")
+        var url = this.buildUrl("layers", "/")
 
         // Set an event listener on the Choose File field.
         $('#fileselect').bind("change", function(e) {
