@@ -51,9 +51,6 @@ License
 
 BSD
 
-
-**Free Software, Hell Yeah!**
-
 [Installation guide]:http://developer.android.com/sdk/installing/index.html
 
 
