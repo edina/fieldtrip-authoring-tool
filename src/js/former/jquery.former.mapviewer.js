@@ -421,7 +421,9 @@ MapViewer.prototype.updateFeaturesOnMap = function(features){
 MapViewer.prototype.prepareManyTableData= function(data, state){
     var features = new Array(), table_data = new Array();
     for(var i=0; i<data.length; i++){
+        //check if it's the old format, back it up and convert it
         for(key in data[i]){
+            this.checkRecord(data[i][key]);
             //var obj = this.prepareSingleTableData(data[i].name, data[i], i, state);
             var obj = this.prepareSingleTableData(key, data[i][key], i, state);
             table_data.push(obj.data);
@@ -430,6 +432,44 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
     }
     return {"table": table_data, "features": features};
 }
+
+MapViewer.prototype.checkRecord = function(record) {
+    var mapviewer = this;
+    if(typeof(record.geometry) === 'undefined') {
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify(record),
+            url: '/'+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records_backup/'+encodeURIComponent(record.name)+'/record.json',
+        }).done(function(data){
+            var newRecord = mapviewer.convertRecord(record);
+            $.ajax({
+                type:"PUT",
+                data: JSON.stringify(newRecord),
+                url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
+            }).done(function(data){
+                console.log(data)
+            });
+        });
+    }
+};
+
+MapViewer.prototype.convertRecord = function(record) {
+    var newRecord = {}, properties = {}, geometry = {};
+    newRecord.name = record.name;
+    properties.fields = record.fields;
+    properties.timestamp = record.timestamp;
+    properties.form = record.editor;
+    newRecord.properties = properties;
+    geometry.coordinates = [
+        record.point.lon,
+        record.point.lat
+    ]
+    if(record.point.lat !== null){
+        geometry.coordinates.push(record.point.lat);
+    }
+    newRecord.geometry = geometry;
+    return newRecord;
+};
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
