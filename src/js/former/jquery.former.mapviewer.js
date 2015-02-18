@@ -412,17 +412,18 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
     for(var i=0; i<data.length; i++){
         //check if it's the old format, back it up and convert it
         for(key in data[i]){
-            this.checkRecord(data[i][key]);
+            this.checkRecord(data[i][key], $.proxy(function (record){
+                var obj = this.prepareSingleTableData(key, record, i, state);
+                table_data.push(obj.data);
+                features.push(obj.feature);
+            }, this));
             //var obj = this.prepareSingleTableData(data[i].name, data[i], i, state);
-            var obj = this.prepareSingleTableData(key, data[i][key], i, state);
-            table_data.push(obj.data);
-            features.push(obj.feature);
         }
     }
     return {"table": table_data, "features": features};
 }
 
-MapViewer.prototype.checkRecord = function(record) {
+MapViewer.prototype.checkRecord = function(record, callback) {
     var mapviewer = this;
     if(typeof(record.geometry) === 'undefined') {
         $.ajax({
@@ -436,9 +437,13 @@ MapViewer.prototype.checkRecord = function(record) {
                 data: JSON.stringify(newRecord),
                 url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
             }).done(function(data){
-                console.log(data)
+                //console.log(data)
+                callback(newRecord);
             });
         });
+    }
+    else{
+        callback(record);
     }
 };
 
@@ -461,8 +466,8 @@ MapViewer.prototype.convertRecord = function(record) {
 };
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
-    var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
-    var data_obj = {id: i, name: folder, editor: record.editor, date: record.timestamp.split("T")[0]};
+    var point = new OpenLayers.Geometry.Point(record.geometry.coordinates[0], record.geometry.coordinates[1]).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
+    var data_obj = {id: i, name: folder, editor: record.properties.form, date: record.properties.timestamp.split("T")[0]};
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
     if(state === "edit"){
         data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View/Edit</button> | <button class="record-delete" title="'+folder+'" row="'+i+'">Delete</button>';
