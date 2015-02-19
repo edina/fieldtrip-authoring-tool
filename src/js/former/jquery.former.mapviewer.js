@@ -463,7 +463,7 @@ MapViewer.prototype.convertRecord = function(record) {
     newRecord.name = record.name;
     properties.fields = record.fields;
     properties.timestamp = record.timestamp;
-    properties.form = record.editor;
+    properties.editor = record.editor;
     newRecord.properties = properties;
     geometry.coordinates = [
         record.point.lon,
