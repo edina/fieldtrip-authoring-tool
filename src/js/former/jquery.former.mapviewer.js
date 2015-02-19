@@ -477,13 +477,8 @@ MapViewer.prototype.convertRecord = function(record) {
 };
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
-<<<<<<< HEAD
-    var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-    var data_obj = {id: i, name: folder, editor: record.editor, date: record.timestamp.split("T")[0]};
-=======
     var point = new OpenLayers.Geometry.Point(record.geometry.coordinates[0], record.geometry.coordinates[1]).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
     var data_obj = {id: i, name: folder, editor: record.properties.form, date: record.properties.timestamp.split("T")[0]};
->>>>>>> b0d08f5... edina/fieldtrip-gb#160: the function should return a callback in order to overlay the converted records
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
     if(state === "edit"){
         data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View/Edit</button> | <button class="record-delete" title="'+folder+'" row="'+i+'">Delete</button>';
