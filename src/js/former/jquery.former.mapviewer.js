@@ -467,7 +467,7 @@ MapViewer.prototype.convertRecord = function(record) {
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var point = new OpenLayers.Geometry.Point(record.geometry.coordinates[0], record.geometry.coordinates[1]).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
-    var data_obj = {id: i, name: folder, editor: record.properties.form, date: record.properties.timestamp.split("T")[0]};
+    var data_obj = {id: i, name: folder, editor: record.properties.editor, date: record.properties.timestamp.split("T")[0]};
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
     if(state === "edit"){
         data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View/Edit</button> | <button class="record-delete" title="'+folder+'" row="'+i+'">Delete</button>';
@@ -517,8 +517,8 @@ MapViewer.prototype.appendDetails = function(recordname, records){
     table.push('<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">');
     for(var i=0; i<records.length; i++){
         if(records[i].name === recordname){
-            for(var j=0; j< records[i].fields.length; j++){
-                table.push('<tr><td>'+records[i].fields[j].label+'</td><td>'+records[i].fields[j].val+'</td></tr>');
+            for(var j=0; j< records[i].properties.fields.length; j++){
+                table.push('<tr><td>'+records[i].properties.fields[j].label+'</td><td>'+records[i].properties.fields[j].val+'</td></tr>');
             }
         }
     }
@@ -556,16 +556,15 @@ MapViewer.prototype.enableRecordEdit = function(){
         //bformer.showEditElements(false, false)
         var record = this.title;
         var row = $(this).attr("row");
-        console.log(row)
         loading(true);
         $.ajax({
             url: mapviewer.buildUrl('records', '/'+record),
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                var editor = data.editor;
+                var editor = data.properties.editor;
                 var title = editor.split(".")[0];
-                var field_values = data.fields;
+                var field_values = data.properties.fields;
                 var url = mapviewer.buildUrl('editors', '/'+editor);
                 //console.log(editor)
                 if(editor === "image.edtr" || editor === "audio.edtr" || editor === "text.edtr"){
@@ -579,9 +578,9 @@ MapViewer.prototype.enableRecordEdit = function(){
                         "strokeOpacity": 1
                     }
                     
-                    for(var i=0; i<data.fields.length; i++){
-                        if(data.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
-                            style = data.fields[i]["style"];
+                    for(var i=0; i<data.propertiesfields.length; i++){
+                        if(data.propertiesfields[i]["id"].indexOf("fieldcontain-track") !== -1){
+                            style = data.properties.fields[i]["style"];
                         }
                     }
                     
