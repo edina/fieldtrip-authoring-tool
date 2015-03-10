@@ -348,7 +348,6 @@ MapViewer.prototype.getData = function(params){
                 //console.log(results)
                 this.prepareTableDataForEditing(results);
             }
-            loading(false);
         }, this)
     });
 }
@@ -393,10 +392,12 @@ MapViewer.prototype.prepareTableDataForEditing = function(results){
 }
 
 MapViewer.prototype.prepareTableDataForShowing = function(results, state){
-    var res = this.prepareManyTableData(results.records, state);
-    var l = this.updateFeaturesOnMap(res.features);
-    this.initTable(res.table);
-    this.filterTableData(l.features);
+    var res = this.prepareManyTableData(results.records, state, $.proxy(function(res){
+        var l = this.updateFeaturesOnMap(res.features);
+        this.initTable(res.table);
+        this.filterTableData(l.features);
+        loading(false);
+    }, this));
 }
 
 MapViewer.prototype.updateFeaturesOnMap = function(features){
@@ -407,20 +408,23 @@ MapViewer.prototype.updateFeaturesOnMap = function(features){
 }
 
 //preparing the object for the table data and the point features
-MapViewer.prototype.prepareManyTableData= function(data, state){
+MapViewer.prototype.prepareManyTableData= function(data, state, callback){
     var features = new Array(), table_data = new Array();
     for(var i=0; i<data.length; i++){
         //check if it's the old format, back it up and convert it
         for(key in data[i]){
             this.checkRecord(data[i][key], $.proxy(function (record){
                 var obj = this.prepareSingleTableData(key, record, i, state);
+                console.log(obj)
                 table_data.push(obj.data);
                 features.push(obj.feature);
+                if(i === data.length){
+                    callback({"table": table_data, "features": features});
+                }
             }, this));
             //var obj = this.prepareSingleTableData(data[i].name, data[i], i, state);
         }
     }
-    return {"table": table_data, "features": features};
 }
 
 MapViewer.prototype.checkRecord = function(record, callback) {
