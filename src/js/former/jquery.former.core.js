@@ -117,7 +117,7 @@
         //menu.push('<li class="divider"></li>');
         //menu.push('<li class="nav-header" id="leditors">Locally saved Editors</li>');
         menu.push('</ul></li>');
-        menu.push('<li><a href="javascript:void(0)" id="layers" class="menu-item">Layers</a></li>');
+        //menu.push('<li><a href="javascript:void(0)" id="layers" class="menu-item">Layers</a></li>');
         menu.push('<li><a href="mailto:edina@ed.ac.uk" class="menu-item">Contact</a></li>');
         return menu;
     }

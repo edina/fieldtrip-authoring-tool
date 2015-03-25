@@ -348,7 +348,6 @@ MapViewer.prototype.getData = function(params){
                 //console.log(results)
                 this.prepareTableDataForEditing(results);
             }
-            loading(false);
         }, this)
     });
 }
@@ -393,10 +392,7 @@ MapViewer.prototype.prepareTableDataForEditing = function(results){
 }
 
 MapViewer.prototype.prepareTableDataForShowing = function(results, state){
-    var res = this.prepareManyTableData(results.records, state);
-    var l = this.updateFeaturesOnMap(res.features);
-    this.initTable(res.table);
-    this.filterTableData(l.features);
+    this.prepareManyTableData(results.records, state);
 }
 
 MapViewer.prototype.updateFeaturesOnMap = function(features){
@@ -409,20 +405,86 @@ MapViewer.prototype.updateFeaturesOnMap = function(features){
 //preparing the object for the table data and the point features
 MapViewer.prototype.prepareManyTableData= function(data, state){
     var features = new Array(), table_data = new Array();
+    var records = [];
+    var promises = [];
     for(var i=0; i<data.length; i++){
+        //check if it's the old format, back it up and convert it
         for(key in data[i]){
-            //var obj = this.prepareSingleTableData(data[i].name, data[i], i, state);
-            var obj = this.prepareSingleTableData(key, data[i][key], i, state);
-            table_data.push(obj.data);
-            features.push(obj.feature);
+            var record = data[i][key];
+            if(typeof(record.geometry) === 'undefined') {
+                promises.push(this.doConversionRecord(record));
+            }
+            else{
+                records.push(record);
+            }
         }
     }
-    return {"table": table_data, "features": features};
+    var convertRecords = $.when.apply($, promises);
+    convertRecords.done($.proxy(function(){
+        var l=0;
+        for(var i=0;i<records.length;i++){
+            var obj = this.prepareSingleTableData(records[i].name, records[i], l, state);
+            table_data.push(obj.data);
+            features.push(obj.feature);
+            l++;
+        }
+        for(var key in arguments){
+            var obj = this.prepareSingleTableData(arguments[key].name, arguments[key], l, state);
+            table_data.push(obj.data);
+            features.push(obj.feature);
+            l++;
+        }
+        var l = this.updateFeaturesOnMap(features);
+        this.initTable(table_data);
+        this.filterTableData(l.features);
+        loading(false);
+    }, this));
 }
 
+MapViewer.prototype.doConversionRecord = function(record) {
+    var mapviewer = this;
+    var d = $.Deferred();
+    var d1 = $.ajax({
+        type: "POST",
+        data: JSON.stringify(record),
+        url: '/'+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records_backup/'+encodeURIComponent(record.name)+'/record.json',
+    });
+    var newRecord = mapviewer.convertRecord(record);
+    var d2 = $.ajax({
+        type:"PUT",
+        data: JSON.stringify(newRecord),
+        url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
+    });
+    
+    $.when(d1, d2).done(function(jqxhr1, jqxhr2) {
+        // Handle both XHR objects
+        d.resolve(newRecord);
+    });
+
+    return d.promise();
+};
+
+MapViewer.prototype.convertRecord = function(record) {
+    var newRecord = {"type": "Feature"}, properties = {}, geometry = {"type": "Point"};
+    newRecord.name = record.name;
+    properties.fields = record.fields;
+    properties.timestamp = record.timestamp;
+    properties.editor = record.editor;
+    newRecord.properties = properties;
+    geometry.coordinates = [
+        record.point.lon,
+        record.point.lat
+    ]
+    if(record.point.alt && record.point.alt !== null){
+        geometry.coordinates.push(record.point.alt);
+    }
+    newRecord.geometry = geometry;
+    return newRecord;
+};
+
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
-    var point = new OpenLayers.Geometry.Point(record.point.lon, record.point.lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
-    var data_obj = {id: i, name: folder, editor: record.editor, date: record.timestamp.split("T")[0]};
+    var point = new OpenLayers.Geometry.Point(record.geometry.coordinates[0], record.geometry.coordinates[1]).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
+    var data_obj = {id: i, name: folder, editor: record.properties.editor, date: record.properties.timestamp.split("T")[0]};
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
     if(state === "edit"){
         data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View/Edit</button> | <button class="record-delete" title="'+folder+'" row="'+i+'">Delete</button>';
@@ -472,8 +534,8 @@ MapViewer.prototype.appendDetails = function(recordname, records){
     table.push('<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">');
     for(var i=0; i<records.length; i++){
         if(records[i].name === recordname){
-            for(var j=0; j< records[i].fields.length; j++){
-                table.push('<tr><td>'+records[i].fields[j].label+'</td><td>'+records[i].fields[j].val+'</td></tr>');
+            for(var j=0; j< records[i].properties.fields.length; j++){
+                table.push('<tr><td>'+records[i].properties.fields[j].label+'</td><td>'+records[i].properties.fields[j].val+'</td></tr>');
             }
         }
     }
@@ -511,16 +573,15 @@ MapViewer.prototype.enableRecordEdit = function(){
         //bformer.showEditElements(false, false)
         var record = this.title;
         var row = $(this).attr("row");
-        console.log(row)
         loading(true);
         $.ajax({
             url: mapviewer.buildUrl('records', '/'+record),
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                var editor = data.editor;
+                var editor = data.properties.editor;
                 var title = editor.split(".")[0];
-                var field_values = data.fields;
+                var field_values = data.properties.fields;
                 var url = mapviewer.buildUrl('editors', '/'+editor);
                 //console.log(editor)
                 if(editor === "image.edtr" || editor === "audio.edtr" || editor === "text.edtr"){
@@ -534,9 +595,9 @@ MapViewer.prototype.enableRecordEdit = function(){
                         "strokeOpacity": 1
                     }
                     
-                    for(var i=0; i<data.fields.length; i++){
-                        if(data.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
-                            style = data.fields[i]["style"];
+                    for(var i=0; i<data.propertiesfields.length; i++){
+                        if(data.propertiesfields[i]["id"].indexOf("fieldcontain-track") !== -1){
+                            style = data.properties.fields[i]["style"];
                         }
                     }
                     
