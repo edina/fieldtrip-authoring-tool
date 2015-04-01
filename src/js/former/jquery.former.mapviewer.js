@@ -131,7 +131,7 @@ MapViewer.prototype.destroyMap = function(){
 MapViewer.prototype.initMap = function(){
     var bounds = new OpenLayers.Bounds (0, 0, 700000, 1300000);
     var apikey = "c7d4d08f1734c6e2ea97e554cf67eab709ff0bce6e2f4064ddc67a49";
-    var cache = "true"; 
+    var cache = "true";
     var attr = "Contains Ordnance Survey data. (c) Crown copyright and database right 20XX. Data provided by Digimap OpenStream, an EDINA, University of Edinburgh Service.";
     var os_options = {
         token: apikey,
@@ -140,20 +140,20 @@ MapViewer.prototype.initMap = function(){
         cache: cache
     };
 
-    var map = new OpenLayers.Map(this.mapdiv, {controls: [], 
+    var map = new OpenLayers.Map(this.mapdiv, {controls: [],
         projection: new OpenLayers.Projection("EPSG:27700"),
-        units: "m", 
+        units: "m",
         maxExtent: bounds,
         resolutions: [1763.889,352.778,176.389,88.194,35.278,26.458,17.639,8.819,3.528,1.764,0.882,0.441]
     });
 
-    var osopenlayer = new OpenLayers.Layer.WMS( 
+    var osopenlayer = new OpenLayers.Layer.WMS(
         "Edina OS OpenData WMS","http://openstream.edina.ac.uk/openstream/wms",
-        os_options 
+        os_options
         /*{attribution: attr}*/);
-    
+
     var base_url = this.base_url;
-    
+
     //var vector_layer = new OpenLayers.Layer.Vector("Points");
     var style = new OpenLayers.Style({
         pointRadius: "${radius}",
@@ -205,7 +205,7 @@ MapViewer.prototype.initMap = function(){
             }
         }
     });
-    
+
     var clusters = new OpenLayers.Layer.Vector("Clusters", {
         strategies: [
           //new OpenLayers.Strategy.Fixed(),
@@ -219,18 +219,18 @@ MapViewer.prototype.initMap = function(){
             }
         })
     });
-    
+
     var gpx = new OpenLayers.Layer.Vector("GPX", {
         style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 1},
         projection: new OpenLayers.Projection("EPSG:4326")
     });
-    
+
     map.addControl(new OpenLayers.Control.Navigation());
     map.addControl(new OpenLayers.Control.PanZoom());
     map.addControl(new OpenLayers.Control.Attribution());
-    
+
     var feat;
-    
+
     var select = new OpenLayers.Control.SelectFeature(clusters, {hover: true});
     //console.log(select.id)
     this.select_id = select.id;
@@ -238,9 +238,9 @@ MapViewer.prototype.initMap = function(){
     select.activate();
     clusters.events.on({"featureselected": $.proxy(this.feature_select, this)});
     clusters.events.on({"featureunselected": $.proxy(this.feature_unselect, this)})
-    
+
     map.addLayers([osopenlayer, gpx, clusters]);
-    
+
     if (!map.getCenter()) map.zoomToMaxExtent();
     return map;
 }
@@ -295,26 +295,26 @@ MapViewer.prototype.prepareFiltersString = function(frmt){
     var params = "";
     var filters = new Array();
     var editor = $("#"+this.options["filter-elements"]["editorId"]).val();
-    
+
     if(editor != ""){
         filters.push("editor");
         params += "&id="+editor;
     }
-    
+
     var dateStart = $("#"+this.options["filter-elements"]["date-s-Id"]).val(), dateEnd = $("#"+this.options["filter-elements"]["date-e-Id"]).val();
-    
+
     if(dateStart != ""){
         filters.push("date");
         var splits1 = dateStart.split(" ");
         var splits2 = dateEnd.split(" ");
         params += "&start_date="+splits1[0]+"_"+splits1[1]+"&end_date="+splits2[0]+"_"+splits2[1];
     }
-    
+
     if(frmt != undefined){
         filters.push("format");
         params += "&frmt="+frmt;
     }
-    
+
     var dataString = "";
     if(filters.length > 0){
         dataString = "filter="+filters.join(",")+params;
@@ -455,7 +455,7 @@ MapViewer.prototype.doConversionRecord = function(record) {
         data: JSON.stringify(newRecord),
         url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
     });
-    
+
     $.when(d1, d2).done(function(jqxhr1, jqxhr2) {
         // Handle both XHR objects
         d.resolve(newRecord);
@@ -594,16 +594,16 @@ MapViewer.prototype.enableRecordEdit = function(){
                         "strokeWidth": 5,
                         "strokeOpacity": 1
                     }
-                    
-                    for(var i=0; i<data.propertiesfields.length; i++){
-                        if(data.propertiesfields[i]["id"].indexOf("fieldcontain-track") !== -1){
+
+                    for(var i=0; i<data.properties.fields.length; i++){
+                        if(data.properties.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
                             style = data.properties.fields[i]["style"];
                         }
                     }
-                    
+
                     $.ajax({
                         type: "GET",
-                        url: mapviewer.buildUrl('records', '/'+record+'/'+data.fields[1].val),
+                        url: mapviewer.buildUrl('records', '/'+record+'/'+data.properties.fields[1].val),
                         dataType: "xml",
                         success: function(gpx_data){
                             var in_options = {
@@ -871,7 +871,7 @@ MapViewer.prototype.enableDeleteAction = function(){
             }, this)
         });
     }, this));
-  
+
     $("#delete_no").click(function(){
         $('#deleteModal').modal('hide');
     });
