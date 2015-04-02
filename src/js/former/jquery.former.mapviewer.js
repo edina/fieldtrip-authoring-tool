@@ -13,6 +13,7 @@ MapViewer.prototype.init = function(){
     this.enableMap();
     this.openDialog();
     this.enableActions();
+    this.getSyncCursor();
 }
 
 MapViewer.prototype.enableActions = function(){
@@ -892,8 +893,11 @@ MapViewer.prototype.removeRecordsForLS = function(data){
 MapViewer.prototype.updateRecordsInLS = function(record){
     var data = this.getRecordsFromLS();
     for(var i=0; i<data.records.length;i++){
-        //console.log(editor, data.records[i].editor)
-        if(record == data.records[i].name){
+        // note: this is gubbins, the record is stored in an array as a property,
+        // the name of which is the record name.  This isn't right but since the
+        // AT is being refactored just get the record object using getFirstProp.
+        var name = getFirstProp(data.records[i]).name;
+        if(record === name){
             data.records.splice(i, 1);
         }
     }

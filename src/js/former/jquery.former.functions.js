@@ -80,13 +80,13 @@ function openWindow(element, title,  wdth, hght, zindex, position, buttons){
         autoOpen: true,
         height: hght,
         width: wdth,
-        zIndex: zindex, 
+        zIndex: zindex,
         modal: false,
         position: position,
         title: title,
         buttons: buttons
-    }); 
-    
+    });
+
     //$( div ).dialog( "open" );
     return false;
 }
@@ -143,7 +143,7 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                         loading(false);
                     }
                 });*/
-                
+
                 $.ajax({
                   url: '/'+version+'/pcapi/records/'+uri+'/'+encodeURIComponent($("#"+dialog_id+" #form-text-hidden-1").val()),
                   type: 'DELETE',
@@ -394,19 +394,19 @@ function doPreview(id_dragged, id_iframe){
     var w = $("#"+id_dragged).width(), h = $("#"+id_dragged).height();
     $("#"+id_iframe).remove();
     makeAlertWindow(previewCode(w, h), 'Preview', w+60, h+140, id_iframe, 1000, "left");
-    
+
     var $$ = jQuery = null;
-    
+
     var code = $("#"+id_dragged).html();
-    
+
     if($(code).find(".sh_dull").length > 0){
         code = $(".view-code").text();
     }
-    
+
     $("#frame").load(function(){
         $$ = jQuery = window.frames[0].jQuery;
         $$("#home-content").append(code).trigger("create");
-        
+
         var finds = $$("#home-content").find('.button-wrapper');
         for(var i=0;i<finds.length; i++){
             if($$(finds[i]).hasClass("button-camera")){
@@ -462,12 +462,12 @@ function touchScroll(selector) {
     if(isTouchDevice()){
         var scrollStartPosY = 0;
         var scrollStartPosX = 0;
-        
+
         $('body').delegate(selector, 'touchstart', function(e) {
             scrollStartPosY = this.scrollTop + e.originalEvent.touches[0].pageY;
             scrollStartPosX = this.scrollLeft + e.originalEvent.touches[0].pageX;
         });
-        
+
         $('body').delegate(selector, 'touchmove', function(e) {
             if ((this.scrollTop < this.scrollHeight - this.offsetHeight &&
                 this.scrollTop + e.originalEvent.touches[0].pageY < scrollStartPosY-5) ||
@@ -479,7 +479,7 @@ function touchScroll(selector) {
                 (this.scrollLeft != 0 && this.scrollLeft+e.originalEvent.touches[0].pageX > scrollStartPosX+5)){
                 e.preventDefault();
             }
-            
+
             this.scrollTop = scrollStartPosY - e.originalEvent.touches[0].pageY;
             this.scrollLeft = scrollStartPosX - e.originalEvent.touches[0].pageX;
         });
@@ -491,4 +491,13 @@ function imgError(image) {
     image.src = image.src.replace("_thumb.", ".");
     //image.src = "img/404-not-found.gif";
     return true;
+}
+
+function getFirstProp(object){
+    var prop;
+    for (var prop in object) {
+        prop = object[prop];
+        break;
+    }
+    return prop;
 }
