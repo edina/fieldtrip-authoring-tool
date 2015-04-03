@@ -61,8 +61,6 @@ RecordRenderer.prototype.renderType = {
     $("#"+obj.id).find("option[value='"+obj.val+"']").prop("selected", true);
   },
   image: function(dialog, el_id, obj, name, path){
-      console.log("******");
-      console.log(path);
     var splits = path.split("/");
     $("#"+obj.id).html('<img src="/'+splits[0]+'/pcapi/records/'+splits[1]+'/'+splits[2]+'/'+name+'/'+obj.val+'"><br>');
   },
