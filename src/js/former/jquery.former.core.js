@@ -59,6 +59,8 @@
         }
     }
 
+    var mapviewer;
+
     //initialize function
     BuildFormer.prototype.init = function(){
         var config = this.options;
@@ -266,7 +268,7 @@
             }
         }
         var base_url = $(location).attr('href').split("?")[0];
-        var mapviewer = new MapViewer(options, base_url);
+        mapviewer = new MapViewer(options, base_url);
         mapviewer.init();
 
         $("#my-records").click($.proxy(function(){
@@ -474,6 +476,7 @@
                             giveFeedback("There is a problem loading all the editors.");
                         }
                     });
+                    mapviewer.getData(mapviewer.prepareFiltersString());
                 }else{
                     loading(false);
                     giveFeedback("You need to refresh your page. The session with dropbox has problems!");

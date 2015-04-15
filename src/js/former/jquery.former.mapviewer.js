@@ -14,7 +14,6 @@ MapViewer.prototype.init = function(){
     this.openDialog();
     this.enableActions();
     this.getSyncCursor();
-    this.getData(this.prepareFiltersString());
 }
 
 MapViewer.prototype.enableActions = function(){
