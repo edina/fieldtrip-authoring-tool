@@ -14,6 +14,7 @@ MapViewer.prototype.init = function(){
     this.openDialog();
     this.enableActions();
     this.getSyncCursor();
+    this.getData(this.prepareFiltersString());
 }
 
 MapViewer.prototype.enableActions = function(){
@@ -297,7 +298,7 @@ MapViewer.prototype.prepareFiltersString = function(frmt){
     var filters = new Array();
     var editor = $("#"+this.options["filter-elements"]["editorId"]).val();
 
-    if(editor != ""){
+    if(editor !== "" && editor !== null){
         filters.push("editor");
         params += "&id="+editor;
     }
