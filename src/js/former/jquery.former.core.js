@@ -449,7 +449,7 @@
                             $(".get-form").remove();
                             $("#deditors").after(form_links.join(""));
                             $("#by-editor").html(by_editor.join(""));
-                            loading(false);
+                            //loading(false);
 
                             $(".get-form").click(function(){
                                 var title = this.title.split(".")[0];
