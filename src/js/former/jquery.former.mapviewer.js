@@ -407,21 +407,24 @@ MapViewer.prototype.updateFeaturesOnMap = function(features){
 MapViewer.prototype.prepareManyTableData= function(data, state){
     var features = new Array(), table_data = new Array();
     var records = [];
-    var promises = [];
+    var oldRecords = [];
+    this.problems = [];
+
     for(var i=0; i<data.length; i++){
         //check if it's the old format, back it up and convert it
         for(key in data[i]){
             var record = data[i][key];
             if(typeof(record.geometry) === 'undefined') {
-                promises.push(this.doConversionRecord(record));
+                oldRecords.push(record);
             }
             else{
                 records.push(record);
             }
         }
     }
-    var convertRecords = $.when.apply($, promises);
-    convertRecords.done($.proxy(function(){
+
+    // process all records
+    var processRecords = $.proxy(function(){
         var l=0;
         for(var i=0;i<records.length;i++){
             var obj = this.prepareSingleTableData(records[i].name, records[i], l, state);
@@ -438,8 +441,47 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
         var l = this.updateFeaturesOnMap(features);
         this.initTable(table_data);
         this.filterTableData(l.features);
+
         loading(false);
-    }, this));
+    }, this);
+
+    if(oldRecords.length > 0){
+        giveFeedback(oldRecords.length + " old style records have been found, these need to be converted.  This can take some time, depending on the number of records in dropbox.");
+
+        // records have old format, convert them synchronously to prevent overloading server
+        var convertRecord = $.proxy(function(record){
+            var promise = this.doConversionRecord(record);
+
+            promise.done(function(newRecord){
+                console.debug("Sucessfully converted record " + record.name + ". " + oldRecords.length + " left to process");
+
+                records.push(newRecord);
+
+                // get next record
+                record = oldRecords.pop();
+                if(record){
+                    convertRecord(record);
+                }
+                else{
+                    // no records left in queue
+                    processRecords();
+                }
+            });
+
+            promise.fail(function(err){
+                giveFeedback(err);
+                console.error(err);
+                loading(false);
+            });
+        }, this);
+
+        var record = oldRecords.pop();
+        convertRecord(record);
+    }
+    else{
+        // no old record proceed to process
+        processRecords();
+    }
 }
 
 MapViewer.prototype.doConversionRecord = function(record) {
@@ -457,10 +499,32 @@ MapViewer.prototype.doConversionRecord = function(record) {
         url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
     });
 
-    $.when(d1, d2).done(function(jqxhr1, jqxhr2) {
-        // Handle both XHR objects
-        d.resolve(newRecord);
-    });
+    // Handle both XHR objects
+    $.when(d1, d2).done($.proxy(function(jqxhr1, jqxhr2) {
+        if(jqxhr2[0].error === 0){
+            d.resolve(newRecord);
+        }
+        else{
+            console.debug("Problem converting the following record " + jqxhr2[0].msg);
+            console.debug(record);
+
+            var tryCount = this.problems[record.name];
+            if(tryCount){
+                this.problems[record.name] = tryCount + 1;
+            }
+            else{
+                this.problems[record.name] = 1;
+            }
+
+            if(tryCount > 2){
+                d.reject("Unable to convert " + record.name);
+            }
+            else{
+                // try again
+                this.doConversionRecord(record);
+            }
+        }
+    }, this));
 
     return d.promise();
 };
