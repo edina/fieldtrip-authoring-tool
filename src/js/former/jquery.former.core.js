@@ -5,8 +5,8 @@
  */
 
 
-// the semi-colon before the function invocation is a safety 
-// net against concatenated scripts and/or other plugins 
+// the semi-colon before the function invocation is a safety
+// net against concatenated scripts and/or other plugins
 // that are not closed properly.
 ;(function($, window, document, undefined){
 
@@ -28,8 +28,8 @@
             "buttonAction": ["btn", "Button"]
         }
     };
-  
-  //the 
+
+  //the
     var BuildFormer = function(element, options){
         this.element = element;
         this.options = $.extend(defaults, options || {});
@@ -40,7 +40,7 @@
         this.provider = this.options.provider;
         this.image_pages = undefined;
     }
-  
+
     BuildFormer.prototype.defaults = {
         mainmenu_id: "",
         editmenu_id: "",
@@ -58,30 +58,32 @@
             "buttonAction": ["btn", "Button"]
         }
     }
-  
+
+    var mapviewer;
+
     //initialize function
     BuildFormer.prototype.init = function(){
         var config = this.options;
         var main_menu = $("#"+config.mainmenu_id);
         var editmenu_id = $("#"+ config.editmenu_id);
-        
+
         //add html for the main menu
         main_menu.html(this.createMainMenu().join(""));
         this.enableTooltips();
         //and enable all the buttons
         this.enableMainMenuEvents();
-    
+
         //load the editors from dropbox
         this.loadEditors();
         //and the example ones
         this.loadGalleryForms();
-    
+
         //load the home page
         //this.loadHomePage();
-    
+
         //hide the edit elements initially
         this.showEditElements("map", false);
-    
+
         //add html for the edit menu
         editmenu_id.find('.container').append(this.createEditMenu().join(""));
         $("#screen").html(this.createSelectMenu().join(""));
@@ -95,10 +97,10 @@
         if ("editor" in this.options) {
             $("#create-form").trigger('click');
         }
-    
+
         return this;
   };
-  
+
     BuildFormer.prototype.createMainMenu = function(){
         var menu = new Array();
         menu.push('<li><a href="javascript:void(0)" id="home" class="menu-item">Home</a></li>');
@@ -117,25 +119,25 @@
         //menu.push('<li class="divider"></li>');
         //menu.push('<li class="nav-header" id="leditors">Locally saved Editors</li>');
         menu.push('</ul></li>');
-        menu.push('<li><a href="javascript:void(0)" id="layers" class="menu-item">Layers</a></li>');
+        //menu.push('<li><a href="javascript:void(0)" id="layers" class="menu-item">Layers</a></li>');
         menu.push('<li><a href="mailto:edina@ed.ac.uk" class="menu-item">Contact</a></li>');
         return menu;
     }
-  
+
     BuildFormer.prototype.enableTooltips = function(){
         $("#create-form").tooltip();
         $("#my-editors").tooltip();
         $("#example-editors").tooltip();
         $("#my-records").tooltip();
     }
-  
+
     //the events relating to the buttons of the create main menu
     BuildFormer.prototype.enableMainMenuEvents = function(){
         $(".menu-item").click(function(){
             $('#mainmenu .active').removeClass('active');
             $(this).parent().addClass("active");
         });
-    
+
         this.enableHomeEvent();
         this.enableCreateFormEvent();
         this.enableMapViewer();
@@ -143,7 +145,7 @@
         this.enableImageViewer();
         this.enableLayersEvent();
     }
-  
+
     //the event of the home button, it hides all the edit menus and shows the home content
     BuildFormer.prototype.enableHomeEvent = function(){
         $("#home").click($.proxy(function(){
@@ -151,13 +153,13 @@
             this.showEditElements("home", false);
         }, this));
     }
-    
+
     //the event of the home button, it hides all the edit menus and shows the home content
     BuildFormer.prototype.enableLayersEvent = function(){
         $("#layers").click($.proxy(function(){
             $("#dialog-upload").dialog("open");
         }, this));
-        
+
         var file;
         var url = this.buildUrl("layers", "/")
 
@@ -167,7 +169,7 @@
             // Our file var now holds the selected file
             file = files[0];
         });
-    
+
         // This function is called when the user clicks on Upload to Parse. It will create the REST API request to upload this image to Parse.
         $('#uploadbutton').click(function() {
             var serverUrl = url + file.name;
@@ -195,7 +197,7 @@
             });
         });
     }
-  
+
     //event for creating a form from scratch
     BuildFormer.prototype.enableCreateFormEvent = function(){
         $("#create-form").click($.proxy(function(){
@@ -211,7 +213,7 @@
             this.enableActionButtons(true, true, false);
         }, this));
     }
-  
+
     //event for giving name to a new form or an existing one
     BuildFormer.prototype.enableGiveFormName = function(){
         $("#give_form_name").click($.proxy(function(){
@@ -233,12 +235,12 @@
             }
         }, this));
     }
-  
+
     //map viewer
     BuildFormer.prototype.enableMapViewer = function(){
         var oauth = this.options.oauth;
         //var bformer = this;
-    
+
         var options = {
             "provider": this.provider,
             "version": this.version,
@@ -266,16 +268,16 @@
             }
         }
         var base_url = $(location).attr('href').split("?")[0];
-        var mapviewer = new MapViewer(options, base_url);
+        mapviewer = new MapViewer(options, base_url);
         mapviewer.init();
-    
+
         $("#my-records").click($.proxy(function(){
             this.clearAll();
             this.showEditElements("map", false);
             $("#options-dialog").remove();
         }, this))
     }
-    
+
     /**
      * function for displaying the images on the viewer
      */
@@ -312,13 +314,13 @@
                         pages = new Object();
                         bformer.createImageViewer(data.records, pages);
                     //}
-                    
-                    
+
+
                 }
             });
         }, this));
     }
-    
+
     BuildFormer.prototype.createImageViewer = function(records, pages){
         var urls = new Array();
         //number of pages
@@ -331,7 +333,7 @@
             //the thumb url of the image
             var thumb_url = this.buildUrl("records", "/")+records[i].replace(".", "_thumb.");
             urls.push('<div class="img-item"><a rel="gallery-'+pages_n+'" href="'+url+'" class="swipebox" title="'+title+'"><img src="'+thumb_url+'" onerror="imgError(this);" class="img_thumb"><p>'+title+'</p></a></div>');
-            
+
             //if we are at the last record and is less than ten then make a new page
             if(records.length == i+1){
                 pages_n++;
@@ -342,6 +344,7 @@
                 urls = new Array();
             }
         }
+
         //build paginator
         $("#pagination").jPaginator({
             nbPages: pages_n,
@@ -360,11 +363,14 @@
                 $(".swipebox").swipebox();
             }
         });
-        
+
+        // show images on first page
+        $("#thumbs").html(pages["page1"].join(""));
+
         var download_url = this.buildUrl("records", "/assets/images/?frmt=zip");
         $("#download_images").html('<a href="'+download_url+'" target="blank" class="btn">Download images</a>');
     }
-    
+
     //the dialog for uploadig an edtr
     BuildFormer.prototype.importEvent = function(){
         var code = new Array();
@@ -380,11 +386,11 @@
             this.enableImportEvent();
         }, this));
     }
-  
+
   //the event for getting the content and editing it with authoring tool
   BuildFormer.prototype.enableImportEvent = function(){
     var bformer = this;
-    
+
     $("#id_file").change(function(event){
       var f = event.target.files[0];
       var splits = f.name.split(".");
@@ -394,7 +400,7 @@
           var r = new FileReader();
           r.onload = function(e){
             var contents = e.target.result;
-            
+
             bformer.appendExistingEditor(contents, false, splits[0]);
           }
           r.readAsText(f)
@@ -407,7 +413,7 @@
       }
     });
   }
-  
+
   //loading the editors from dropbox
     BuildFormer.prototype.loadEditors = function(){
         //dropbox editors
@@ -439,12 +445,12 @@
                                     by_editor.push('<option value="'+name+'">'+name+'</option>');
                                 }
                             }
-                        
+
                             $(".get-form").remove();
                             $("#deditors").after(form_links.join(""));
                             $("#by-editor").html(by_editor.join(""));
-                            loading(false);
-                        
+                            //loading(false);
+
                             $(".get-form").click(function(){
                                 var title = this.title.split(".")[0];
                                 loading(true);
@@ -470,6 +476,7 @@
                             giveFeedback("There is a problem loading all the editors.");
                         }
                     });
+                    mapviewer.getData(mapviewer.prepareFiltersString());
                 }else{
                     loading(false);
                     giveFeedback("You need to refresh your page. The session with dropbox has problems!");
@@ -477,7 +484,7 @@
             }
         });
     }
-    
+
     //loading the example editors
     BuildFormer.prototype.loadGalleryForms = function(){
         $.getJSON('editors/gallery.json', $.proxy(function(data){
@@ -489,7 +496,7 @@
             this.enableLoadExampleEditor();
         }, this));
     }
-  
+
     //enable the events of the button for selecting an example form
     BuildFormer.prototype.enableLoadExampleEditor = function(){
         $(".get-example-form").click($.proxy(function(event){
@@ -505,7 +512,7 @@
             });
         }, this));
     }
-    
+
     //load home page
     BuildFormer.prototype.loadHomePage = function(){
         this.$element.after('<div id="home-content"></div>');
@@ -517,7 +524,7 @@
             }
         });
     }
-  
+
     //html for the edit banner
     BuildFormer.prototype.createEditMenu = function(){
         var menu = new Array();
@@ -525,7 +532,7 @@
         menu.push('<ul class="nav" id="screen"></ul>');
         return menu;
     }
-    
+
     //html for the select menu
     BuildFormer.prototype.createSelectMenu = function(){
         var select = new Array();
@@ -552,7 +559,7 @@
         select.push('<li><a href="javascript:void(0)" id="synch" class="btn" role="button">Save</a></li>');
         return select;
     };
-    
+
     //all the events relating to the select menu buttons
     BuildFormer.prototype.enableSelectMenuEvents = function(){
         var element = this.$element;
@@ -561,7 +568,7 @@
           var values = $(this).attr("title").split("x");
           element.width(values[0]).height(values[1]);
         });
-        
+
         $(".rotation").click(function(){
           var h = element.height();
           var w = element.width();
@@ -577,7 +584,7 @@
             }
           }
         });
-        
+
         $("#save").click($.proxy(function(){
             var bformer = this;
             if($("#form_title").text().length === 0){
@@ -605,7 +612,7 @@
                 });
             }
         }, this));
-        
+
         $("#synch").click($.proxy(function(){
             var bformer = this;
             if($("#form_title").text().length === 0){
@@ -635,7 +642,7 @@
                 });
             }
         }, this));
-        
+
         $("#delete").click($.proxy(function(){
             var bformer = this;
             loading(true);
@@ -656,7 +663,7 @@
             });
         }, this));
     };
-  
+
     //html for code menu
     BuildFormer.prototype.createCodeMenu = function(){
         var code = new Array();
@@ -670,7 +677,7 @@
         code.push('</li>');
         return code;
     }
-  
+
     //the events related to the code menu buttons
     BuildFormer.prototype.enableCodeMenuEvents = function(){
         $("#code").click($.proxy(function(event){
@@ -685,7 +692,7 @@
                 $("pre.view-code").snippet("html", {style:"dull", showNum:false, menu:true});
             }
         }, this));
-      
+
         $("#edit").click($.proxy(function(){
             var code = $(".view-code").text();
             if(code != ""){
@@ -694,12 +701,12 @@
             this.addEditButtons();
             $(".fieldcontain").removeClass('fieldcontain_preview');
         }, this));
-    
+
         $("#preview").click($.proxy(function(){
             doPreview(this.id, "iframe");
         }, this));
     }
-  
+
     BuildFormer.prototype.prepareCode = function(){
         var code = "";
         var rand_number = Math.floor(Math.random()*1100);
@@ -733,7 +740,7 @@
         text_code.push('\n</form>');
         return text_code;
     }
-  
+
     BuildFormer.prototype.createElementsMenu = function(){
         var elements = new Array();
         for(option in this.options.choices){
@@ -742,7 +749,7 @@
         }
         $("#"+this.options.form_elements_id).append(elements.join(""));
     };
-  
+
     BuildFormer.prototype.createMandatoryElement = function(){
         var finds = this.$element.find(".fieldcontain");
         if(finds.length == 0){
@@ -754,7 +761,7 @@
         }
         this.addEditButtons();
     }
-  
+
     //enable the events for dragging, dropping, sorting, editing and deleting elements
     BuildFormer.prototype.enableEvents = function() {
         this.enableDragging();
@@ -763,7 +770,7 @@
         this.enableDeleteFieldcontain();
         this.enableEditFieldcontain();
     }
-  
+
     BuildFormer.prototype.enableDragging = function(){
         $("#"+this.options.form_elements_id+" li").draggable({
             appendTo: "body",
@@ -773,7 +780,7 @@
             }
         });
     }
-  
+
     BuildFormer.prototype.enableDropping = function(){
         var el = this.id;
         var choices = this.options.choices;
@@ -793,14 +800,14 @@
             }
         });
     }
-  
+
     BuildFormer.prototype.enableSorting = function(){
         var bformer = this;
         $("#"+this.id).sortable({items: "div.fieldcontain", handle: '.handle', change: function(event, ui){
             bformer.updateSyncStatus(false);
         }});
     }
-    
+
     BuildFormer.prototype.enableDeleteFieldcontain = function(){
         var bformer = this;
         $(document).off('click', '.delete-field');
@@ -813,7 +820,7 @@
             }
         });
     }
-  
+
     BuildFormer.prototype.enableEditFieldcontain = function(){
         $(document).off('click', '.edit-field');
         $(document).on('click', '.edit-field', $.proxy(function(event){
@@ -821,19 +828,19 @@
             this.enableEditing(id);
         }, this));
     }
-    
-    
+
+
     BuildFormer.prototype.clearAll = function(){
         this.$element.html("");
         $("#form_title").html("");
     }
-    
+
     BuildFormer.prototype.enableActionButtons = function(save, del, saveas){
         $("#save").toggleClass("disabled", save);
         $("#synch").toggleClass("disabled", saveas);
         $("#delete").toggleClass("disabled", del);
     }
-  
+
   /**
    * function for showing/hiding different pages of the app (home, map viewer, form editor)
    * @state: variable for showing which page to show/hide
@@ -871,12 +878,12 @@
                 $("#map-content").show("fast");
             }
         }
-        
+
         if(dialogNameState === true){
             this.showFormName("");
         }
     }
-    
+
     BuildFormer.prototype.showFormName = function(name){
         if($("#formModal").length === 0){
             $("body").append(appendFormName("formModal", name).join(""));
@@ -884,7 +891,7 @@
         }
         $('#formModal').modal('show');
     }
-  
+
     //enable edit mode of buildformer
     BuildFormer.prototype.appendExistingEditor = function(data, sync, title){
         this.showEditElements("form", false);
@@ -901,13 +908,13 @@
         $('#'+title.toLowerCase()+'-buttons').remove();
         this.addEditButtons();
     }
-  
+
     //initialize the size of the frame where the elements will be dragged
     BuildFormer.prototype.initializeFrameSize = function(){
         var initial_size = this.options.sizes[1].split("x");
         this.$element.width(initial_size[0]).height(initial_size[1]);
     }
-    
+
     BuildFormer.prototype.enableEditing = function(id){
         var bformer = this;
         var splits = id.split("-");
@@ -916,7 +923,7 @@
         var searcher = new Searcher(id, type, $);
         var results = searcher.search();
         var optionsForm = new OptionsForm(type, results.title, results.placeholder, results.required, results.group, bformer.getElements(), results.value, i);
-        
+
         if(type === "range"){
             makeAlertWindow(optionsForm.create(null, results.range[0], results.range[1], results.range[2]).join(""), 'Options', 260, 400, 'options-dialog', 1000, "right", makeDialogButtons('options-dialog', this.target));
         }else if(type === "text"){
@@ -926,7 +933,7 @@
         }
         optionsForm.enableEvents[type](i, this.id)
     }
-  
+
     BuildFormer.prototype.getElements = function(){
         var elements = new Array();
         for(choice in this.options.choices){
@@ -950,18 +957,18 @@
         this.enableEditTitleButton();
         this.enableSorting();
     }
-  
+
     BuildFormer.prototype.enableEditTitleButton = function(){
         $("#edit-f-title").click($.proxy(function(){
             this.showFormName($("#form_title").text());
         }, this));
     }
-  
+
     BuildFormer.prototype.appendEditButtons = function(id){
         $("#"+id).prepend( "<div class='handle'><span class='ui-icon ui-icon-carat-2-n-s'></span></div>" );
         $("#"+id).append('<div class="fieldButtons"><a class="btn edit-field" href="javascript:void( 0);"><i class="icon-pencil"></i></a></div>');
     }
-  
+
     BuildFormer.prototype.appendEditDeleteButtons = function(id){
         $("#"+id).prepend( "<div class='handle'><span class='ui-icon ui-icon-carat-2-n-s'></span></div>" );
         $("#"+id).append('<div class="fieldButtons"><a class="btn edit-field" href="javascript:void( 0);"><i class="icon-pencil"></i></a><a class="btn delete-field" href="javascript:void( 0);"><i class="icon-remove-sign"></i></a></div>');
@@ -971,12 +978,12 @@
         $(".handle").remove();
         $(".fieldButtons").remove();
     }
-    
+
     BuildFormer.prototype.appendTitle = function(title, sync){
         $("#f_title").html('<strong style="font-size: 20px;">Title: <span id="form_title">'+title+'</span></strong>  <button type="button" id="edit-f-title" class="btn btn-primary btn-small">Edit</button>  <span id="sync_status" class="label"></span>');
         this.updateSyncStatus(sync);
     }
-  
+
     BuildFormer.prototype.updateSyncStatus = function(sync){
         if(sync == true){
             $("#sync_status").removeClass("label-warning").addClass("label-success").text("Synchronized");
@@ -984,7 +991,7 @@
             $("#sync_status").removeClass("label-success").addClass("label-warning").text("Unsynchronized");
         }
     }
-    
+
     BuildFormer.prototype.buildUrl = function(path, ext){
         var url = config.baseurl+this.version+'/pcapi/'+path+'/'+this.provider+'/'+this.options.oauth;
         if(ext){
@@ -992,14 +999,14 @@
         }
         return url;
     }
-    
+
     BuildFormer.defaults = BuildFormer.prototype.defaults;
         $.fn.buildformer = function(options){
             return this.each(function(){
             new BuildFormer( this, options ).init();
         });
     }
-    
+
     window.BuildFormer = BuildFormer;
 
 })(jQuery, window, document);

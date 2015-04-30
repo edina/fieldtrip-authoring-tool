@@ -80,13 +80,13 @@ function openWindow(element, title,  wdth, hght, zindex, position, buttons){
         autoOpen: true,
         height: hght,
         width: wdth,
-        zIndex: zindex, 
+        zIndex: zindex,
         modal: false,
         position: position,
         title: title,
         buttons: buttons
-    }); 
-    
+    });
+
     //$( div ).dialog( "open" );
     return false;
 }
@@ -111,10 +111,11 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
             if($("#"+dialog_id+" #form-text-1").val() != $("#"+dialog_id+" #form-text-hidden-1").val()){
                 rename = true;
             }
-            for(var i=0; i<obj.fields.length; i++){
-                var fid = obj.fields[i].id;
-                var splits = obj.fields[i].id.split("-");
-                obj.fields[i].val = getValueFromEditForm(splits[1], dialog_id, fid);
+            var fields = obj.properties.fields;
+            for(var i=0; i<fields.length; i++){
+                var fid = fields[i].id;
+                var splits = fields[i].id.split("-");
+                fields[i].val = getValueFromEditForm(splits[1], dialog_id, fid);
             }
             obj.name = $("#"+dialog_id+" #form-text-1").val();
             var data = JSON.stringify(obj);
@@ -130,7 +131,7 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                 });
             }else{
                 //to be implemented in the next version
-                $.ajax({
+                /*$.ajax({
                     url: '/'+version+'/pcapi/records/'+uri+'/'+encodeURIComponent($("#"+dialog_id+" #form-text-hidden-1").val()),
                     type: 'PUT',
                     data: obj.name,
@@ -141,25 +142,25 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
                         $("#row-"+row +" .record-delete").attr("title", obj.name+"-"+row);
                         loading(false);
                     }
-                });
-                
-                /*$.ajax({
-                  url: '/pcapi/records/dropbox/'+oauth+'/'+encodeURIComponent($("#"+dialog_id+" #form-text-hidden-1").val()),
+                });*/
+
+                $.ajax({
+                  url: '/'+version+'/pcapi/records/'+uri+'/'+encodeURIComponent($("#"+dialog_id+" #form-text-hidden-1").val()),
                   type: 'DELETE',
                   success: function() {
                     $.ajax({
-                      url: '/pcapi/records/dropbox/'+oauth+'/'+encodeURIComponent(obj.name)+'/record.json',
+                      url: '/'+version+'/pcapi/records/'+uri+'/'+encodeURIComponent(obj.name)+'/record.json',
                       type: 'POST',
                       data: data,
                       success: function(data) {
                         oTable.fnUpdate(obj.name, parseInt(row), 1);
-                        $("#row-"+row +" .record-edit").attr("title", obj.name+"-"+row);
-                        $("#row-"+row +" .record-delete").attr("title", obj.name+"-"+row);
+                        $("#row-"+row +" .record-edit").attr("title", obj.name);
+                        $("#row-"+row +" .record-delete").attr("title", obj.name);
                         loading(false);
                       }
                     });
                   }
-                });*/
+                });
             }
             $("#"+dialog_id).dialog('close');
         },
@@ -168,6 +169,25 @@ function makeEditDialogButtons(dialog_id, obj, version, uri, oTable, row){
         }
     };
 }
+
+function isAsset(field, type){
+    var isAsset = false;
+
+    if(type === undefined){
+        type = typeFromId(field.id);
+    }
+
+    if($.inArray(type, ['image', 'audio']) != -1){
+        isAsset = true;
+    }
+
+    return isAsset;
+};
+
+function typeFromId(id){
+    var s = id.indexOf('-') + 1;
+    return id.substr(s, id.lastIndexOf('-') - s);
+};
 
 function getValueFromEditForm(type, dialog_id, fid){
   var updateValues = {
@@ -374,19 +394,19 @@ function doPreview(id_dragged, id_iframe){
     var w = $("#"+id_dragged).width(), h = $("#"+id_dragged).height();
     $("#"+id_iframe).remove();
     makeAlertWindow(previewCode(w, h), 'Preview', w+60, h+140, id_iframe, 1000, "left");
-    
+
     var $$ = jQuery = null;
-    
+
     var code = $("#"+id_dragged).html();
-    
+
     if($(code).find(".sh_dull").length > 0){
         code = $(".view-code").text();
     }
-    
+
     $("#frame").load(function(){
         $$ = jQuery = window.frames[0].jQuery;
         $$("#home-content").append(code).trigger("create");
-        
+
         var finds = $$("#home-content").find('.button-wrapper');
         for(var i=0;i<finds.length; i++){
             if($$(finds[i]).hasClass("button-camera")){
@@ -442,12 +462,12 @@ function touchScroll(selector) {
     if(isTouchDevice()){
         var scrollStartPosY = 0;
         var scrollStartPosX = 0;
-        
+
         $('body').delegate(selector, 'touchstart', function(e) {
             scrollStartPosY = this.scrollTop + e.originalEvent.touches[0].pageY;
             scrollStartPosX = this.scrollLeft + e.originalEvent.touches[0].pageX;
         });
-        
+
         $('body').delegate(selector, 'touchmove', function(e) {
             if ((this.scrollTop < this.scrollHeight - this.offsetHeight &&
                 this.scrollTop + e.originalEvent.touches[0].pageY < scrollStartPosY-5) ||
@@ -459,7 +479,7 @@ function touchScroll(selector) {
                 (this.scrollLeft != 0 && this.scrollLeft+e.originalEvent.touches[0].pageX > scrollStartPosX+5)){
                 e.preventDefault();
             }
-            
+
             this.scrollTop = scrollStartPosY - e.originalEvent.touches[0].pageY;
             this.scrollLeft = scrollStartPosX - e.originalEvent.touches[0].pageX;
         });
@@ -471,4 +491,13 @@ function imgError(image) {
     image.src = image.src.replace("_thumb.", ".");
     //image.src = "img/404-not-found.gif";
     return true;
+}
+
+function getFirstProp(object){
+    var prop;
+    for (var prop in object) {
+        prop = object[prop];
+        break;
+    }
+    return prop;
 }

@@ -38,14 +38,14 @@ RecordRenderer.prototype.renderType = {
       /*$("#"+dialog+" "+el_id).attr("readonly", "readonly");
       $("#"+dialog+" "+el_id).after("read-only")
       $("#"+dialog+" "+el_id).val(name);*/
-      
+
       //for next release in order rename to work
       $("#"+dialog+" "+el_id).after('<input type="hidden" id="form-text-hidden-1" value="'+name+'">');
       $("#"+dialog+" "+el_id).val(name);
     }
   },
   textarea: function(dialog, el_id, obj){
-    $("#"+dialog+" "+el_id).attr("value", obj.val);
+    $("#"+dialog+" textarea"+el_id).val(obj.val)
   },
   checkbox: function(dialog, el_id, obj){
     var splits = new Array();

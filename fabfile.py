@@ -139,8 +139,7 @@ def _set_server():
     env.releases_path = "%(domain_path)s/releases" % { 'domain_path':env.domain_path }
     env.app_local = "./%(app_name)s" % { 'app_name':env.app_local_name }
 
-@task
-def setup():
+def _setup():
     """Prepare server for deployment"""
     run("mkdir -p %(domain_path)s" % { 'domain_path':env.domain_path })
     run("mkdir -p %(releases_path)s" % { 'releases_path':env.releases_path })
@@ -148,6 +147,7 @@ def setup():
 @task
 def deploy():
     """Deploys your project, updates the virtual env then restarts"""
+    _setup()
     _update()
 
 def _update():
@@ -169,21 +169,21 @@ def _find_version():
     refspec = local('git tag | sort -V | tail -1 | cut -d"v" -f2', capture=True)
     print "Showing the last 5 tags"
     local('git tag | sort -V | tail -5')
-    create_tag = prompt('Tag this release? [y/N]')
-    if create_tag.lower() == 'y':
-        notify("Showing latest tags for reference")
-        refspec = prompt('Tag name [in format x.x.x for general tagging or x.x.x.x for pcapi tagging]? ')
-        local('git tag %(ref)s -m "Tagging version %(ref)s in fabfile"' % {'ref': refspec})
-        local('git push --tags')
-    else:
-        use_commit = prompt('Build from a specific commit? [y/N] ')
-        if use_commit.lower() == 'y':
-            refspec = prompt('Choose commit to build from [in format x.x.x]: ')
-            local('git stash save')
-            local('git checkout v%s' % refspec)
-            print "Don't forget to run the command <git stash pop> after the app is installed"
-        else:
-            refspec = prompt('Create dev folder to build in [e.g. dev]: ')
+    #create_tag = prompt('Tag this release? [y/N]')
+    #if create_tag.lower() == 'y':
+    #    notify("Showing latest tags for reference")
+    #    refspec = prompt('Tag name [in format x.x.x for general tagging or x.x.x.x for pcapi tagging]? ')
+    #    local('git tag %(ref)s -m "Tagging version %(ref)s in fabfile"' % {'ref': refspec})
+    #    local('git push --tags')
+    #else:
+    #    use_commit = prompt('Build from a specific commit? [y/N] ')
+    #    if use_commit.lower() == 'y':
+    #        refspec = prompt('Choose commit to build from [in format x.x.x]: ')
+    #        local('git stash save')
+    #        local('git checkout v%s' % refspec)
+    #        print "Don't forget to run the command <git stash pop> after the app is installed"
+    #    else:
+    refspec = prompt('Create dev folder to build in [e.g. dev]: ')
     return refspec
 
 def _symlink():
