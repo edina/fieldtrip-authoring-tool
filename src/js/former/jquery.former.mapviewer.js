@@ -408,12 +408,18 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
     var features = new Array(), table_data = new Array();
     var records = [];
     var oldRecords = [];
+    //var faultyRecords = [];
     this.problems = [];
 
     for(var i=0; i<data.length; i++){
         //check if it's the old format, back it up and convert it
         for(key in data[i]){
             var record = data[i][key];
+            if(key !== record.name){
+                console.log("the record "+record.name+" is buggy");
+                record["newName"] = key;
+                record['buggy'] = true;
+            }
             if(typeof(record.geometry) === 'undefined') {
                 oldRecords.push(record);
             }
@@ -443,6 +449,28 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
         this.filterTableData(l.features);
 
         loading(false);
+    }, this);
+
+
+    var fixRecord = $.proxy(function(record){
+        var deferred = new $.Deferred();
+
+        $.ajax({
+            type: "PUT",
+            data: JSON.stringify(record),
+            url: config.baseurl+'/'+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records/'+encodeURIComponent(record.name)+'/record.json',
+        }).done(function(){
+            console.debug("Sucessfully fixed record " + record.name);
+
+            deferred.resolve(record);
+
+        }).fail(function(){
+            giveFeedback(err);
+            console.error(err);
+            loading(false);
+            deferred.reject();
+        });
+        return deferred.promise();
     }, this);
 
     if(oldRecords.length > 0){
@@ -479,7 +507,25 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
         }, this);
 
         var record = oldRecords.pop();
-        convertRecord(record);
+        if (record.buggy){
+            record.name = record.newName;
+            delete record.buggy;
+            delete record.newName;
+            var promise = fixRecord(record);
+
+            promise.done(function(newRecord){
+                convertRecord(newRecord);
+            });
+
+            promise.fail(function(err){
+                giveFeedback(err);
+                console.error(err);
+                loading(false);
+            });
+        }
+        else {
+            convertRecord(record);
+        }
     }
     else{
         // no old record proceed to process
@@ -493,7 +539,7 @@ MapViewer.prototype.doConversionRecord = function(record) {
     var d1 = $.ajax({
         type: "POST",
         data: JSON.stringify(record),
-        url: '/'+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records_backup/'+encodeURIComponent(record.name)+'/record.json',
+        url: config.baseurl+'/'+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records_backup/'+encodeURIComponent(record.name)+'/record.json',
     });
     var newRecord = mapviewer.convertRecord(record);
     var d2 = $.ajax({
