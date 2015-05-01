@@ -466,6 +466,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
                 }
                 else{
                     // no records left in queue
+                    $('#feedback').modal('hide');
                     processRecords();
                 }
             });
