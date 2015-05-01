@@ -453,7 +453,9 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             var promise = this.doConversionRecord(record);
 
             promise.done(function(newRecord){
-                console.debug("Sucessfully converted record " + record.name + ". " + oldRecords.length + " left to process");
+                var info = "Sucessfully converted record " + record.name + ". " + oldRecords.length + " left to process";
+                console.debug(info);
+                $('#feedback-extra').text(info);
 
                 records.push(newRecord);
 
