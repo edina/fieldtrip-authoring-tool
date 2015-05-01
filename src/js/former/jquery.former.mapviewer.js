@@ -481,7 +481,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             var promise = this.doConversionRecord(record);
 
             promise.done(function(newRecord){
-                var info = "Sucessfully converted record " + record.name + ". " + oldRecords.length + " left to process";
+                var info = "Sucessfully converted record " + record.name + ". " + oldRecords.length + " left to process.";
                 console.debug(info);
                 $('#feedback-extra').text(info);
 
@@ -536,44 +536,61 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 MapViewer.prototype.doConversionRecord = function(record) {
     var mapviewer = this;
     var d = $.Deferred();
-    var d1 = $.ajax({
-        type: "POST",
-        data: JSON.stringify(record),
-        url: config.baseurl+'/'+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records_backup/'+encodeURIComponent(record.name)+'/record.json',
-    });
-    var newRecord = mapviewer.convertRecord(record);
-    var d2 = $.ajax({
-        type:"PUT",
-        data: JSON.stringify(newRecord),
-        url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
-    });
 
-    // Handle both XHR objects
-    $.when(d1, d2).done($.proxy(function(jqxhr1, jqxhr2) {
-        if(jqxhr2[0].error === 0){
-            d.resolve(newRecord);
+    var retry = $.proxy(function(){
+        // this function will retry a failed convert, if the convert fails
+        // 3 times for a particular record, simply abort
+        console.debug("Problem converting " + record.name);
+        console.debug(record);
+        var tryCount = this.problems[record.name];
+        if(tryCount){
+            tryCount += 1;
         }
         else{
-            console.debug("Problem converting the following record " + jqxhr2[0].msg);
-            console.debug(record);
-
-            var tryCount = this.problems[record.name];
-            if(tryCount){
-                this.problems[record.name] = tryCount + 1;
-            }
-            else{
-                this.problems[record.name] = 1;
-            }
-
-            if(tryCount > 2){
-                d.reject("Unable to convert " + record.name);
-            }
-            else{
-                // try again
-                this.doConversionRecord(record);
-            }
+            tryCount = 1;
         }
-    }, this));
+
+        this.problems[record.name] = tryCount;
+        if(tryCount > 2){
+            $('#feedback-extra').text("");
+            d.reject("Unable to convert " + record.name);
+        }
+        else{
+            // try again
+            $('#feedback-extra').text("Problem converting " + record.name + " (" + tryCount + " try). trying again ...");
+            doConvert();
+        }
+    }, this);
+
+    var doConvert = $.proxy(function(){
+        var d1 = $.ajax({
+            type: "POST",
+            data: JSON.stringify(record),
+            url: config.baseurl+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records_backup/'+encodeURIComponent(record.name)+'/record.json',
+        });
+        var newRecord = mapviewer.convertRecord(record);
+        var d2 = $.ajax({
+            type:"PUT",
+            data: JSON.stringify(newRecord),
+            url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
+        });
+
+        // Handle both XHR objects
+        $.when(d1, d2)
+            .done($.proxy(function(jqxhr1, jqxhr2) {
+                if(jqxhr2[0].error === 0){
+                    d.resolve(newRecord);
+                }
+                else{
+                    console.debug(jqxhr2[0].msg);
+                    retry();
+                }
+            }, this))
+            .fail(function(){
+                retry();
+            });
+    }, this);
+    doConvert();
 
     return d.promise();
 };
