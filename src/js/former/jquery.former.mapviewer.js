@@ -506,8 +506,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             });
         }, this);
 
-        var record = oldRecords.pop();
-        if (record.buggy){
+        var fixAndConvertRecord = function(record){
             record.name = record.newName;
             delete record.buggy;
             delete record.newName;
@@ -515,6 +514,13 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
             promise.done(function(newRecord){
                 convertRecord(newRecord);
+                record = oldRecords.pop();
+                if(record.buggy){
+                    fixAndConvertRecord(record);
+                }
+                else{
+                    convertRecord(record);
+                }
             });
 
             promise.fail(function(err){
@@ -522,6 +528,11 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
                 console.error(err);
                 loading(false);
             });
+        };
+
+        var record = oldRecords.pop();
+        if (record.buggy){
+            fixAndConvertRecord(record);
         }
         else {
             convertRecord(record);
