@@ -568,7 +568,7 @@ MapViewer.prototype.doConversionRecord = function(record) {
         }
         else{
             // try again
-            $('#feedback-extra').text("Problem converting " + record.name + " (" + tryCount + " try). trying again ...");
+            $('#feedback-extra').text("Problem converting " + record.name + " (try " + tryCount + "). trying again ...");
             doConvert();
         }
     }, this);
