@@ -419,6 +419,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
                 console.log("the record "+record.name+" is buggy");
                 record["newName"] = key;
                 record['buggy'] = true;
+                console.log(record)
             }
             if(typeof(record.geometry) === 'undefined') {
                 oldRecords.push(record);
@@ -490,7 +491,12 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
                 // get next record
                 record = oldRecords.pop();
                 if(record){
-                    convertRecord(record);
+                    if (record.buggy){
+                        fixAndConvertRecord(record);
+                    }
+                    else {
+                        convertRecord(record);
+                    }
                 }
                 else{
                     // no records left in queue
@@ -514,19 +520,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
             promise.done(function(newRecord){
                 convertRecord(newRecord);
-                record = oldRecords.pop();
-                if(record){
-                    if(record.buggy){
-                        fixAndConvertRecord(record);
-                    }
-                    else{
-                    convertRecord(record);
-                    }
-                }
-                else{
-                    $('#feedback').modal('hide');
-                    processRecords();
-                }
+                //records.push(newRecord);
             });
 
             promise.fail(function(err){
