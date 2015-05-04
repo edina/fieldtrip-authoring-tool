@@ -458,7 +458,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
         $.ajax({
             type: "PUT",
             data: JSON.stringify(record),
-            url: config.baseurl+'/'+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records/'+encodeURIComponent(record.name)+'/record.json',
+            url: config.baseurl+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records/'+encodeURIComponent(record.name)+'/record.json',
         }).done(function(){
             console.debug("Sucessfully fixed record " + record.name);
 
