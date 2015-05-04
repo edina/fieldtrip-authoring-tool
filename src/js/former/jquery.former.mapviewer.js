@@ -515,7 +515,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             promise.done(function(newRecord){
                 convertRecord(newRecord);
                 record = oldRecords.pop();
-                if(record.buggy){
+                if(record && record.buggy){
                     fixAndConvertRecord(record);
                 }
                 else{
