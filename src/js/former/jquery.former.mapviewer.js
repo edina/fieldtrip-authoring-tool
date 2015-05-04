@@ -515,11 +515,17 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             promise.done(function(newRecord){
                 convertRecord(newRecord);
                 record = oldRecords.pop();
-                if(record && record.buggy){
-                    fixAndConvertRecord(record);
+                if(record){
+                    if(record.buggy){
+                        fixAndConvertRecord(record);
+                    }
+                    else{
+                    convertRecord(record);
+                    }
                 }
                 else{
-                    convertRecord(record);
+                    $('#feedback').modal('hide');
+                    processRecords();
                 }
             });
 
