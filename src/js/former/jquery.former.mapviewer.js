@@ -417,14 +417,21 @@ MapViewer.prototype.updateFeaturesOnMap = function(features){
 //preparing the object for the table data and the point features
 MapViewer.prototype.prepareManyTableData= function(data, state){
     var features = new Array(), table_data = new Array();
+    var mapviewer = this;
     var records = [];
     var oldRecords = [];
+    //var faultyRecords = [];
     this.problems = [];
 
     for(var i=0; i<data.length; i++){
         //check if it's the old format, back it up and convert it
         for(key in data[i]){
             var record = data[i][key];
+            if(key !== record.name){
+                console.log("the record "+record.name+" is buggy");
+                record["newName"] = key;
+                record['buggy'] = true;
+            }
             if(typeof(record.geometry) === 'undefined') {
                 oldRecords.push(record);
             }
@@ -456,25 +463,54 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
         loading(false);
     }, this);
 
+    var fixRecord = $.proxy(function(record){
+        var deferred = new $.Deferred();
+
+        $.ajax({
+            type: "PUT",
+            data: JSON.stringify(record),
+            url: config.baseurl+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records/'+encodeURIComponent(record.name)+'/record.json',
+        }).done(function(){
+            console.debug("Sucessfully fixed record " + record.name);
+
+            deferred.resolve(record);
+
+        }).fail(function(err){
+            giveFeedback(err);
+            console.error(err);
+            loading(false);
+            deferred.reject();
+        });
+        return deferred.promise();
+    }, this);
+
     if(oldRecords.length > 0){
         giveFeedback(oldRecords.length + " old style records have been found, these need to be converted.  This can take some time, depending on the number of records in dropbox.");
 
         // records have old format, convert them synchronously to prevent overloading server
-        var convertRecord = $.proxy(function(record){
-            var promise = this.doConversionRecord(record);
+        var convertRecord = $.proxy(function(record, backup){
+            var promise = this.doConversionRecord(record, backup);
 
             promise.done(function(newRecord){
-                console.debug("Sucessfully converted record " + record.name + ". " + oldRecords.length + " left to process");
+                var info = "Sucessfully converted record " + record.name + ". " + oldRecords.length + " left to process.";
+                console.debug(info);
+                $('#feedback-extra').text(info);
 
                 records.push(newRecord);
 
                 // get next record
                 record = oldRecords.pop();
                 if(record){
-                    convertRecord(record);
+                    if (record.buggy){
+                        fixAndConvertRecord(record);
+                    }
+                    else {
+                        convertRecord(record, true);
+                    }
                 }
                 else{
                     // no records left in queue
+                    $('#feedback').modal('hide');
                     processRecords();
                 }
             });
@@ -486,8 +522,37 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             });
         }, this);
 
+        var fixAndConvertRecord = function(record){
+            var newName = record.newName;
+            delete record.buggy;
+            delete record.newName;
+            var promise1 = mapviewer.backUpRecord(record);
+
+            var fail = function(err){
+                giveFeedback(err);
+                console.error(err);
+                loading(false);
+            };
+
+            promise1.done(function(){
+                record.name = newName;
+                var promise2 = fixRecord(record);
+                promise2.done(function(newRecord){
+                    convertRecord(newRecord, false);
+                });
+                promise2.fail(fail);
+            });
+
+            promise1.fail(fail);
+        };
+
         var record = oldRecords.pop();
-        convertRecord(record);
+        if (record.buggy){
+            fixAndConvertRecord(record);
+        }
+        else {
+            convertRecord(record, true);
+        }
     }
     else{
         // no old record proceed to process
@@ -495,49 +560,97 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
     }
 }
 
-MapViewer.prototype.doConversionRecord = function(record) {
+MapViewer.prototype.doConversionRecord = function(record, backup) {
     var mapviewer = this;
     var d = $.Deferred();
-    var d1 = $.ajax({
-        type: "POST",
-        data: JSON.stringify(record),
-        url: '/'+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records_backup/'+encodeURIComponent(record.name)+'/record.json',
-    });
-    var newRecord = mapviewer.convertRecord(record);
-    var d2 = $.ajax({
-        type:"PUT",
-        data: JSON.stringify(newRecord),
-        url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
-    });
 
-    // Handle both XHR objects
-    $.when(d1, d2).done($.proxy(function(jqxhr1, jqxhr2) {
-        if(jqxhr2[0].error === 0){
-            d.resolve(newRecord);
+    var retry = $.proxy(function(){
+        // this function will retry a failed convert, if the convert fails
+        // 3 times for a particular record, simply abort
+        console.debug("Problem converting " + record.name);
+        console.debug(record);
+        var tryCount = this.problems[record.name];
+        if(tryCount){
+            tryCount += 1;
         }
         else{
-            console.debug("Problem converting the following record " + jqxhr2[0].msg);
-            console.debug(record);
-
-            var tryCount = this.problems[record.name];
-            if(tryCount){
-                this.problems[record.name] = tryCount + 1;
-            }
-            else{
-                this.problems[record.name] = 1;
-            }
-
-            if(tryCount > 2){
-                d.reject("Unable to convert " + record.name);
-            }
-            else{
-                // try again
-                this.doConversionRecord(record);
-            }
+            tryCount = 1;
         }
-    }, this));
+
+        this.problems[record.name] = tryCount;
+        if(tryCount > 2){
+            $('#feedback-extra').text("");
+            d.reject("Unable to convert " + record.name);
+        }
+        else{
+            // try again
+            $('#feedback-extra').text("Problem converting " + record.name + " (try " + tryCount + "). trying again ...");
+            doConvert();
+        }
+    }, this);
+
+    var doConvert = $.proxy(function(){
+        var newRecord = mapviewer.convertRecord(record);
+        if(backup === true){
+            var d1 = mapviewer.backUpRecord(record);
+            var d2 = $.ajax({
+                type:"PUT",
+                data: JSON.stringify(newRecord),
+                url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
+            });
+
+            // Handle both XHR objects
+            $.when(d1, d2)
+                .done($.proxy(function(jqxhr1, jqxhr2) {
+                    if(jqxhr2[0].error === 0){
+                        d.resolve(newRecord);
+                    }
+                    else{
+                        console.debug(jqxhr2[0].msg);
+                        retry();
+                    }
+                }, this))
+                .fail(function(){
+                    retry();
+                });
+        }
+        else{
+            $.ajax({
+                type:"PUT",
+                data: JSON.stringify(newRecord),
+                url: mapviewer.buildUrl('records', '/'+encodeURIComponent(newRecord.name)+'/record.json')
+            }).done(function(){
+                d.resolve(newRecord);
+            }).fail(function(err){
+                retry();
+            });
+        }
+
+    }, this);
+    doConvert();
 
     return d.promise();
+};
+
+MapViewer.prototype.backUpRecord = function(record){
+    var deferred = new $.Deferred();
+
+    $.ajax({
+        type: "POST",
+        data: JSON.stringify(record),
+        url: config.baseurl+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records_backup/'+encodeURIComponent(record.name)+'/record.json',
+    }).done(function(){
+        console.debug("Sucessfully backed up record " + record.name);
+
+        deferred.resolve();
+
+    }).fail(function(err){
+        giveFeedback(err);
+        console.error(err);
+        loading(false);
+        deferred.reject();
+    });
+    return deferred.promise();
 };
 
 MapViewer.prototype.convertRecord = function(record) {
@@ -720,7 +833,6 @@ MapViewer.prototype.enableRecordDelete = function(){
     $(document).off('click', '.record-delete');
     $(document).on('click', '.record-delete', $.proxy(function(event){
         var record = $(event.currentTarget).attr("title");
-        console.log(record)
         this.askForDeletion(record);
     }, this))
 }

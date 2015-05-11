@@ -311,6 +311,7 @@ function makeAlertModal(id, msg){
     body.push('<div class="alert">');
     body.push(msg);
     body.push('</div>');
+    body.push('<div id="feedback-extra"></div>');
     return makeModalWindow(id, header, body, footer);
 }
 
