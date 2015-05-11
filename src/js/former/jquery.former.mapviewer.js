@@ -672,7 +672,7 @@ MapViewer.prototype.convertRecord = function(record) {
 };
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
-    var point = new OpenLayers.Geometry.Point(record.geometry.coordinates[0], record.geometry.coordinates[1]).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:27700"));
+    var point = new OpenLayers.Geometry.Point(record.geometry.coordinates[0], record.geometry.coordinates[1]).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
     var data_obj = {id: i, name: folder, editor: record.properties.editor, date: record.properties.timestamp.split("T")[0]};
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
     if(state === "edit"){
