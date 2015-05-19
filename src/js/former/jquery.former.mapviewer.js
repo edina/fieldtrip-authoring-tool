@@ -229,7 +229,8 @@ MapViewer.prototype.initMap = function(){
                 fillColor: "#8aeeef",
                 strokeColor: "#32a8a9"
             }
-        })
+        }),
+        projection: new OpenLayers.Projection("EPSG:4326")
     });
 
     var gpx = new OpenLayers.Layer.Vector("GPX", {
