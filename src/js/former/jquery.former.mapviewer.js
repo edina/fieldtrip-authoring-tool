@@ -629,12 +629,12 @@ MapViewer.prototype.backUpRecords = function(){
     }).done(function(res){
         if (res.error === 0) {
             console.debug("Sucessfully backed up records");
-            deferred.resolve();
         }
         else{
-            console.debug(err.msg);
-            deferred.reject();
+            console.debug(res.msg);
+            //deferred.reject();
         }
+        deferred.resolve();
 
     }).fail(function(err){
         giveFeedback(err);
