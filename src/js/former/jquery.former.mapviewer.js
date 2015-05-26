@@ -355,7 +355,7 @@ MapViewer.prototype.getData = function(params){
 
 MapViewer.prototype.getSyncCursor = function(){
     var url = this.buildUrl('sync');
-    console.debug("Sync download with cursor: " + url);
+    console.log("Sync download with cursor: " + url);
     $.ajax({
         type: "GET",
         dataType: "json",
@@ -369,7 +369,7 @@ MapViewer.prototype.getSyncCursor = function(){
 
 MapViewer.prototype.syncWithCursor = function(){
     var url = this.buildUrl('sync', '/'+this.cursor);
-    console.debug("Sync download with cursor: " + url);
+    console.log("Sync download with cursor: " + url);
     $.ajax({
         type: "GET",
         dataType: "json",
@@ -462,7 +462,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             data: JSON.stringify(record),
             url: config.baseurl+this.options.version+'/pcapi/fs/'+this.options.provider+'/'+this.options.oauth+'/records/'+encodeURIComponent(record.name)+'/record.json',
         }).done(function(){
-            console.debug("Sucessfully fixed record " + record.name);
+            console.log("Sucessfully fixed record " + record.name);
 
             deferred.resolve(record);
 
@@ -484,7 +484,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
             promise.done(function(newRecord){
                 var info = "Sucessfully converted record " + record.name + ". " + oldRecords.length + " left to process.";
-                console.debug(info);
+                console.log(info);
                 $('#feedback-extra').text(info);
 
                 records.push(newRecord);
@@ -541,11 +541,11 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
                 console.error(err);
                 loading(false);
             };
-    
+
             promise1.done(function(){
                 giveFeedback("Your old records have been backed up");
                 var record = oldRecords.pop();
-        
+
                 if (record.buggy){
                     fixAndConvertRecord(record);
                 }
@@ -553,7 +553,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
                     convertRecord(record);
                 }
             });
-    
+
             promise1.fail(fail);
         }
         else{
@@ -580,8 +580,8 @@ MapViewer.prototype.doConversionRecord = function(record) {
     var retry = $.proxy(function(){
         // this function will retry a failed convert, if the convert fails
         // 3 times for a particular record, simply abort
-        console.debug("Problem converting " + record.name);
-        console.debug(record);
+        console.log("Problem converting " + record.name);
+        console.log(record);
         var tryCount = this.problems[record.name];
         if(tryCount){
             tryCount += 1;
@@ -628,10 +628,10 @@ MapViewer.prototype.backUpRecords = function(){
         url: config.baseurl+this.options.version+'/pcapi/backup/'+this.options.provider+'/'+this.options.oauth+'/records',
     }).done(function(res){
         if (res.error === 0) {
-            console.debug("Sucessfully backed up records");
+            console.log("Sucessfully backed up records");
         }
         else{
-            console.debug(res.msg);
+            console.log(res.msg);
             //deferred.reject();
         }
         deferred.resolve();
