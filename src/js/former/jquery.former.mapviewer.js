@@ -432,6 +432,11 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
 
     var backup = oldRecords.length > 0;
 
+    var finished = function(){
+        $('#filter-records').removeClass('disabled');
+        loading(false);
+    };
+
     // process all records
     var processRecords = $.proxy(function(){
         var l=0;
@@ -451,7 +456,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
         this.initTable(table_data);
         this.filterTableData(l.features);
 
-        loading(false);
+        finished();
     }, this);
 
     var fixRecord = $.proxy(function(record){
@@ -469,7 +474,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
         }).fail(function(err){
             giveFeedback(err);
             console.error(err);
-            loading(false);
+            finished();
             deferred.reject();
         });
         return deferred.promise();
@@ -509,7 +514,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             promise.fail(function(err){
                 giveFeedback(err);
                 console.error(err);
-                loading(false);
+                finished();
             });
         }, this);
 
@@ -521,7 +526,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             var fail = function(err){
                 giveFeedback(err);
                 console.error(err);
-                loading(false);
+                finished();
             };
 
             record.name = newName;
@@ -539,7 +544,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
             var fail = function(err){
                 giveFeedback(err);
                 console.error(err);
-                loading(false);
+                finished();
             };
 
             promise1.done(function(){
