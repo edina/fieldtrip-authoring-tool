@@ -22,7 +22,7 @@ Searcher.prototype.searchTypes = {
     var required = this.target("#"+this.id).find("select").attr("required");
     var placeholder = "";
     var group = new Object();
-    
+
     var i = 0;
     if(required != undefined){
       i=1;
@@ -90,7 +90,7 @@ Searcher.prototype.getGroupResults = function(){
   var placeholder = "";
   var required;
   var group = new Object();
-  
+
   for(var i=0;i<find.length;i++){
     required = $(find[i]).attr("required");
     if(this.type != "radio"){

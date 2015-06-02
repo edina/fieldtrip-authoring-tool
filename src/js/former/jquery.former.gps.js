@@ -11,7 +11,7 @@ GPSImplementation.prototype.implement = function(){
   var i = findIForFieldcontain("#"+this.target, '.fieldcontain');
   $("#"+this.target).append(capture.render(i).join(""));
   appendEditButtons("fieldcontain-"+i);
-  
+
   var form = new OptionsForm (this.type, this.title, 'false', 'required', null, this.elements);
   makeAlertWindow(form.create(this.type).join(""), 'Options', 300, 500, 'options-dialog', 1000);
   form.enableEvents[this.type]("#"+this.title+this.n);

@@ -1,4 +1,4 @@
-  
+
   var Action = function(options, target, elements){
     this.options = options;
     //this.id = id;

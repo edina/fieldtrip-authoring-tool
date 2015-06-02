@@ -18,7 +18,7 @@ TextImplementation.prototype.implement = function(){
   var i = findIForFieldcontain("#"+this.target, '.fieldcontain', this.type);
   $("#"+this.target).append(text.render(i).join(""));
   appendEditButtons("fieldcontain-"+this.type+"-"+i);
-  
+
   var form = new OptionsForm (this.type, this.title, 'Placeholder', 'required', null, this.elements, "", i);
   makeAlertWindow(form.create(this.maxlength, this.step, this.min, this.max).join(""), 'Options', 260, 400, 'options-dialog', 1000, "right", makeDialogButtons('options-dialog', this.target));
   form.enableEvents[this.type](i, this.target);

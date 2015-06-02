@@ -7,7 +7,7 @@ var RadioImplementation = function(target, title, type, elements, names){
 }
 
 RadioImplementation.prototype.implement = function(){
-  
+
   //var i = findIForFieldcontain("#"+this.target, '.fieldcontain', 'radio');
   //var j = findHighestElement(this.target, ".fieldcontain", "fieldcontain-radio-");
   var i = findHighestElement(this.target, '.fieldcontain', 'fieldcontain-radio-')+1;
@@ -15,7 +15,7 @@ RadioImplementation.prototype.implement = function(){
   var radiogroup = new RadioGroup(this.title, i, this.names, 'required');
   $("#"+this.target).append(radiogroup.render().join(""));
   appendEditButtons("fieldcontain-radio-"+i);
-  
+
   var form = new OptionsForm (this.type, this.title, i, 'required', this.names, this.elements);
   makeAlertWindow(form.create().join(""), 'Options', 260, 400, 'options-dialog', 1000, "right", makeDialogButtons('options-dialog', this.target));
   form.enableEvents[this.type](i, this.target);
