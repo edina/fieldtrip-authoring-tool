@@ -25,7 +25,8 @@
         "d3": "3.3.11",
         "jPaginator": "https://github.com/remylab/jpaginator/archive/master.zip",
         "snippet": "http://fieldtripgb.edina.ac.uk/authoring/js/jquery.snippet.min.js",
-        "swipebox": "1.2.9"
+        "swipebox": "1.2.9",
+        "underscore": "~1.8.3"
     },
     "dependency_locations": {
         "snippet": [
