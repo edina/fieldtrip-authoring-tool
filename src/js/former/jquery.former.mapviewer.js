@@ -323,7 +323,7 @@ MapViewer.prototype.prepareFiltersString = function(frmt){
             var dtArray = str.split(" ");
             var dateArray = dtArray[0].split("-");
             var timeArray = dtArray[1].split(':');
-            return new Date(dateArray[0], dateArray[1], dateArray[2], timeArray[0], timeArray[1], timeArray[2]);
+            return new Date(dateArray[0], dateArray[1] - 1, dateArray[2], timeArray[0], timeArray[1], timeArray[2]);
         };
 
         var dStart = strToDate(dateStart);
@@ -694,7 +694,9 @@ MapViewer.prototype.convertRecord = function(record) {
 
 MapViewer.prototype.prepareSingleTableData = function(folder, record, i, state){
     var point = new OpenLayers.Geometry.Point(record.geometry.coordinates[0], record.geometry.coordinates[1]).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-    var data_obj = {id: i, name: folder, editor: record.properties.editor, date: record.properties.timestamp.split("T")[0]};
+
+    var dateTime = new Date(record.properties.timestamp);
+    var data_obj = {id: i, name: folder, editor: record.properties.editor, date: dateTime.toLocaleString()};
     var feature = new OpenLayers.Feature.Vector(point, data_obj);
     if(state === "edit"){
         data_obj["buttons"] = '<button class="record-edit" title="'+folder+'" row="'+i+'">View/Edit</button> | <button class="record-delete" title="'+folder+'" row="'+i+'">Delete</button>';
