@@ -31,13 +31,13 @@ MapViewer.prototype.enableActions = function(){
 MapViewer.prototype.initElements = function(){
     //initialise datetime picker
     $("#"+this.options["filter-elements"]["date-s-Id"]).datetimepicker({
-        dateFormat: "yymmdd",
+        dateFormat: "yy-mm-dd",
         showSecond: true,
         timeFormat: 'HH:mm:ss',
         stepSecond: 10
     });
     $("#"+this.options["filter-elements"]["date-e-Id"]).datetimepicker({
-        dateFormat: "yymmdd",
+        dateFormat: "yy-mm-dd",
         showSecond: true,
         timeFormat: 'HH:mm:ss',
         stepSecond: 10
@@ -314,13 +314,30 @@ MapViewer.prototype.prepareFiltersString = function(frmt){
         params += "&id="+editor;
     }
 
-    var dateStart = $("#"+this.options["filter-elements"]["date-s-Id"]).val(), dateEnd = $("#"+this.options["filter-elements"]["date-e-Id"]).val();
+    var dateStart = $("#"+this.options["filter-elements"]["date-s-Id"]).val();
 
-    if(dateStart != ""){
+    if(dateStart !== ""){
         filters.push("date");
-        var splits1 = dateStart.split(" ");
-        var splits2 = dateEnd.split(" ");
-        params += "&start_date="+splits1[0]+"_"+splits1[1]+"&end_date="+splits2[0]+"_"+splits2[1];
+
+        var strToDate = function(str){
+            var dtArray = str.split(" ");
+            var dateArray = dtArray[0].split("-");
+            var timeArray = dtArray[1].split(':');
+            return new Date(dateArray[0], dateArray[1], dateArray[2], timeArray[0], timeArray[1], timeArray[2]);
+        };
+
+        var dStart = strToDate(dateStart);
+        var dEnd;
+
+        var dateEnd = $("#"+this.options["filter-elements"]["date-e-Id"]).val();
+        if(dateEnd === ""){
+            dEnd = new Date();
+        }
+        else{
+            dEnd = strToDate(dateEnd);
+        }
+
+        params += "&start_date=" + escape(dStart.toISOString()) + "&end_date=" + escape(dEnd.toISOString());
     }
 
     if(frmt != undefined){
@@ -553,11 +570,11 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
                 console.error(err);
                 loading(false);
             };
-    
+
             promise1.done(function(){
                 giveFeedback("Your old records have been backed up");
                 var record = oldRecords.pop();
-        
+
                 if (record.buggy){
                     fixAndConvertRecord(record);
                 }
@@ -565,7 +582,7 @@ MapViewer.prototype.prepareManyTableData= function(data, state){
                     convertRecord(record);
                 }
             });
-    
+
             promise1.fail(fail);
         }
         else{
