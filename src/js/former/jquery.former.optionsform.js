@@ -333,6 +333,9 @@ OptionsForm.prototype.enableEvents = {
     $(".type").change(function(event){
       $(id).prop("type", $(this).val());
     });
+  },
+  poi: function(i, target) {
+    console.debug('TODO');
   }
 }
 
@@ -437,6 +440,11 @@ OptionsForm.prototype.render = {
     form.push("<div class='element-name'>Min value</div><div class='element'><input type='number' name='text_min' id='text_min' value='"+min+"' /></div>");
     form.push("<div class='element-name'>Max value</div><div class='element'><input type='number' name='text_max' id='text_max' value='"+max+"' /></div>");
 
+    return form;
+  },
+  poi: function() {
+    var form = [];
+    console.debug('TODO');
     return form;
   }
 }

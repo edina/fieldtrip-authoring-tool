@@ -65,5 +65,9 @@
     rangeAction : function(target, element, elements){
       var textimplementation = new TextImplementation(target, "Range", element, elements, "", 1, 0, 10, 10);
       textimplementation.implement();
+    },
+    poiAction: function(target, element, elements) {
+      var poiImplementation = new POIImplementation(target, "Points of Interest", element, elements);
+      poiImplementation.implement();
     }
   }

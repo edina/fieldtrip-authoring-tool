@@ -69,6 +69,10 @@ Searcher.prototype.searchTypes = {
   },
   audio: function(){
     return this.getMediaElements();
+  },
+  poi: function() {
+    console.debug('TODO');
+    return {};
   }
 }
 
