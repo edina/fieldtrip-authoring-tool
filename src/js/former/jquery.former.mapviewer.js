@@ -750,77 +750,226 @@ MapViewer.prototype.enableRecordActions = function(){
     this.enableRecordDelete();
 }
 
-MapViewer.prototype.enableRecordEdit = function(){
+MapViewer.prototype.showRecordDetail = function(recordName, data) {
+    var editor = data.properties.editor;
     var oauth = this.options.oauth;
     var mapviewer = this;
     var oTable = this.oTable;
-    $(document).off('click', '.record-edit');
-    $(document).on('click', '.record-edit', function(){
-        //bformer.showEditElements(false, false)
-        var record = this.title;
-        var row = $(this).attr("row");
-        loading(true);
+    var title = editor.split(".")[0];
+    var fieldValues = data.properties.fields;
+    var url = mapviewer.buildUrl('editors', '/'+editor);
+    var row = $(this).attr("row");
+    var deferred = $.Deferred();
+    loading(true);
+
+    var checkJSONError = function(data) {
+        var errorData = null;
+        try {
+            errorData = JSON.parse(data);
+        }
+        catch (exception) {
+            // Ignore non json
+        }
+        return errorData;
+    };
+
+    //console.log(editor)
+    if(editor === "image.edtr" || editor === "audio.edtr" || editor === "text.edtr"){
+        url = "editors/default/"+editor;
+    }
+    if(editor === "track.edtr"){
+        url = "editors/default/text.edtr";
+        var style = {
+            "strokeColor": "rgb(255, 255, 0)",
+            "strokeWidth": 5,
+            "strokeOpacity": 1
+        }
+
+        for(var i=0; i<data.properties.fields.length; i++){
+            if(data.properties.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
+                style = data.properties.fields[i]["style"];
+            }
+        }
+
         $.ajax({
-            url: mapviewer.buildUrl('records', '/'+record),
+            type: "GET",
+            url: mapviewer.buildUrl('records', '/'+recordName+'/'+data.properties.fields[1].val),
+            dataType: "xml",
+            success: function(gpx_data){
+                var in_options = {
+                    'internalProjection': mapviewer.map.baseLayer.projection,
+                    'externalProjection': new OpenLayers.Projection("EPSG:4326")
+                };
+                var layers = mapviewer.map.getLayersByName("GPX");
+                var gpx_format = new OpenLayers.Format.GPX(in_options);
+                layers[0].removeAllFeatures();
+                layers[0].style = style;
+                layers[0].addFeatures(gpx_format.read(gpx_data))
+            }
+        });
+    }
+
+    $.ajax({type: 'GET', url: url, dataType: 'text'})
+        .done(function(data) {
+            var errorJSON = checkJSONError(data)
+            if (errorJSON !== null) {
+                if (errorJSON.msg.search('[404]') > 0) {
+                    deferred.reject(
+                        'The record was captured with an editor that is not longer present:<br />' +
+                        'Error:' + errorJSON.msg
+                    );
+                }
+                else {
+                    deferred.reject(errorJSON.msg);
+                }
+                return;
+            }
+
+            var path = mapviewer.options.version + '/' + mapviewer.options.provider + '/' + oauth;
+            var recorder = new RecordRenderer(path, recordName, editor, 'edit-record-dialog', fieldValues)
+            var buttons = makeEditDialogButtons('edit-record-dialog', data, mapviewer.options.version, mapviewer.options.provider + '/' + oauth, oTable, row);
+            makeAlertWindow(data, 'Edit', 300, 400, 'edit-record-dialog', 1000, 'middle', buttons);
+            recorder.render();
+            deferred.resolve();
+        })
+        .fail(function(jqXHR, status, error) {
+            console.debug(error);
+            deferred.reject('Error ' + status);
+        })
+        .always(function() {
+            loading(false);
+        });
+
+    return deferred.promise();
+}
+
+/**
+ * Use the fs request to fetch a record that could have problems in the
+ * form of a promise that resolves in two parameters the first one
+ * a record and the second one a list of files in the record directory.
+ *
+ * @param record - record name
+ * @returns a jquery promise
+ */
+MapViewer.prototype.fetchRecordFromFS = function(record) {
+    var fetchRecord;
+    var fetchAssetsList;
+    var mapviewer = this;
+    var deferred = $.Deferred();
+    var recordPath = '/records/' + record + '/';
+
+    var cancelRequests = function() {
+        var args = Array.prototype.slice.call(arguments);
+        args.forEach(function(jqXHR) {
+            if (jqXHR && typeof jqHXR.abort === 'function') {
+                jqXHR.abort();
+            }
+        });
+    };
+
+    var ajaxFail = function(jqXHR, status, error) {
+        console.debug(error);
+        //cancelRequests(fetchRecord, fetchAssetsList);
+        deferred.reject(JSON.parse(jqXHR.responseText).msg);
+    };
+
+    fetchRecord = $.getJSON(mapviewer.buildUrl('fs', recordPath + 'record.json'));
+    fetchAssetsList = $.getJSON(mapviewer.buildUrl('fs', recordPath));
+
+    fetchRecord.fail(ajaxFail);
+    fetchAssetsList.fail(ajaxFail);
+
+    $.when(fetchRecord, fetchAssetsList)
+        .done(function(ajaxRecord, ajaxAssetsList) {
+            var assetsList;
+
+            if (ajaxRecord[0].error) {
+                deferred.reject(ajaxRecord[0].msg);
+            }
+
+            // Remove the record path
+            assetsList = ajaxAssetsList[0].metadata.map(function(asset) {
+                return asset.replace(recordPath, '');
+            });
+
+            deferred.resolve(ajaxRecord[0], assetsList)
+        });
+
+    return deferred.promise();
+};
+
+MapViewer.prototype.enableRecordEdit = function() {
+    var mapviewer = this;
+
+    var showAndHighlightRecordErrors = function(record, assetsList) {
+        mapviewer.showRecordDetail(record.name, record)
+            .done(function() {
+                var errorCount = 0;
+                record.properties.fields.forEach(function(field) {
+                    if (field.id.search(/^fieldcontain-(image|audio)/) === 0) {
+                        if (assetsList.indexOf(field.val) < 0) {
+                            $('#' + field.id, '#edit-record-dialog')
+                                .css('border', '4px solid yellow');
+                            errorCount++;
+                        }
+
+                    }
+                });
+
+                if (errorCount > 0) {
+                    $('#edit-record-dialog')
+                        .prepend(
+                            '<span style="display: block; background: yellow">' +
+                                'Warning: Incomplete record' +
+                            '</span>'
+                        );
+                }
+            })
+            .fail(function(msg) {
+                giveFeedback(msg);
+            });
+    };
+
+    var displayIncompleteRecord = function(recordName) {
+        loading(true);
+        console.debug('Trying to fetch incomplete record');
+        mapviewer
+            .fetchRecordFromFS(recordName)
+            .done(showAndHighlightRecordErrors)
+            .fail(function(msg) {
+                giveFeedback(msg);
+            })
+            .always(function() {
+                loading(false);
+            })
+    };
+
+    $(document).off('click', '.record-edit');
+    $(document).on('click', '.record-edit', function() {
+        //bformer.showEditElements(false, false)
+        var recordName = this.title;
+        $.ajax({
+            url: mapviewer.buildUrl('records', '/' + recordName),
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                var editor = data.properties.editor;
-                var title = editor.split(".")[0];
-                var field_values = data.properties.fields;
-                var url = mapviewer.buildUrl('editors', '/'+editor);
-                //console.log(editor)
-                if(editor === "image.edtr" || editor === "audio.edtr" || editor === "text.edtr"){
-                    url = "editors/default/"+editor;
-                }
-                if(editor === "track.edtr"){
-                    url = "editors/default/text.edtr";
-                    var style = {
-                        "strokeColor": "rgb(255, 255, 0)",
-                        "strokeWidth": 5,
-                        "strokeOpacity": 1
-                    }
-
-                    for(var i=0; i<data.properties.fields.length; i++){
-                        if(data.properties.fields[i]["id"].indexOf("fieldcontain-track") !== -1){
-                            style = data.properties.fields[i]["style"];
-                        }
-                    }
-
-                    $.ajax({
-                        type: "GET",
-                        url: mapviewer.buildUrl('records', '/'+record+'/'+data.properties.fields[1].val),
-                        dataType: "xml",
-                        success: function(gpx_data){
-                            var in_options = {
-                                'internalProjection': mapviewer.map.baseLayer.projection,
-                                'externalProjection': new OpenLayers.Projection("EPSG:4326")
-                            };
-                            var layers = mapviewer.map.getLayersByName("GPX");
-                            var gpx_format = new OpenLayers.Format.GPX(in_options);
-                            layers[0].removeAllFeatures();
-                            layers[0].style = style;
-                            layers[0].addFeatures(gpx_format.read(gpx_data))
-                        }
+                loading(true);
+                mapviewer.showRecordDetail(recordName, data)
+                    .fail(function(msg) {
+                        giveFeedback(msg);
                     });
-                }
-                $.ajax({
-                    type: "GET",
-                    url: url,
-                    dataType: "html",
-                    success: function(edit_data){
-                        var path = mapviewer.options.version+'/'+mapviewer.options.provider+'/'+oauth;
-                        var recorder = new RecordRenderer(path, record, editor, 'edit-record-dialog', field_values)
-                        makeAlertWindow(edit_data, "Edit", 300, 400, "edit-record-dialog", 1000, "middle", makeEditDialogButtons('edit-record-dialog', data, mapviewer.options.version, mapviewer.options.provider+'/'+oauth, oTable, row));
-                        recorder.render();
-                        loading(false);
-                    }
-                });
-                //need code to open a dialog with which the user will edit the data
             },
-            error: function(jqXHR, status, error){
+            error: function(jqXHR, status, error) {
                 loading(false);
-                giveFeedback(JSON.parse(jqXHR.responseText)["msg"]);
+
+                switch (jqXHR.status) {
+                    case 409:
+                        // Try to fetch the record with errors and display it partially
+                        displayIncompleteRecord(recordName);
+                        break;
+                    default:
+                        giveFeedback(JSON.parse(jqXHR.responseText).msg);
+                }
             }
         });
     });
