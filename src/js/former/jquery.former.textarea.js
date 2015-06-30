@@ -10,7 +10,7 @@ TextAreaImplementation.prototype.implement = function(){
   var i = findIForFieldcontain("#"+this.target, '.fieldcontain', this.type);
   $("#"+this.target).append(textarea.render(i).join(""));
   appendEditButtons("fieldcontain-textarea-"+i);
-  
+
   var form = new OptionsForm (this.type, this.title, 'Placeholder', 'required', null, this.elements);
   makeAlertWindow(form.create().join(""), 'Options', 260, 400, 'options-dialog', 1000, "right", makeDialogButtons('options-dialog', this.target));
   form.enableEvents[this.type](i, this.target);

@@ -11,7 +11,7 @@ OptionsImplementation.prototype.implement = function(){
   var optionsgroup = new OptionsGroup(this.title, i, this.names, 'required');
   $("#"+this.target).append(optionsgroup.render().join(""));
   appendEditButtons("fieldcontain-select-"+i);
-  
+
   var form = new OptionsForm (this.type, this.title, i, 'required', this.names, this.elements);
   //makeAlertWindow(form.render["checkbox"](this.title, this.n, 'required', form.renderOptiones()).join(""), 'Options', 300, 500, 'options-dialog', 1000);
   makeAlertWindow(form.create(form.renderGroup('option')).join(""), 'Options', 260, 400, 'options-dialog', 1000, "right", makeDialogButtons('options-dialog', this.target));

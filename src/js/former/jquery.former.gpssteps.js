@@ -19,7 +19,7 @@ GPSStepsImplementation.prototype.implement = function(){
     var i = findIForFieldcontain("#"+this.target, '.fieldcontain');
     $("#"+this.target).append(text.render(i).join(""));
     appendEditButtons("fieldcontain-"+i);
-    
+
     var form = new OptionsForm (this.type, this.title, 'Placeholder', 'required', null, this.elements);
     makeAlertWindow(form.create(this.type, this.step, this.min, this.max).join(""), 'Options', 300, 500, 'options-dialog', 1000);
     form.enableEvents[this.type]("#text"+this.n);

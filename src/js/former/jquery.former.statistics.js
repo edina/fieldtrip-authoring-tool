@@ -84,7 +84,7 @@ Grapher.prototype.prepareGroupList = function(){
 
 /**
  * function that enables the action of creating a graph and displaying it on the
- * dialog window. 
+ * dialog window.
  */
 Grapher.prototype.enableGraphCreation = function(data){
   $("#create-graph").click($.proxy(function(event){
@@ -94,7 +94,7 @@ Grapher.prototype.enableGraphCreation = function(data){
     var type = $("#graph-kind").val();
     $("#graph-frame").empty();
     this.createGraph[type].apply(this, [data, xaxis, yaxis, group]);
-    
+
   }, this));
 }
 
@@ -241,9 +241,9 @@ Grapher.prototype.createScatterGraph = function(dataobj, xaxis, yaxis, group){
 Grapher.prototype.createBarChart = function(dataobj, xaxis, yaxis, group){
   var grouped = this.convertData(dataobj.data, xaxis, group);
   var data = this.prepareBarData(grouped[xaxis], xaxis, yaxis, dataobj.data.length);
-  
+
   var margin = 50, width = 400, height = 400;
-  
+
   if(yaxis == "frequency"){
     var formatPercent = d3.format(".0%");
   }else{
@@ -261,14 +261,14 @@ Grapher.prototype.createBarChart = function(dataobj, xaxis, yaxis, group){
       .attr("height", height + margin + margin)
     .append("g")
       .attr("transform", "translate(" + margin + "," + margin + ")");
-  
+
   data.forEach(function(d) {
     d.sepalWidth = +d[yaxis];
   });
-  
+
   x.domain(data.map(function(d) { return d[xaxis]; }));
   y.domain([0, d3.max(data, function(d) { return d[yaxis]; })]);
-  
+
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
@@ -297,9 +297,9 @@ Grapher.prototype.createBarChart = function(dataobj, xaxis, yaxis, group){
 Grapher.prototype.createPieChart = function(dataobj, xaxis, yaxis, group){
   var grouped = this.convertData(dataobj.data, xaxis, group);
   var data = this.prepareBarData(grouped[xaxis], xaxis, yaxis, dataobj.data.length);
-  
+
   var w = 400, h = 400, r = 200, color = d3.scale.category20c();
-  
+
   var vis = d3.select("#graph-frame")
         .append("svg:svg")              //create the SVG element inside the <body>
         .data([data])                   //associate our data with the document
@@ -307,23 +307,23 @@ Grapher.prototype.createPieChart = function(dataobj, xaxis, yaxis, group){
             .attr("height", h)
         .append("svg:g")                //make a group to hold our pie chart
             .attr("transform", "translate(" + r + "," + r + ")")    //move the center of the pie chart from 0, 0 to radius, radius
- 
+
   var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
       .outerRadius(r);
- 
+
   var pie = d3.layout.pie()           //this will create arc data for us given a list of values
       .value(function(d) { return d[yaxis]; });    //we must tell it out to access the value of each element in our data array
- 
+
   var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
-      .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties) 
+      .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
       .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
           .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
               .attr("class", "slice");    //allow us to style things in the slices (like text)
- 
+
   arcs.append("svg:path")
           .attr("fill", function(d, i) { return color(i); } ) //set the color for each slice to be chosen from the color function defined above
           .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
- 
+
   arcs.append("svg:text")                                     //add a label to each slice
         .attr("transform", function(d) {                    //set the label's origin to the center of the arc
           //we have to make sure to set these before calling arc.centroid

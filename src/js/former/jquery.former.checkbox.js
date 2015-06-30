@@ -11,7 +11,7 @@ CheckBoxImplementation.prototype.implement = function(){
   var checkboxgroup = new CheckBoxGroup(this.title, i, this.names, 'required');
   $("#"+this.target).append(checkboxgroup.render().join(""));
   appendEditButtons("fieldcontain-checkbox-"+i);
-  
+
   var form = new OptionsForm (this.type, this.title, i, 'required', this.names, this.elements);
   makeAlertWindow(form.create().join(""), 'Options', 260, 400, 'options-dialog', 1000, "right", makeDialogButtons('options-dialog', this.target));
   form.enableEvents[this.type](i, this.target);
