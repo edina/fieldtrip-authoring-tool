@@ -32,12 +32,11 @@ RecordRenderer.prototype.renderField = function(value){
 
 RecordRenderer.prototype.renderType = {
   text: function(dialog, el_id, obj, name){
-    if(el_id != "#form-text-1"){
+    if(el_id !== "#form-text-1"){
       $("#"+dialog+" "+el_id).attr("value", obj.val);
     }else{
-      /*$("#"+dialog+" "+el_id).attr("readonly", "readonly");
-      $("#"+dialog+" "+el_id).after("read-only")
-      $("#"+dialog+" "+el_id).val(name);*/
+      // diable title field for timebeing
+      $("#"+dialog+" "+el_id).attr("readonly", "readonly");
 
       //for next release in order rename to work
       $("#"+dialog+" "+el_id).after('<input type="hidden" id="form-text-hidden-1" value="'+name+'">');
