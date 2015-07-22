@@ -63,9 +63,16 @@
 
     //initialize function
     BuildFormer.prototype.init = function(){
-        var config = this.options;
-        var main_menu = $("#"+config.mainmenu_id);
-        var editmenu_id = $("#"+ config.editmenu_id);
+        var _config = this.options;
+        var main_menu = $("#"+_config.mainmenu_id);
+        var editmenu_id = $("#"+ _config.editmenu_id);
+
+        pcapi.init({
+            url: config.baseurl,
+            version: _config.version
+        });
+        pcapi.setProvider(_config.provider);
+        pcapi.setCloudLogin(_config.oauth);
 
         //add html for the main menu
         main_menu.html(this.createMainMenu().join(""));
