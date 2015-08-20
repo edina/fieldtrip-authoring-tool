@@ -54,7 +54,7 @@ POI.prototype.initFileUploadDialog = function() {
                 file: file,
                 contentType: true
             })
-            .then(function(data) {
+            .done(function(data) {
                 self.poiFilename = data.path;
                 self.render();
             })
@@ -62,7 +62,7 @@ POI.prototype.initFileUploadDialog = function() {
                 giveFeedBack('There was an error uploading the file');
                 console.error(err);
             })
-            .done(function() {
+            .always(function() {
                 $('#upload-poi-dialog').dialog('close');
                 loading(false);
             });
