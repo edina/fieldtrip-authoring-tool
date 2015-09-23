@@ -59,7 +59,7 @@ POI.prototype.initFileUploadDialog = function() {
                 self.render();
             })
             .fail(function(err) {
-                giveFeedBack('There was an error uploading the file');
+                giveFeedback('There was an error uploading the file');
                 console.error(err);
             })
             .always(function() {
